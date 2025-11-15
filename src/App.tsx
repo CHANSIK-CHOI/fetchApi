@@ -11,7 +11,7 @@ function App() {
   return (
     <main>
       <h1>React Starter</h1>
-      <p>Vite + React + TypeScript 프로젝트가 준비되었습니다.</p>
+      <p>Vite + React + TypeScript 프로젝트가 준비되었습니다. 테스트</p>
       <CounterButton
         value={count}
         onIncrement={increment}
