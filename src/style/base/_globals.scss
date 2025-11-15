@@ -1,0 +1,31 @@
+@use '../abstracts/variables' as v;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  font-family: v.$font-stack;
+  background-color: v.$surface-color;
+  color: v.$text-color;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 4vw, 4rem);
+}
+
+main h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: v.$accent-color;
+}
+
+main p {
+  max-width: 60ch;
+  line-height: 1.6;
+  color: v.$muted-color;
+}
