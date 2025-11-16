@@ -1,0 +1,35 @@
+@use '../abstracts/variables' as v;
+
+button {
+  padding: 1rem 1.6rem;
+  background-color: #4a90e2;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 700;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+button.line {
+  background-color: #fff;
+  border: 1px solid #4a90e2;
+  color: #3b7ec4;
+}
+
+button:hover {
+  background-color: #3b7ec4;
+}
+
+button.line:hover {
+  background-color: #f3f9ff;
+}
+
+button:active {
+  background-color: #336fae;
+  transform: scale(0.98);
+}
+
+button:focus-visible {
+  outline: 2px solid #c2e1ff;
+  outline-offset: 3px;
+}

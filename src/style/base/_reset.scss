@@ -1,37 +1,148 @@
-/* Modern CSS reset inspired by Josh Comeau & Andy Bell */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
 
-* {
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
   margin: 0;
-}
-
-body {
-  min-height: 100vh;
-  text-rendering: optimizeLegibility;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-
-img, picture, video, canvas, svg {
-  display: block;
-  max-width: 100%;
-}
-
-input, button, textarea, select {
+  padding: 0;
+  border: 0;
+  font-size: 100%;
   font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol,
+ul {
+  list-style: none;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+button {
+  margin: 0; /* 99% */
+  padding: 0; /* 99% */
+  border: none; /* 99% */
+  background: none; /* 99% */
 
-p, h1, h2, h3, h4, h5, h6 {
-  overflow-wrap: break-word;
-}
+  font: inherit; /* 부모 폰트 상속 → UI 통일 98% */
+  color: inherit; /* 글자색 상속 98% */
 
-#root {
-  isolation: isolate;
+  cursor: pointer; /* 버튼 느낌 유지 98% */
+
+  /* 브라우저 기본 스타일 제거 */
+  appearance: none; /* 97% */
+  -webkit-appearance: none; /* 97% */
+
+  /* 모바일 브라우저 터치 강조 제거 */
+  -webkit-tap-highlight-color: transparent; /* 97% */
 }

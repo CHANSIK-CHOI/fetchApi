@@ -4,9 +4,14 @@
   color-scheme: light;
 }
 
+html {
+  font-size: 10px;
+  line-height: 1.6;
+  font-weight: 400;
+}
 body {
   font-family: v.$font-stack;
-  background-color: v.$surface-color;
+  background-color: #fff;
   color: v.$text-color;
 }
 
@@ -16,16 +21,17 @@ main {
   gap: 1.5rem;
   align-items: center;
   justify-content: center;
-  padding: clamp(1.5rem, 4vw, 4rem);
+  padding: 2rem;
 }
 
 main h1 {
-  font-size: clamp(2rem, 4vw, 3rem);
-  color: v.$accent-color;
+  font-size: 4rem;
+  font-weight: 700;
+  color: #4a90e2;
 }
 
 main p {
-  max-width: 60ch;
-  line-height: 1.6;
-  color: v.$muted-color;
+  font-size: 2rem;
+  margin-top: 1rem;
+  color: #4f5d75;
 }

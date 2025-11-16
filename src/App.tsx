@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
 import { Users } from '@/components'
+import UsersProvider from '@/components/Users/UsersProvider'
 
 function App() {
   useEffect(() => {
@@ -26,16 +27,24 @@ function App() {
         <h1>Fetch API 실습</h1>
         <p>지금까지 배운 JavaScript & TypeScript를 활용하여 fetch API로 CRUD를 구현해보자.</p>
 
-        <section>
+        <UsersProvider>
           <Users>
             <Users.Item
               profileSrc={undefined}
-              firstName="ChanSik"
+              firstName="ChanChan"
               lastName="Choi"
-              email="ccsik0828@gmail.com"
+              email="chanchan@gmail.com"
+              id={1}
+            />
+            <Users.Item
+              profileSrc={undefined}
+              firstName="ChanChan"
+              lastName="Choi"
+              email="chanchan@gmail.com"
+              id={2}
             />
           </Users>
-        </section>
+        </UsersProvider>
       </div>
     </main>
   )
