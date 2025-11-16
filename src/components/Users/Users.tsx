@@ -1,15 +1,21 @@
 import React from 'react'
 
-import UsersItem from './UsersItem'
-import { useUsers } from '@/components/Users/useUsers'
+import { UsersItem, useUsers } from '@/components/Users'
 
 type UsersProps = {
   children: React.ReactNode
 }
 export default function Users({ children }: UsersProps) {
-  const { isAllEditingState, setIsAllEditing } = useUsers()
+  const {
+    isAllEditing,
+    onAllEditing,
+    isSelectedForDeletion,
+    onSelectedForDeletion,
+    onSelectedDelete,
+  } = useUsers()
+
   const handleModifiycomplete = () => {
-    setIsAllEditing(false)
+    onAllEditing(false)
   }
 
   return (
@@ -18,8 +24,8 @@ export default function Users({ children }: UsersProps) {
         <span className="users__result">검색 결과 : 00건</span>
 
         <div className="users__actions">
-          {!isAllEditingState ? (
-            <button type="button" className="line" onClick={() => setIsAllEditing(true)}>
+          {!isAllEditing ? (
+            <button type="button" className="line" onClick={() => onAllEditing(true)}>
               전체수정
             </button>
           ) : (
@@ -28,7 +34,21 @@ export default function Users({ children }: UsersProps) {
             </button>
           )}
 
-          <button type="button">선택삭제</button>
+          {!isSelectedForDeletion ? (
+            <button type="button" className="line" onClick={() => onSelectedForDeletion(true)}>
+              선택하기
+            </button>
+          ) : (
+            <button type="button" onClick={() => onSelectedForDeletion(false)}>
+              선택취소하기
+            </button>
+          )}
+
+          {isSelectedForDeletion && (
+            <button type="button" onClick={onSelectedDelete}>
+              삭제하기
+            </button>
+          )}
         </div>
       </div>
       <div className="users__body">

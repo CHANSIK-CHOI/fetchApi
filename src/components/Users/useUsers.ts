@@ -1,19 +1,22 @@
 import type { User } from '@/types/users'
 import { createContext, useContext } from 'react'
 
+export type OnItemEditing = {
+  id: number
+  isEditing: boolean
+  data?: Partial<User>
+}
+export type OnChangeItem = { checked: boolean; id: number }
+
 export type UsersContextType = {
-  isAllEditingState: boolean
-  setIsAllEditing: (isEditing: boolean) => void
-  isItemEditingState: number[]
-  setIsItemEditing: ({
-    id,
-    isEditing,
-    data,
-  }: {
-    id: number
-    isEditing: boolean
-    data?: Partial<User>
-  }) => void
+  isAllEditing: boolean
+  onAllEditing: (isEditing: boolean) => void
+  editingItemArray: number[]
+  onItemEditing: ({ id, isEditing, data }: OnItemEditing) => void
+  isSelectedForDeletion: boolean
+  onSelectedForDeletion: (isActive: boolean) => void
+  onChangeItem: ({ checked, id }: OnChangeItem) => void
+  onSelectedDelete: () => void
 }
 
 export const UsersContext = createContext<UsersContextType | null>(null)

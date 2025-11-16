@@ -1,7 +1,5 @@
 import { useEffect } from 'react'
-
-import { Users } from '@/components'
-import UsersProvider from '@/components/Users/UsersProvider'
+import { Users, UsersProvider } from '@/components/Users'
 
 function App() {
   useEffect(() => {

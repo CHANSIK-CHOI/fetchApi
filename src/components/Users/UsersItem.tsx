@@ -1,5 +1,5 @@
-import { useUsers } from '@/components/Users/useUsers'
-import { useState } from 'react'
+import { useUsers } from '@/components/Users'
+import type { ChangeEvent } from 'react'
 
 type UsersItem = {
   profileSrc: string | undefined
@@ -10,14 +10,29 @@ type UsersItem = {
 }
 
 export default function UsersItem({ profileSrc, firstName, lastName, email, id }: UsersItem) {
-  const { isAllEditingState, isItemEditingState, setIsItemEditing } = useUsers()
+  const { isAllEditing, editingItemArray, onItemEditing, isSelectedForDeletion, onChangeItem } =
+    useUsers()
 
-  const isItemEditing = isItemEditingState.includes(id)
-  const isEditing = isAllEditingState || isItemEditing
+  const isItemEditing = editingItemArray.includes(id)
+  const isEditing = isAllEditing || isItemEditing
 
+  const handleChangeCheckBox = (e: ChangeEvent<HTMLInputElement>) => {
+    const { checked } = e.target
+    onChangeItem({ checked, id })
+  }
   return (
     <li className="userItem">
       <div className="userItem__box">
+        {isSelectedForDeletion && (
+          <div className="userItem__checkbox">
+            <input
+              type="checkbox"
+              name="usersItem"
+              id={`checkbox_${id}`}
+              onChange={handleChangeCheckBox}
+            />
+          </div>
+        )}
         <div className="userItem__info">
           <div className="userItem__profileWrap">
             <div className="userItem__profile">
@@ -48,18 +63,18 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
           </div>
         </div>
 
-        {!isAllEditingState && (
+        {!isAllEditing && (
           <div className="userItem__actions">
             {!isItemEditing ? (
               <button
                 type="button"
                 className="line"
-                onClick={() => setIsItemEditing({ id, isEditing: true })}
+                onClick={() => onItemEditing({ id, isEditing: true })}
               >
                 수정하기
               </button>
             ) : (
-              <button type="button" onClick={() => setIsItemEditing({ id, isEditing: false })}>
+              <button type="button" onClick={() => onItemEditing({ id, isEditing: false })}>
                 수정완료
               </button>
             )}
