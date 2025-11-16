@@ -22,6 +22,7 @@ export default function UsersProvider({ children }: UsersProviderProps) {
       setEditingItemArray((prev) => (prev.includes(id) ? prev : [...prev, id]))
     } else {
       // data : 데이터 수정 완료한 후 아래 로직 실행
+      console.log(data)
       setEditingItemArray((prev) => prev.filter((value) => value !== id))
     }
   }, [])
