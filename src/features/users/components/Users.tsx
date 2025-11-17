@@ -13,9 +13,6 @@ export default function Users({ children }: UsersProps) {
     onSelectedDelete,
   } = useUsers()
 
-  const handleModifiycomplete = () => {
-    onAllEditing(false)
-  }
   const resultCount = React.Children.count(children).toString().padStart(2, '0')
 
   return (
