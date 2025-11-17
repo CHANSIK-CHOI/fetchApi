@@ -14,7 +14,9 @@ export default function UsersProvider({ children }: UsersProviderProps) {
   const onAllEditing = useCallback((isEditing: boolean) => {
     setIsAllEditing(isEditing)
 
-    if (isEditing) setEditingItemArray([])
+    if (isEditing) {
+      setEditingItemArray([])
+    }
   }, [])
 
   const onItemEditing = useCallback(({ id, isEditing, data }: OnItemEditing) => {
@@ -37,7 +39,11 @@ export default function UsersProvider({ children }: UsersProviderProps) {
 
   const onSelectedForDeletion = useCallback((isActive: boolean) => {
     setIsSelectedForDeletion(isActive)
-    if (!isActive) setCheckedItemArray([])
+    if (!isActive) {
+      setCheckedItemArray([])
+    } else {
+      setEditingItemArray([])
+    }
   }, [])
 
   const onSelectedDelete = useCallback(() => {

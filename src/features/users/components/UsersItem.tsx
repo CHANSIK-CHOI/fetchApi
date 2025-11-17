@@ -63,7 +63,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
           </div>
         </div>
 
-        {!isAllEditing && (
+        {!isAllEditing && !isSelectedForDeletion && (
           <div className="userItem__actions">
             {!isItemEditing ? (
               <button

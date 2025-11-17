@@ -54,9 +54,14 @@ export default function Users({ children }: UsersProps) {
                   전체수정
                 </button>
               ) : (
-                <button type="button" onClick={handleModifiycomplete}>
-                  수정완료
-                </button>
+                <>
+                  <button type="button" className="line" onClick={() => onAllEditing(false)}>
+                    수정취소
+                  </button>
+                  <button type="button" onClick={() => onAllEditing(false)}>
+                    수정완료
+                  </button>
+                </>
               )}
             </>
           )}
