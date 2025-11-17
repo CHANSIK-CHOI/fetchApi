@@ -1,5 +1,5 @@
-import { useUsers } from '@/components/Users'
 import type { ChangeEvent } from 'react'
+import { useUsers } from '@/features/users'
 
 type UsersItem = {
   profileSrc: string | undefined
@@ -63,7 +63,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
           </div>
         </div>
 
-        {!isAllEditing && (
+        {!isAllEditing && !isSelectedForDeletion && (
           <div className="userItem__actions">
             {!isItemEditing ? (
               <button

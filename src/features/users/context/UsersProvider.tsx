@@ -1,5 +1,5 @@
 import { type ReactNode, useCallback, useMemo, useState } from 'react'
-import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/components/Users'
+import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
 
 type UsersProviderProps = {
   children: ReactNode
@@ -14,10 +14,13 @@ export default function UsersProvider({ children }: UsersProviderProps) {
   const onAllEditing = useCallback((isEditing: boolean) => {
     setIsAllEditing(isEditing)
 
-    if (isEditing) setEditingItemArray([])
+    if (isEditing) {
+      setEditingItemArray([])
+    }
   }, [])
 
   const onItemEditing = useCallback(({ id, isEditing, data }: OnItemEditing) => {
+    void data
     if (isEditing) {
       setEditingItemArray((prev) => (prev.includes(id) ? prev : [...prev, id]))
     } else {
@@ -37,7 +40,11 @@ export default function UsersProvider({ children }: UsersProviderProps) {
 
   const onSelectedForDeletion = useCallback((isActive: boolean) => {
     setIsSelectedForDeletion(isActive)
-    if (!isActive) setCheckedItemArray([])
+    if (!isActive) {
+      setCheckedItemArray([])
+    } else {
+      setEditingItemArray([])
+    }
   }, [])
 
   const onSelectedDelete = useCallback(() => {
