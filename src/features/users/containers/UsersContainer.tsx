@@ -1,28 +1,18 @@
 import { UsersProvider, Users } from '@/features/users'
-import type { User } from '@/types/users'
-
-const fallbackUsers: User[] = [
-  {
-    avatar: '',
-    email: 'chanchan@gmail.com',
-    first_name: 'ChanChan',
-    id: 1,
-    last_name: 'Choi',
-  },
-  {
-    avatar: '',
-    email: 'chanchan@gmail.com',
-    first_name: 'ChanChan',
-    id: 2,
-    last_name: 'Choi',
-  },
-]
+import { useUsersQuery } from '@/hooks/useUsersQuery'
+import { useEffect } from 'react'
 
 export default function UsersContainer() {
+  const { users, getUsers } = useUsersQuery()
+
+  useEffect(() => {
+    void getUsers()
+  }, [])
+
   return (
     <UsersProvider>
       <Users>
-        {fallbackUsers.map((user) => (
+        {users.map((user) => (
           <Users.Item
             key={user.id}
             profileSrc={user.avatar}
