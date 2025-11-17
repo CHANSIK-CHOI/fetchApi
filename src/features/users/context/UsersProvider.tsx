@@ -1,5 +1,5 @@
 import { type ReactNode, useCallback, useMemo, useState } from 'react'
-import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/components/Users'
+import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
 
 type UsersProviderProps = {
   children: ReactNode
@@ -18,6 +18,7 @@ export default function UsersProvider({ children }: UsersProviderProps) {
   }, [])
 
   const onItemEditing = useCallback(({ id, isEditing, data }: OnItemEditing) => {
+    void data
     if (isEditing) {
       setEditingItemArray((prev) => (prev.includes(id) ? prev : [...prev, id]))
     } else {

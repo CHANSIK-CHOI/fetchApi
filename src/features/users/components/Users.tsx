@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { UsersItem, useUsers } from '@/components/Users'
+import { UsersItem, useUsers } from '@/features/users'
 
 type UsersProps = {
   children: React.ReactNode
@@ -17,11 +16,12 @@ export default function Users({ children }: UsersProps) {
   const handleModifiycomplete = () => {
     onAllEditing(false)
   }
+  const resultCount = React.Children.count(children).toString().padStart(2, '0')
 
   return (
     <div className="users">
       <div className="users__head">
-        <span className="users__result">검색 결과 : 00건</span>
+        <span className="users__result">검색 결과 : {resultCount}건</span>
 
         <div className="users__actions">
           {!isAllEditing && (

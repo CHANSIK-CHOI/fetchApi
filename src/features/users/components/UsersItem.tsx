@@ -1,5 +1,5 @@
-import { useUsers } from '@/components/Users'
 import type { ChangeEvent } from 'react'
+import { useUsers } from '@/features/users'
 
 type UsersItem = {
   profileSrc: string | undefined
