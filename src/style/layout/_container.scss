@@ -3,3 +3,25 @@
   max-width: 102.8rem;
   margin: 0 auto;
 }
+
+.loading {
+  width: 10rem;
+  height: 10rem;
+  margin: 10rem auto;
+}
+
+.error {
+  margin: 10rem auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 2rem;
+
+  &__img {
+    width: 10rem;
+    height: 10rem;
+  }
+  &__text {
+    font-size: 2rem;
+  }
+}

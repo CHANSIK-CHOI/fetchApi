@@ -3,7 +3,7 @@ import { useUsersQuery } from '@/hooks/useUsersQuery'
 import { useEffect } from 'react'
 
 export default function UsersContainer() {
-  const { users, getUsers } = useUsersQuery()
+  const { users, getUsers, isLoading, error } = useUsersQuery()
 
   useEffect(() => {
     void getUsers()
@@ -12,6 +12,15 @@ export default function UsersContainer() {
   return (
     <UsersProvider>
       <Users>
+        {isLoading && <img src="src/assets/loading.gif" className="loading" />}
+        {error.length > 0 && (
+          <>
+            <div className="error">
+              <img src="src/assets/error.jpeg" alt="" className="error__img" />
+              <span className="error__text">{error}</span>
+            </div>
+          </>
+        )}
         {users.map((user) => (
           <Users.Item
             key={user.id}

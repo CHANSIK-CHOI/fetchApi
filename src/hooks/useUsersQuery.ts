@@ -4,16 +4,22 @@ import { useCallback, useState } from 'react'
 
 export function useUsersQuery() {
   const [users, setUsers] = useState<User[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string>('')
 
   const getUsers = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
     try {
       const { data } = await getUsersApi()
-      console.log(data)
       setUsers(data)
     } catch (err) {
       console.error(err)
+      if (err instanceof Error) setError(err.message)
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
-  return { users, getUsers }
+  return { users, getUsers, isLoading, error }
 }
