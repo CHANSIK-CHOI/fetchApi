@@ -1,7 +1,7 @@
 import type { User } from '@/types/users'
 
 export const getUsersApi = async () => {
-  const response = await fetch('https://reqres.in/apidddd/users', {
+  const response = await fetch('https://reqres.in/api/users', {
     headers: {
       'x-api-key': 'reqres-free-v1',
     },
