@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useMemo, useState } from 'react'
 import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
+import type { OnPostUserData } from './useUsers'
 
 type UsersProviderProps = {
   children: ReactNode
@@ -10,6 +11,7 @@ export default function UsersProvider({ children }: UsersProviderProps) {
   const [editingItemArray, setEditingItemArray] = useState<number[]>([])
   const [isSelectedForDeletion, setIsSelectedForDeletion] = useState<boolean>(false)
   const [checkedItemArray, setCheckedItemArray] = useState<number[]>([])
+  const [isShowUserForm, setIsShowUserForm] = useState<boolean>(false)
 
   const onAllEditing = useCallback((isEditing: boolean) => {
     setIsAllEditing(isEditing)
@@ -51,9 +53,16 @@ export default function UsersProvider({ children }: UsersProviderProps) {
     if (checkedItemArray.length === 0) {
       alert('선택한 데이터가 없습니다.')
     } else {
-      console.log(checkedItemArray)
+      // checkedItemArray : 선택된 id Array
     }
   }, [checkedItemArray])
+
+  const onPostUserData = useCallback(({ isShow, isPost = false }: OnPostUserData) => {
+    setIsShowUserForm(isShow)
+    if (isPost) {
+      // isPost : POST
+    }
+  }, [])
 
   const providerValue = useMemo(
     () => ({
@@ -65,6 +74,8 @@ export default function UsersProvider({ children }: UsersProviderProps) {
       onSelectedForDeletion,
       onChangeItem,
       onSelectedDelete,
+      isShowUserForm,
+      onPostUserData,
     }),
     [
       editingItemArray,
@@ -75,6 +86,8 @@ export default function UsersProvider({ children }: UsersProviderProps) {
       onItemEditing,
       onSelectedDelete,
       onSelectedForDeletion,
+      isShowUserForm,
+      onPostUserData,
     ],
   )
 

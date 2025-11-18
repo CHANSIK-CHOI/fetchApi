@@ -11,7 +11,7 @@ export default function UsersContainer() {
 
   return (
     <UsersProvider>
-      <Users>
+      <Users userForm={<Users.Form />}>
         {isLoading && <img src="src/assets/loading.gif" className="loading" />}
         {error.length > 0 && (
           <>
