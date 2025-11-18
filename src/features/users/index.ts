@@ -1,6 +1,7 @@
 export { default as UsersContainer } from './containers/UsersContainer'
 export { default as Users } from './components/Users'
 export { default as UsersItem } from './components/UsersItem'
+export { default as UsersForm } from './components/UsersForm'
 export { default as UsersProvider } from './context/UsersProvider'
 export { UsersContext, useUsers } from './context/useUsers'
 export type { UsersContextType, OnItemEditing, OnChangeItem } from './context/useUsers'

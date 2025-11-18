@@ -21,7 +21,7 @@ const fallbackUsers: User[] = [
 export default function UsersContainer() {
   return (
     <UsersProvider>
-      <Users>
+      <Users userForm={<Users.Form />}>
         {fallbackUsers.map((user) => (
           <Users.Item
             key={user.id}

@@ -8,6 +8,8 @@ export type OnItemEditing = {
 }
 export type OnChangeItem = { checked: boolean; id: number }
 
+export type OnPostUserData = { isShow: boolean; isPost?: boolean }
+
 export type UsersContextType = {
   isAllEditing: boolean
   onAllEditing: (isEditing: boolean) => void
@@ -17,6 +19,8 @@ export type UsersContextType = {
   onSelectedForDeletion: (isActive: boolean) => void
   onChangeItem: ({ checked, id }: OnChangeItem) => void
   onSelectedDelete: () => void
+  isShowUserForm: boolean
+  onPostUserData: ({ isShow, isPost }: OnPostUserData) => void
 }
 
 export const UsersContext = createContext<UsersContextType | null>(null)

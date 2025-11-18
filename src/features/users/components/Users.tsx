@@ -1,22 +1,28 @@
 import React from 'react'
-import { UsersItem, useUsers } from '@/features/users'
+import { UsersItem, UsersForm, useUsers } from '@/features/users'
 
 type UsersProps = {
   children: React.ReactNode
+  userForm: React.ReactNode
 }
-export default function Users({ children }: UsersProps) {
+export default function Users({ children, userForm }: UsersProps) {
   const {
     isAllEditing,
     onAllEditing,
     isSelectedForDeletion,
     onSelectedForDeletion,
     onSelectedDelete,
+    isShowUserForm,
+    onPostUserData,
   } = useUsers()
 
   const handleModifiycomplete = () => {
     onAllEditing(false)
   }
   const resultCount = React.Children.count(children).toString().padStart(2, '0')
+  const isActiveUserForm = !isAllEditing && !isSelectedForDeletion
+  const isActiveSelectedForDeletion = !isShowUserForm && !isAllEditing
+  const isActiveAllEditing = !isShowUserForm && !isSelectedForDeletion
 
   return (
     <div className="users">
@@ -24,7 +30,37 @@ export default function Users({ children }: UsersProps) {
         <span className="users__result">검색 결과 : {resultCount}건</span>
 
         <div className="users__actions">
-          {!isAllEditing && (
+          {isActiveUserForm && (
+            <>
+              {!isShowUserForm ? (
+                <button
+                  type="button"
+                  className="line"
+                  onClick={() => onPostUserData({ isShow: true })}
+                >
+                  추가하기
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="line"
+                    onClick={() => onPostUserData({ isShow: false })}
+                  >
+                    추가취소
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPostUserData({ isShow: false, isPost: true })}
+                  >
+                    추가완료
+                  </button>
+                </>
+              )}
+            </>
+          )}
+
+          {isActiveSelectedForDeletion && (
             <>
               {!isSelectedForDeletion ? (
                 <button type="button" className="line" onClick={() => onSelectedForDeletion(true)}>
@@ -37,7 +73,7 @@ export default function Users({ children }: UsersProps) {
                     className="line"
                     onClick={() => onSelectedForDeletion(false)}
                   >
-                    선택취소하기
+                    선택취소
                   </button>
                   <button type="button" onClick={onSelectedDelete}>
                     삭제하기
@@ -47,7 +83,7 @@ export default function Users({ children }: UsersProps) {
             </>
           )}
 
-          {!isSelectedForDeletion && (
+          {isActiveAllEditing && (
             <>
               {!isAllEditing ? (
                 <button type="button" className="line" onClick={() => onAllEditing(true)}>
@@ -67,6 +103,8 @@ export default function Users({ children }: UsersProps) {
           )}
         </div>
       </div>
+      {isShowUserForm && <div className="users__form">{userForm}</div>}
+
       <div className="users__body">
         <ul className="users__list">{children}</ul>
       </div>
@@ -75,3 +113,4 @@ export default function Users({ children }: UsersProps) {
 }
 
 Users.Item = UsersItem
+Users.Form = UsersForm
