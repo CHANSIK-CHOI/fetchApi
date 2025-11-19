@@ -8,7 +8,7 @@ export default function UsersForm() {
     setFile(selected)
   }
 
-  const handleClickCencleImg = () => {
+  const handleRemoveImage = () => {
     if (!file) return
     setFile(null)
   }
@@ -44,7 +44,7 @@ export default function UsersForm() {
               <button
                 type="button"
                 className="line userForm__profileBtn"
-                onClick={handleClickCencleImg}
+                onClick={handleRemoveImage}
               >
                 삭제
               </button>

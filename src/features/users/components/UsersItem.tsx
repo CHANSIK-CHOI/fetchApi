@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useUsers } from '@/features/users'
 
+const PLACEHOLDER_SRC = 'https://placehold.co/100x100?text=Hello+World'
+
 type UsersItem = {
   profileSrc: string | undefined
   firstName: string
@@ -19,79 +21,12 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     isShowUserForm,
   } = useUsers()
 
-  const [file, setFile] = useState<File | null>(null)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0] || null
-    setFile(selected)
-  }
-
-  const handleClickCencleImg = () => {
-    if (!file) return
-    setFile(null)
-  }
-
-  const handleClickCencleModifiy = () => {
-    if (file) setFile(null)
-    onItemEditing({ id, isEditing: false })
-  }
-
-  const previewUrl = useMemo(() => {
-    if (!file) return null
-    return URL.createObjectURL(file)
-  }, [file])
-
-  useEffect(() => {
-    if (!previewUrl) return
-    return () => URL.revokeObjectURL(previewUrl)
-  }, [previewUrl])
-
   const isItemEditing = editingItemArray.includes(id)
   const isEditing = isAllEditing || isItemEditing
 
   const handleChangeCheckBox = (e: ChangeEvent<HTMLInputElement>) => {
     const { checked } = e.target
     onChangeItem({ checked, id })
-  }
-  const placeholderSrc = 'https://placehold.co/100x100?text=Hello+World'
-  const hasPreview = Boolean(previewUrl)
-  const hasProfileSrc = Boolean(profileSrc)
-  const displaySrc = previewUrl || profileSrc || placeholderSrc
-
-  const renderProfileActions = () => {
-    if (!isEditing) return null
-
-    if (hasPreview) {
-      return (
-        <div className="userItem__profileBtns">
-          {file?.name && <span className="userItem__profileName">{file.name}</span>}
-          <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
-            프로필 변경
-          </label>
-          <button
-            type="button"
-            className="line userItem__profileBtn"
-            onClick={handleClickCencleImg}
-          >
-            삭제
-          </button>
-        </div>
-      )
-    }
-
-    if (hasProfileSrc) {
-      return (
-        <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
-          프로필 변경
-        </label>
-      )
-    }
-
-    return (
-      <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
-        프로필 추가
-      </label>
-    )
   }
 
   return (
@@ -109,18 +44,11 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
         )}
         <div className="userItem__info">
           <div className="userItem__profileWrap">
-            <div className="userItem__profile">
-              <img src={displaySrc} alt="" />
-            </div>
-            {renderProfileActions()}
-            <input
-              id={`userItem_${id}`}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleChange}
-              disabled={!isEditing}
-            />
+            {isEditing ? (
+              <UserItemProfileEditor key={`editing-${id}`} id={id} profileSrc={profileSrc} />
+            ) : (
+              <UserItemProfileView profileSrc={profileSrc} />
+            )}
           </div>
 
           <div className="userItem__texts">
@@ -153,7 +81,11 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
               </button>
             ) : (
               <>
-                <button type="button" className="line" onClick={handleClickCencleModifiy}>
+                <button
+                  type="button"
+                  className="line"
+                  onClick={() => onItemEditing({ id, isEditing: false })}
+                >
                   수정취소
                 </button>
                 <button
@@ -174,5 +106,82 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
         )}
       </div>
     </li>
+  )
+}
+
+type UserItemProfileViewProps = {
+  profileSrc?: string
+}
+
+function UserItemProfileView({ profileSrc }: UserItemProfileViewProps) {
+  return (
+    <div className="userItem__profile">
+      <img src={profileSrc || PLACEHOLDER_SRC} alt="" />
+    </div>
+  )
+}
+
+type UserItemProfileEditorProps = {
+  id: number
+  profileSrc?: string
+}
+
+function UserItemProfileEditor({ id, profileSrc }: UserItemProfileEditorProps) {
+  const [file, setFile] = useState<File | null>(null)
+  const [isProfileCleared, setIsProfileCleared] = useState(false)
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] || null
+    setFile(selected)
+    if (selected) {
+      setIsProfileCleared(false)
+    }
+  }
+
+  const handleRemoveImage = () => {
+    if (file) {
+      setFile(null)
+      return
+    }
+
+    if (!isProfileCleared) {
+      setIsProfileCleared(true)
+    }
+  }
+
+  const previewUrl = useMemo(() => {
+    if (!file) return null
+    return URL.createObjectURL(file)
+  }, [file])
+
+  useEffect(() => {
+    if (!previewUrl) return
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [previewUrl])
+
+  const hasPreview = Boolean(previewUrl)
+  const hasProfileSrc = Boolean(profileSrc) && !isProfileCleared
+  const displaySrc = previewUrl || (hasProfileSrc ? profileSrc : null) || PLACEHOLDER_SRC
+  const labelText = hasPreview || hasProfileSrc ? '프로필 변경' : '프로필 추가'
+
+  return (
+    <>
+      <div className="userItem__profile">
+        <img src={displaySrc} alt="" />
+      </div>
+      <div className="userItem__profileBtns">
+        {hasPreview && file?.name && <span className="userItem__profileName">{file.name}</span>}
+
+        <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
+          {labelText}
+        </label>
+        {(hasPreview || hasProfileSrc) && (
+          <button type="button" className="line userItem__profileBtn" onClick={handleRemoveImage}>
+            삭제
+          </button>
+        )}
+      </div>
+      <input id={`userItem_${id}`} type="file" accept="image/*" hidden onChange={handleChange} />
+    </>
   )
 }
