@@ -4,17 +4,18 @@ import { createContext, useContext } from 'react'
 export type OnItemEditing = {
   id: number
   isEditing: boolean
+  isPatch?: boolean
   data?: Partial<User>
 }
 export type OnChangeItem = { checked: boolean; id: number }
 
-export type OnPostUserData = { isShow: boolean; isPost?: boolean }
+export type OnPostUserData = { isShow: boolean; isPost?: boolean; data: Partial<User> }
 
 export type UsersContextType = {
   isAllEditing: boolean
   onAllEditing: (isEditing: boolean) => void
   editingItemArray: number[]
-  onItemEditing: ({ id, isEditing, data }: OnItemEditing) => void
+  onItemEditing: ({ id, isEditing, isPatch, data }: OnItemEditing) => void
   isSelectedForDeletion: boolean
   onSelectedForDeletion: (isActive: boolean) => void
   onChangeItem: ({ checked, id }: OnChangeItem) => void

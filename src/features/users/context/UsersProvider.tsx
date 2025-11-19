@@ -21,12 +21,14 @@ export default function UsersProvider({ children }: UsersProviderProps) {
     }
   }, [])
 
-  const onItemEditing = useCallback(({ id, isEditing, data }: OnItemEditing) => {
-    void data
+  const onItemEditing = useCallback(({ id, isEditing, isPatch = false, data }: OnItemEditing) => {
+    void data // 임시
     if (isEditing) {
       setEditingItemArray((prev) => (prev.includes(id) ? prev : [...prev, id]))
     } else {
-      // data : 데이터 수정 완료한 후 아래 로직 실행
+      if (isPatch) {
+        // isPatch : PATCH
+      }
       setEditingItemArray((prev) => prev.filter((value) => value !== id))
     }
   }, [])
@@ -56,7 +58,8 @@ export default function UsersProvider({ children }: UsersProviderProps) {
     }
   }, [checkedItemArray])
 
-  const onPostUserData = useCallback(({ isShow, isPost = false }: OnPostUserData) => {
+  const onPostUserData = useCallback(({ isShow, isPost = false, data }: OnPostUserData) => {
+    void data // 임시
     setIsShowUserForm(isShow)
     if (isShow) {
       setEditingItemArray([])

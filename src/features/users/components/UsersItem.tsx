@@ -31,6 +31,11 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     setFile(null)
   }
 
+  const handleClickCencleModifiy = () => {
+    if (file) setFile(null)
+    onItemEditing({ id, isEditing: false })
+  }
+
   const previewUrl = useMemo(() => {
     if (!file) return null
     return URL.createObjectURL(file)
@@ -147,14 +152,24 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
                 수정하기
               </button>
             ) : (
-              <button type="button" onClick={() => onItemEditing({ id, isEditing: false })}>
-                수정완료
-              </button>
+              <>
+                <button type="button" className="line" onClick={handleClickCencleModifiy}>
+                  수정취소
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onItemEditing({ id, isEditing: false, isPatch: true })}
+                >
+                  수정완료
+                </button>
+              </>
             )}
 
-            <button type="button" className="line">
-              삭제
-            </button>
+            {!isItemEditing && (
+              <button type="button" className="line">
+                삭제
+              </button>
+            )}
           </div>
         )}
       </div>
