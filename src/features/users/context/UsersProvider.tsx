@@ -58,6 +58,9 @@ export default function UsersProvider({ children }: UsersProviderProps) {
 
   const onPostUserData = useCallback(({ isShow, isPost = false }: OnPostUserData) => {
     setIsShowUserForm(isShow)
+    if (isShow) {
+      setEditingItemArray([])
+    }
     if (isPost) {
       // isPost : POST
     }

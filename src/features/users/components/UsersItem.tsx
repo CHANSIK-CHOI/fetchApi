@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useUsers } from '@/features/users'
 
 type UsersItem = {
@@ -10,8 +10,36 @@ type UsersItem = {
 }
 
 export default function UsersItem({ profileSrc, firstName, lastName, email, id }: UsersItem) {
-  const { isAllEditing, editingItemArray, onItemEditing, isSelectedForDeletion, onChangeItem } =
-    useUsers()
+  const {
+    isAllEditing,
+    editingItemArray,
+    onItemEditing,
+    isSelectedForDeletion,
+    onChangeItem,
+    isShowUserForm,
+  } = useUsers()
+
+  const [file, setFile] = useState<File | null>(null)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] || null
+    setFile(selected)
+  }
+
+  const handleClickCencleImg = () => {
+    if (!file) return
+    setFile(null)
+  }
+
+  const previewUrl = useMemo(() => {
+    if (!file) return null
+    return URL.createObjectURL(file)
+  }, [file])
+
+  useEffect(() => {
+    if (!previewUrl) return
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [previewUrl])
 
   const isItemEditing = editingItemArray.includes(id)
   const isEditing = isAllEditing || isItemEditing
@@ -20,6 +48,47 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     const { checked } = e.target
     onChangeItem({ checked, id })
   }
+  const placeholderSrc = 'https://placehold.co/100x100?text=Hello+World'
+  const hasPreview = Boolean(previewUrl)
+  const hasProfileSrc = Boolean(profileSrc)
+  const displaySrc = previewUrl || profileSrc || placeholderSrc
+
+  const renderProfileActions = () => {
+    if (!isEditing) return null
+
+    if (hasPreview) {
+      return (
+        <div className="userItem__profileBtns">
+          {file?.name && <span className="userItem__profileName">{file.name}</span>}
+          <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
+            프로필 변경
+          </label>
+          <button
+            type="button"
+            className="line userItem__profileBtn"
+            onClick={handleClickCencleImg}
+          >
+            삭제
+          </button>
+        </div>
+      )
+    }
+
+    if (hasProfileSrc) {
+      return (
+        <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
+          프로필 변경
+        </label>
+      )
+    }
+
+    return (
+      <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
+        프로필 추가
+      </label>
+    )
+  }
+
   return (
     <li className="userItem">
       <div className="userItem__box">
@@ -36,13 +105,17 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
         <div className="userItem__info">
           <div className="userItem__profileWrap">
             <div className="userItem__profile">
-              <img src={profileSrc || 'https://placehold.co/100x100?text=Hello+World'} alt="" />
+              <img src={displaySrc} alt="" />
             </div>
-            {isEditing && (
-              <button type="button" className="line userItem__profileBtn">
-                프로필 변경
-              </button>
-            )}
+            {renderProfileActions()}
+            <input
+              id={`userItem_${id}`}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleChange}
+              disabled={!isEditing}
+            />
           </div>
 
           <div className="userItem__texts">
@@ -63,7 +136,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
           </div>
         </div>
 
-        {!isAllEditing && !isSelectedForDeletion && (
+        {!isAllEditing && !isSelectedForDeletion && !isShowUserForm && (
           <div className="userItem__actions">
             {!isItemEditing ? (
               <button
