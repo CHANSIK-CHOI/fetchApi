@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useMemo, useState } from 'react'
 import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
 import type { OnPostUserData } from './useUsers'
+import type { User } from '@/types/users'
 
 type UsersProviderProps = {
   children: ReactNode

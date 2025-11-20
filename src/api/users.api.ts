@@ -11,3 +11,18 @@ export const getUsersApi = async () => {
   const json: { data: User[] } = await response.json()
   return json
 }
+
+export const createUsersApi = async (userData: User) => {
+  const response = await fetch('https://reqres.in/api/users', {
+    headers: {
+      'x-api-key': 'reqres-free-v1',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
+  })
+
+  if (!response.ok) throw Error('유저 데이터를 추가할 수 없습니다.')
+
+  const json: { data: User[] } = await response.json()
+  return json
+}

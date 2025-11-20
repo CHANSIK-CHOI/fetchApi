@@ -3,7 +3,7 @@ import { useUsersQuery } from '@/hooks/useUsersQuery'
 import { useEffect } from 'react'
 
 export default function UsersContainer() {
-  const { users, getUsers, isLoading, error } = useUsersQuery()
+  const { users, getUsers, isLoading, error, createUsers } = useUsersQuery()
 
   useEffect(() => {
     void getUsers()

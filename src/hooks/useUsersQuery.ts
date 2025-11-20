@@ -1,4 +1,4 @@
-import { getUsersApi } from '@/api/users.api'
+import { createUsersApi, getUsersApi } from '@/api/users.api'
 import { type User } from '@/types/users'
 import { useCallback, useState } from 'react'
 
@@ -21,5 +21,15 @@ export function useUsersQuery() {
     }
   }, [])
 
-  return { users, getUsers, isLoading, error }
+  const createUsers = useCallback(async (userData: User) => {
+    try {
+      const { data } = await createUsersApi(userData)
+      console.log(data)
+    } catch (err) {
+      console.error(err)
+      if (err instanceof Error) setError(err.message)
+    }
+  }, [])
+
+  return { users, getUsers, isLoading, error, createUsers }
 }
