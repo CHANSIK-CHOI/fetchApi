@@ -1,5 +1,5 @@
 import type { User } from '@/types/users'
-import { createContext, useContext } from 'react'
+import { createContext, useContext, type Dispatch, type SetStateAction } from 'react'
 
 export type OnItemEditing = {
   id: number
@@ -22,6 +22,7 @@ export type UsersContextType = {
   onSelectedDelete: () => void
   isShowUserForm: boolean
   onPostUserData: ({ isShow, isPost }: OnPostUserData) => void
+  // setNewUserData : Dispatch<SetStateAction<>>
 }
 
 export const UsersContext = createContext<UsersContextType | null>(null)

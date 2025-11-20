@@ -5,14 +5,16 @@ import type { User } from '@/types/users'
 
 type UsersProviderProps = {
   children: ReactNode
+  onCreate: (userData: User) => Promise<void>
 }
 
-export default function UsersProvider({ children }: UsersProviderProps) {
+export default function UsersProvider({ children, onCreate }: UsersProviderProps) {
   const [isAllEditing, setIsAllEditing] = useState<boolean>(false)
   const [editingItemArray, setEditingItemArray] = useState<number[]>([])
   const [isSelectedForDeletion, setIsSelectedForDeletion] = useState<boolean>(false)
   const [checkedItemArray, setCheckedItemArray] = useState<number[]>([])
   const [isShowUserForm, setIsShowUserForm] = useState<boolean>(false)
+  const [newUserData, setNewUserData] = useState<Partial<User> | null>(null)
 
   const onAllEditing = useCallback((isEditing: boolean) => {
     setIsAllEditing(isEditing)
@@ -82,6 +84,7 @@ export default function UsersProvider({ children }: UsersProviderProps) {
       onSelectedDelete,
       isShowUserForm,
       onPostUserData,
+      setNewUserData,
     }),
     [
       editingItemArray,
@@ -94,6 +97,7 @@ export default function UsersProvider({ children }: UsersProviderProps) {
       onSelectedForDeletion,
       isShowUserForm,
       onPostUserData,
+      setNewUserData,
     ],
   )
 
