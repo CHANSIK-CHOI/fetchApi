@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useUsers } from '@/features/users'
 
 export default function UsersForm() {
   const [file, setFile] = useState<File | null>(null)
+  const { setNewUserData } = useUsers()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null
@@ -11,6 +13,7 @@ export default function UsersForm() {
   const handleRemoveImage = () => {
     if (!file) return
     setFile(null)
+    setNewUserData((prev) => ({ ...prev, avatar: undefined }))
   }
 
   const previewUrl = useMemo(() => {
@@ -18,8 +21,18 @@ export default function UsersForm() {
     return URL.createObjectURL(file)
   }, [file])
 
+  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, name: newDataName } = e.target
+
+    const name = newDataName.replace(/_userForm$/, '')
+
+    setNewUserData((prev) => ({ ...prev, [name]: value }))
+  }
+
   useEffect(() => {
     if (!previewUrl) return
+    setNewUserData((prev) => ({ ...prev, avatar: previewUrl }))
+
     return () => URL.revokeObjectURL(previewUrl)
   }, [previewUrl])
 
@@ -55,9 +68,24 @@ export default function UsersForm() {
         </div>
 
         <div className="userForm__editer">
-          <input type="text" name={`first_name_userForm`} placeholder="first name" />
-          <input type="text" name={`last_name_userForm`} placeholder="last name" />
-          <input type="text" name={`email_userForm`} placeholder="email" />
+          <input
+            type="text"
+            name={`first_name_userForm`}
+            placeholder="first name"
+            onChange={handleChangeInput}
+          />
+          <input
+            type="text"
+            name={`last_name_userForm`}
+            placeholder="last name"
+            onChange={handleChangeInput}
+          />
+          <input
+            type="text"
+            name={`email_userForm`}
+            placeholder="email"
+            onChange={handleChangeInput}
+          />
         </div>
       </div>
     </div>

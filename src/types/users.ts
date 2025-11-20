@@ -5,3 +5,5 @@ export type User = {
   id: number
   last_name: string
 }
+
+export type NewUserData = Omit<User, 'id' | 'avatar'> & { avatar?: string }

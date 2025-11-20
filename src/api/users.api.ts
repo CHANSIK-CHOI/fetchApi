@@ -1,4 +1,4 @@
-import type { User } from '@/types/users'
+import type { NewUserData, User } from '@/types/users'
 
 export const getUsersApi = async () => {
   const response = await fetch('https://reqres.in/api/users', {
@@ -12,7 +12,7 @@ export const getUsersApi = async () => {
   return json
 }
 
-export const createUsersApi = async (payload: User) => {
+export const createUsersApi = async (payload: NewUserData) => {
   const response = await fetch('https://reqres.in/api/users', {
     method: 'POST',
     headers: {

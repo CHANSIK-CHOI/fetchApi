@@ -1,11 +1,12 @@
 import { type ReactNode, useCallback, useMemo, useState } from 'react'
 import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
 import type { OnPostUserData } from './useUsers'
-import type { User } from '@/types/users'
+import type { NewUserData } from '@/types/users'
+import { INIT_NEW_USER_DATA } from '@/utils'
 
 type UsersProviderProps = {
   children: ReactNode
-  onCreate: (userData: User) => Promise<void>
+  onCreate: (userData: NewUserData) => Promise<void>
 }
 
 export default function UsersProvider({ children, onCreate }: UsersProviderProps) {
@@ -14,7 +15,7 @@ export default function UsersProvider({ children, onCreate }: UsersProviderProps
   const [isSelectedForDeletion, setIsSelectedForDeletion] = useState<boolean>(false)
   const [checkedItemArray, setCheckedItemArray] = useState<number[]>([])
   const [isShowUserForm, setIsShowUserForm] = useState<boolean>(false)
-  const [newUserData, setNewUserData] = useState<Partial<User> | null>(null)
+  const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA)
 
   const onAllEditing = useCallback((isEditing: boolean) => {
     setIsAllEditing(isEditing)
@@ -61,16 +62,19 @@ export default function UsersProvider({ children, onCreate }: UsersProviderProps
     }
   }, [checkedItemArray])
 
-  const onPostUserData = useCallback(({ isShow, isPost = false, data }: OnPostUserData) => {
-    void data // 임시
-    setIsShowUserForm(isShow)
-    if (isShow) {
-      setEditingItemArray([])
-    }
-    if (isPost) {
-      // isPost : POST
-    }
-  }, [])
+  const onPostUserData = useCallback(
+    ({ isShow, isPost = false }: OnPostUserData) => {
+      setIsShowUserForm(isShow)
+      if (isShow) {
+        setEditingItemArray([])
+      }
+      if (isPost) {
+        // isPost : POST
+        onCreate(newUserData)
+      }
+    },
+    [newUserData, onCreate],
+  )
 
   const providerValue = useMemo(
     () => ({

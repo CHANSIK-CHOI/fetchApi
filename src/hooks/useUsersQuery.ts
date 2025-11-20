@@ -1,5 +1,5 @@
 import { createUsersApi, getUsersApi } from '@/api/users.api'
-import { type User } from '@/types/users'
+import { type NewUserData, type User } from '@/types/users'
 import { useCallback, useState } from 'react'
 
 export function useUsersQuery() {
@@ -21,7 +21,7 @@ export function useUsersQuery() {
     }
   }, [])
 
-  const createUsers = useCallback(async (userData: User) => {
+  const createUsers = useCallback(async (userData: NewUserData) => {
     try {
       const { data } = await createUsersApi(userData)
       console.log(data)
