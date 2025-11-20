@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
+import { type ChangeEvent } from 'react'
 import { useUsers } from '@/features/users'
-
-const PLACEHOLDER_SRC = 'https://placehold.co/100x100?text=Hello+World'
+import { UsersItemProfileView, UsersItemProfileEditor } from '@/features/users'
 
 type UsersItem = {
   profileSrc: string | undefined
@@ -45,9 +44,9 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
         <div className="userItem__info">
           <div className="userItem__profileWrap">
             {isEditing ? (
-              <UserItemProfileEditor key={`editing-${id}`} id={id} profileSrc={profileSrc} />
+              <UsersItem.ProfileEditor key={`editing-${id}`} id={id} profileSrc={profileSrc} />
             ) : (
-              <UserItemProfileView profileSrc={profileSrc} />
+              <UsersItem.ProfileView profileSrc={profileSrc} />
             )}
           </div>
 
@@ -109,79 +108,5 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
   )
 }
 
-type UserItemProfileViewProps = {
-  profileSrc?: string
-}
-
-function UserItemProfileView({ profileSrc }: UserItemProfileViewProps) {
-  return (
-    <div className="userItem__profile">
-      <img src={profileSrc || PLACEHOLDER_SRC} alt="" />
-    </div>
-  )
-}
-
-type UserItemProfileEditorProps = {
-  id: number
-  profileSrc?: string
-}
-
-function UserItemProfileEditor({ id, profileSrc }: UserItemProfileEditorProps) {
-  const [file, setFile] = useState<File | null>(null)
-  const [isProfileCleared, setIsProfileCleared] = useState(false)
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0] || null
-    setFile(selected)
-    if (selected) {
-      setIsProfileCleared(false)
-    }
-  }
-
-  const handleRemoveImage = () => {
-    if (file) {
-      setFile(null)
-      return
-    }
-
-    if (!isProfileCleared) {
-      setIsProfileCleared(true)
-    }
-  }
-
-  const previewUrl = useMemo(() => {
-    if (!file) return null
-    return URL.createObjectURL(file)
-  }, [file])
-
-  useEffect(() => {
-    if (!previewUrl) return
-    return () => URL.revokeObjectURL(previewUrl)
-  }, [previewUrl])
-
-  const hasPreview = Boolean(previewUrl)
-  const hasProfileSrc = Boolean(profileSrc) && !isProfileCleared
-  const displaySrc = previewUrl || (hasProfileSrc ? profileSrc : null) || PLACEHOLDER_SRC
-  const labelText = hasPreview || hasProfileSrc ? '프로필 변경' : '프로필 추가'
-
-  return (
-    <>
-      <div className="userItem__profile">
-        <img src={displaySrc} alt="" />
-      </div>
-      <div className="userItem__profileBtns">
-        {hasPreview && file?.name && <span className="userItem__profileName">{file.name}</span>}
-
-        <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
-          {labelText}
-        </label>
-        {(hasPreview || hasProfileSrc) && (
-          <button type="button" className="line userItem__profileBtn" onClick={handleRemoveImage}>
-            삭제
-          </button>
-        )}
-      </div>
-      <input id={`userItem_${id}`} type="file" accept="image/*" hidden onChange={handleChange} />
-    </>
-  )
-}
+UsersItem.ProfileView = UsersItemProfileView
+UsersItem.ProfileEditor = UsersItemProfileEditor

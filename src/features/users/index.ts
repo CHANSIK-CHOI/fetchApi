@@ -1,6 +1,8 @@
 export { default as UsersContainer } from './containers/UsersContainer'
 export { default as Users } from './components/Users'
 export { default as UsersItem } from './components/UsersItem'
+export { default as UsersItemProfileEditor } from './components/UsersItemProfileEditor'
+export { default as UsersItemProfileView } from './components/UsersItemProfileView'
 export { default as UsersForm } from './components/UsersForm'
 export { default as UsersProvider } from './context/UsersProvider'
 export { UsersContext, useUsers } from './context/useUsers'
