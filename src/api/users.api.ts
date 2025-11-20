@@ -25,7 +25,5 @@ export const createUsersApi = async (payload: NewUserData) => {
   if (!response.ok) throw Error('유저 데이터를 추가할 수 없습니다.')
 
   const json = await response.json()
-  console.log({ response, json })
-
   return json
 }

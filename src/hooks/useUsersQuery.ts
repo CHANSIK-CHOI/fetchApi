@@ -23,8 +23,8 @@ export function useUsersQuery() {
 
   const createUsers = useCallback(async (userData: NewUserData) => {
     try {
-      const { data } = await createUsersApi(userData)
-      console.log(data)
+      const result = await createUsersApi(userData)
+      console.log('createUsers', result)
     } catch (err) {
       console.error(err)
       if (err instanceof Error) setError(err.message)

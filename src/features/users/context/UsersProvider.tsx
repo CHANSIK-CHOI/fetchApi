@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
 import type { OnPostUserData } from './useUsers'
 import type { NewUserData } from '@/types/users'
@@ -16,6 +16,11 @@ export default function UsersProvider({ children, onCreate }: UsersProviderProps
   const [checkedItemArray, setCheckedItemArray] = useState<number[]>([])
   const [isShowUserForm, setIsShowUserForm] = useState<boolean>(false)
   const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA)
+  const newUserDataRef = useRef<NewUserData>(INIT_NEW_USER_DATA)
+
+  useEffect(() => {
+    newUserDataRef.current = newUserData
+  }, [newUserData])
 
   const onAllEditing = useCallback((isEditing: boolean) => {
     setIsAllEditing(isEditing)
@@ -67,13 +72,21 @@ export default function UsersProvider({ children, onCreate }: UsersProviderProps
       setIsShowUserForm(isShow)
       if (isShow) {
         setEditingItemArray([])
+        setNewUserData(INIT_NEW_USER_DATA)
       }
       if (isPost) {
         // isPost : POST
-        onCreate(newUserData)
+        const { email, first_name, last_name } = newUserDataRef.current
+
+        if (!email || !first_name || !last_name) {
+          alert('이메일, 이름, 성을 모두 입력해주세요.')
+          return
+        }
+
+        onCreate(newUserDataRef.current)
       }
     },
-    [newUserData, onCreate],
+    [onCreate],
   )
 
   const providerValue = useMemo(
