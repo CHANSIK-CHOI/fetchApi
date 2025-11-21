@@ -18,11 +18,9 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   const [isShowUserForm, setIsShowUserForm] = useState<boolean>(false)
   const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA)
   const newUserDataRef = useRef<NewUserData>(INIT_NEW_USER_DATA)
-  const [userFormValues, setUserFormValues] = useState<Record<string, string | undefined>[]>([])
 
-  useEffect(() => {
-    if (!users) return
-    const userFormData = users.map((item) => {
+  const usersFormValue = useMemo(() => {
+    return users.map((item) => {
       const renamed = {
         [`first_name_${item.id}`]: item.first_name,
         [`last_name_${item.id}`]: item.last_name,
@@ -32,7 +30,6 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       }
       return renamed
     })
-    setUserFormValues(userFormData)
   }, [users])
 
   useEffect(() => {
@@ -119,6 +116,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       isShowUserForm,
       onPostUserData,
       setNewUserData,
+      usersFormValue,
     }),
     [
       editingItemArray,
@@ -132,6 +130,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       isShowUserForm,
       onPostUserData,
       setNewUserData,
+      usersFormValue,
     ],
   )
 

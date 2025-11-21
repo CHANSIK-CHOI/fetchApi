@@ -18,6 +18,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     isSelectedForDeletion,
     onChangeItem,
     isShowUserForm,
+    usersFormValue,
   } = useUsers()
 
   const isItemEditing = editingItemArray.includes(id)
@@ -27,6 +28,9 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     const { checked } = e.target
     onChangeItem({ checked, id })
   }
+
+  const thisUserData = usersFormValue.find((item) => item.id === id)
+  console.log(thisUserData)
 
   return (
     <li className="userItem">
@@ -60,9 +64,24 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
               </>
             ) : (
               <div className="userItem__editer">
-                <input type="text" name={`first_name_${id}`} placeholder="first name" />
-                <input type="text" name={`last_name_${id}`} placeholder="last name" />
-                <input type="text" name={`email_${id}`} placeholder="email" />
+                <input
+                  type="text"
+                  name={`first_name_${id}`}
+                  placeholder="first name"
+                  value={thisUserData[`first_name_${id}`]}
+                />
+                <input
+                  type="text"
+                  name={`last_name_${id}`}
+                  placeholder="last name"
+                  value={thisUserData[`last_name_${id}`]}
+                />
+                <input
+                  type="text"
+                  name={`email_${id}`}
+                  placeholder="email"
+                  value={thisUserData[`email_${id}`]}
+                />
               </div>
             )}
           </div>

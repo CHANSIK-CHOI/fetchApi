@@ -22,6 +22,7 @@ export type UsersContextType = {
   isShowUserForm: boolean
   onPostUserData: ({ isShow, isPost }: OnPostUserData) => void
   setNewUserData: Dispatch<SetStateAction<NewUserData>>
+  usersFormValue: Record<string, string | number> | undefined
 }
 
 export const UsersContext = createContext<UsersContextType | null>(null)
