@@ -24,7 +24,16 @@ export function useUsersQuery() {
   const createUsers = useCallback(async (userData: NewUserData) => {
     try {
       const result = await createUsersApi(userData)
-      setUsers((prev) => [result, ...prev])
+      const { id, ...rest } = result
+      const numericId = Number(id)
+      const newUser: User = {
+        id: Number.isNaN(numericId) ? Date.now() : numericId,
+        avatar: rest.avatar ?? '',
+        email: rest.email,
+        first_name: rest.first_name,
+        last_name: rest.last_name,
+      }
+      setUsers((prev) => [newUser, ...prev])
     } catch (err) {
       console.error(err)
       if (err instanceof Error) setError(err.message)

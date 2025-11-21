@@ -9,10 +9,8 @@ export default function UsersContainer() {
     void getUsers()
   }, [])
 
-  console.log(users)
-
   return (
-    <UsersProvider onCreate={createUsers}>
+    <UsersProvider users={users} onCreate={createUsers}>
       <Users userForm={<Users.Form />}>
         {isLoading && <img src="src/assets/loading.gif" className="loading" />}
         {error.length > 0 && (

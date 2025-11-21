@@ -1,15 +1,16 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
 import type { OnPostUserData } from './useUsers'
-import type { NewUserData } from '@/types/users'
+import type { NewUserData, User } from '@/types/users'
 import { INIT_NEW_USER_DATA } from '@/utils'
 
 type UsersProviderProps = {
   children: ReactNode
   onCreate: (userData: NewUserData) => Promise<void>
+  users: User[]
 }
 
-export default function UsersProvider({ children, onCreate }: UsersProviderProps) {
+export default function UsersProvider({ children, onCreate, users }: UsersProviderProps) {
   const [isAllEditing, setIsAllEditing] = useState<boolean>(false)
   const [editingItemArray, setEditingItemArray] = useState<number[]>([])
   const [isSelectedForDeletion, setIsSelectedForDeletion] = useState<boolean>(false)
@@ -17,6 +18,22 @@ export default function UsersProvider({ children, onCreate }: UsersProviderProps
   const [isShowUserForm, setIsShowUserForm] = useState<boolean>(false)
   const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA)
   const newUserDataRef = useRef<NewUserData>(INIT_NEW_USER_DATA)
+  const [userFormValues, setUserFormValues] = useState<Record<string, string | undefined>[]>([])
+
+  useEffect(() => {
+    if (!users) return
+    const userFormData = users.map((item) => {
+      const renamed = {
+        [`first_name_${item.id}`]: item.first_name,
+        [`last_name_${item.id}`]: item.last_name,
+        [`email_${item.id}`]: item.email,
+        [`avatar_${item.id}`]: item.avatar,
+        id: item.id,
+      }
+      return renamed
+    })
+    setUserFormValues(userFormData)
+  }, [users])
 
   useEffect(() => {
     newUserDataRef.current = newUserData
@@ -30,8 +47,7 @@ export default function UsersProvider({ children, onCreate }: UsersProviderProps
     }
   }, [])
 
-  const onItemEditing = useCallback(({ id, isEditing, isPatch = false, data }: OnItemEditing) => {
-    void data // 임시
+  const onItemEditing = useCallback(({ id, isEditing, isPatch = false }: OnItemEditing) => {
     if (isEditing) {
       setEditingItemArray((prev) => (prev.includes(id) ? prev : [...prev, id]))
     } else {
