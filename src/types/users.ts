@@ -7,3 +7,4 @@ export type User = {
 }
 
 export type NewUserData = Omit<User, 'id' | 'avatar'> & { avatar?: string }
+export type ResultNewUserData = User & { createdAt: string }

@@ -9,6 +9,8 @@ export default function UsersContainer() {
     void getUsers()
   }, [])
 
+  console.log(users)
+
   return (
     <UsersProvider onCreate={createUsers}>
       <Users userForm={<Users.Form />}>

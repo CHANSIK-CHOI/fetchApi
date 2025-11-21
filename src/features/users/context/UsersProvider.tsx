@@ -69,21 +69,22 @@ export default function UsersProvider({ children, onCreate }: UsersProviderProps
 
   const onPostUserData = useCallback(
     ({ isShow, isPost = false }: OnPostUserData) => {
-      setIsShowUserForm(isShow)
-      if (isShow) {
+      if (!isShow) {
+        if (isPost) {
+          const { email, first_name, last_name } = newUserDataRef.current
+
+          if (!email || !first_name || !last_name) {
+            alert('이메일, 이름, 성을 모두 입력해주세요.')
+            return
+          }
+
+          onCreate(newUserDataRef.current)
+        }
+        setIsShowUserForm(false)
+      } else {
         setEditingItemArray([])
         setNewUserData(INIT_NEW_USER_DATA)
-      }
-      if (isPost) {
-        // isPost : POST
-        const { email, first_name, last_name } = newUserDataRef.current
-
-        if (!email || !first_name || !last_name) {
-          alert('이메일, 이름, 성을 모두 입력해주세요.')
-          return
-        }
-
-        onCreate(newUserDataRef.current)
+        setIsShowUserForm(true)
       }
     },
     [onCreate],
