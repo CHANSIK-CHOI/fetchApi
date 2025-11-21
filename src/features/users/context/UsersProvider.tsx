@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
 import type { OnPostUserData } from './useUsers'
-import type { NewUserData, User } from '@/types/users'
+import type { NewUserData, User, UsersFormValueItem } from '@/types/users'
 import { INIT_NEW_USER_DATA } from '@/utils'
 
 type UsersProviderProps = {
@@ -19,7 +19,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA)
   const newUserDataRef = useRef<NewUserData>(INIT_NEW_USER_DATA)
 
-  const usersFormValue = useMemo(() => {
+  const usersFormValue = useMemo<UsersFormValueItem[]>(() => {
     return users.map((item) => {
       const renamed = {
         [`first_name_${item.id}`]: item.first_name,

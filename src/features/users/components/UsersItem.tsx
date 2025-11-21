@@ -29,8 +29,10 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     onChangeItem({ checked, id })
   }
 
-  const thisUserData = usersFormValue.find((item) => item.id === id)
-  console.log(thisUserData)
+  const userData = usersFormValue.find((item) => item.id === id)
+  const firstNameValue = userData ? userData[`first_name_${id}`] : ''
+  const lastNameValue = userData ? userData[`last_name_${id}`] : ''
+  const emailValue = userData ? userData[`email_${id}`] : ''
 
   return (
     <li className="userItem">
@@ -68,20 +70,15 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
                   type="text"
                   name={`first_name_${id}`}
                   placeholder="first name"
-                  value={thisUserData[`first_name_${id}`]}
+                  value={firstNameValue}
                 />
                 <input
                   type="text"
                   name={`last_name_${id}`}
                   placeholder="last name"
-                  value={thisUserData[`last_name_${id}`]}
+                  value={lastNameValue}
                 />
-                <input
-                  type="text"
-                  name={`email_${id}`}
-                  placeholder="email"
-                  value={thisUserData[`email_${id}`]}
-                />
+                <input type="text" name={`email_${id}`} placeholder="email" value={emailValue} />
               </div>
             )}
           </div>

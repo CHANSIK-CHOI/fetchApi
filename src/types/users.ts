@@ -8,3 +8,5 @@ export type User = {
 
 export type NewUserData = Omit<User, 'id' | 'avatar'> & { avatar?: string }
 export type ResultNewUserData = User & { createdAt: string }
+
+export type UsersFormValueItem = Record<string, string | number> & { id: number }

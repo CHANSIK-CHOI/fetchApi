@@ -1,4 +1,4 @@
-import type { NewUserData } from '@/types/users'
+import type { NewUserData, UsersFormValueItem } from '@/types/users'
 import { createContext, useContext, type Dispatch, type SetStateAction } from 'react'
 
 export type OnItemEditing = {
@@ -22,7 +22,7 @@ export type UsersContextType = {
   isShowUserForm: boolean
   onPostUserData: ({ isShow, isPost }: OnPostUserData) => void
   setNewUserData: Dispatch<SetStateAction<NewUserData>>
-  usersFormValue: Record<string, string | number> | undefined
+  usersFormValue: UsersFormValueItem[]
 }
 
 export const UsersContext = createContext<UsersContextType | null>(null)
