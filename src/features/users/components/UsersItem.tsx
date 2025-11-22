@@ -3,14 +3,20 @@ import { useUsers } from '@/features/users'
 import { UsersItemProfileView, UsersItemProfileEditor } from '@/features/users'
 
 type UsersItem = {
-  profileSrc: string | undefined
-  firstName: string
-  lastName: string
-  email: string
+  // profileSrc: string | undefined
+  // firstName: string
+  // lastName: string
+  // email: string
   id: number
 }
 
-export default function UsersItem({ profileSrc, firstName, lastName, email, id }: UsersItem) {
+export default function UsersItem({
+  // profileSrc,
+  // firstName,
+  // lastName,
+  //  email,
+  id,
+}: UsersItem) {
   const {
     isAllEditing,
     editingItemArray,
@@ -33,6 +39,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
   const firstNameValue = userData ? userData[`first_name_${id}`] : ''
   const lastNameValue = userData ? userData[`last_name_${id}`] : ''
   const emailValue = userData ? userData[`email_${id}`] : ''
+  const avatarSrc = (userData ? userData[`avatar_${id}`] : '') as string
 
   return (
     <li className="userItem">
@@ -50,9 +57,9 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
         <div className="userItem__info">
           <div className="userItem__profileWrap">
             {isEditing ? (
-              <UsersItem.ProfileEditor key={`editing-${id}`} id={id} profileSrc={profileSrc} />
+              <UsersItem.ProfileEditor key={`editing-${id}`} id={id} profileSrc={avatarSrc} />
             ) : (
-              <UsersItem.ProfileView profileSrc={profileSrc} />
+              <UsersItem.ProfileView profileSrc={avatarSrc} />
             )}
           </div>
 
@@ -60,9 +67,9 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
             {!isEditing ? (
               <>
                 <span className="userItem__name">
-                  {firstName} {lastName}
+                  {firstNameValue} {lastNameValue}
                 </span>
-                <span className="userItem__email">{email}</span>
+                <span className="userItem__email">{emailValue}</span>
               </>
             ) : (
               <div className="userItem__editer">
