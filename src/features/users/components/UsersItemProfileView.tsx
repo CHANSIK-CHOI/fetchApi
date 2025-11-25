@@ -1,4 +1,3 @@
-import React from 'react'
 import { PLACEHOLDER_SRC } from '@/utils'
 
 type UsersItemProfileViewProps = {

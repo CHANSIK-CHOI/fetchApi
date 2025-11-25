@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, type ChangeEvent } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { PLACEHOLDER_SRC } from '@/utils'
 
 type UsersItemProfileEditorProps = {

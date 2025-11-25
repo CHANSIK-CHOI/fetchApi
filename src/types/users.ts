@@ -13,3 +13,4 @@ type UserKeys = keyof User
 export type UsersFormValueItem = {
   [K in UserKeys as K extends 'id' ? K : `${K}_${number}`]: User[K]
 } & { isModify: boolean }
+export type UsersFormValueMap = Record<number, UsersFormValueItem>

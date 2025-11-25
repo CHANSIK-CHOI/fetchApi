@@ -1,4 +1,4 @@
-import type { NewUserData, UsersFormValueItem } from '@/types/users'
+import type { NewUserData, UsersFormValueMap } from '@/types/users'
 import {
   createContext,
   useContext,
@@ -28,8 +28,8 @@ export type UsersContextType = {
   isShowUserForm: boolean
   onPostUserData: ({ isShow, isPost }: OnPostUserData) => void
   setNewUserData: Dispatch<SetStateAction<NewUserData>>
-  usersFormValue: UsersFormValueItem[]
-  onChangeUserData: (e: ChangeEvent<HTMLInputElement>) => void
+  usersFormValue: UsersFormValueMap
+  onChangeUserData: (e: ChangeEvent<HTMLInputElement>, id: number) => void
 }
 
 export const UsersContext = createContext<UsersContextType | null>(null)

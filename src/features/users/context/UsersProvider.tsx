@@ -9,7 +9,7 @@ import {
 } from 'react'
 import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
 import type { OnPostUserData } from './useUsers'
-import type { NewUserData, User, UsersFormValueItem } from '@/types/users'
+import type { NewUserData, User, UsersFormValueItem, UsersFormValueMap } from '@/types/users'
 import { INIT_NEW_USER_DATA } from '@/utils'
 
 type UsersProviderProps = {
@@ -27,21 +27,25 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA)
   const newUserDataRef = useRef<NewUserData>(INIT_NEW_USER_DATA)
 
-  const usersFormValue = useMemo<UsersFormValueItem[]>(() => {
-    return users.map(
-      (item) =>
-        ({
-          [`first_name_${item.id}`]: item.first_name,
-          [`last_name_${item.id}`]: item.last_name,
-          [`email_${item.id}`]: item.email,
-          [`avatar_${item.id}`]: item.avatar,
-          id: item.id,
-          isModify: false,
-        }) as UsersFormValueItem,
-    )
-  }, [users])
+  const buildUsersFormValue = useCallback((data: User[]) => {
+    return data.reduce<UsersFormValueMap>((acc, item) => {
+      acc[item.id] = {
+        [`first_name_${item.id}`]: item.first_name,
+        [`last_name_${item.id}`]: item.last_name,
+        [`email_${item.id}`]: item.email,
+        [`avatar_${item.id}`]: item.avatar,
+        id: item.id,
+        isModify: false,
+      } as UsersFormValueItem
+      return acc
+    }, {})
+  }, [])
 
-  const usersFormValueRef = useRef(usersFormValue)
+  const [usersFormValue, setUsersFormValue] = useState(buildUsersFormValue(users))
+
+  useEffect(() => {
+    setUsersFormValue(buildUsersFormValue(users))
+  }, [buildUsersFormValue, users])
 
   useEffect(() => {
     newUserDataRef.current = newUserData
@@ -114,8 +118,21 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     [onCreate],
   )
 
-  const onChangeUserData = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    console.log(usersFormValueRef, e)
+  const onChangeUserData = useCallback((e: ChangeEvent<HTMLInputElement>, id: number) => {
+    const { name, value } = e.target
+
+    setUsersFormValue((prev) => {
+      const target = prev[id]
+      if (!target) return prev
+
+      return {
+        ...prev,
+        [id]: {
+          ...target,
+          [name]: value,
+        } as UsersFormValueItem,
+      }
+    })
   }, [])
 
   const providerValue = useMemo(
