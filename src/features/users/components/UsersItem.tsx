@@ -3,20 +3,14 @@ import { useUsers } from '@/features/users'
 import { UsersItemProfileView, UsersItemProfileEditor } from '@/features/users'
 
 type UsersItem = {
-  // profileSrc: string | undefined
-  // firstName: string
-  // lastName: string
-  // email: string
+  profileSrc: string | undefined
+  firstName: string
+  lastName: string
+  email: string
   id: number
 }
 
-export default function UsersItem({
-  // profileSrc,
-  // firstName,
-  // lastName,
-  //  email,
-  id,
-}: UsersItem) {
+export default function UsersItem({ profileSrc, firstName, lastName, email, id }: UsersItem) {
   const {
     isAllEditing,
     editingItemArray,
@@ -25,6 +19,7 @@ export default function UsersItem({
     onChangeItem,
     isShowUserForm,
     usersFormValue,
+    onChangeUserData,
   } = useUsers()
 
   const isItemEditing = editingItemArray.includes(id)
@@ -59,7 +54,7 @@ export default function UsersItem({
             {isEditing ? (
               <UsersItem.ProfileEditor key={`editing-${id}`} id={id} profileSrc={avatarSrc} />
             ) : (
-              <UsersItem.ProfileView profileSrc={avatarSrc} />
+              <UsersItem.ProfileView profileSrc={profileSrc} />
             )}
           </div>
 
@@ -67,9 +62,9 @@ export default function UsersItem({
             {!isEditing ? (
               <>
                 <span className="userItem__name">
-                  {firstNameValue} {lastNameValue}
+                  {firstName} {lastName}
                 </span>
-                <span className="userItem__email">{emailValue}</span>
+                <span className="userItem__email">{email}</span>
               </>
             ) : (
               <div className="userItem__editer">
@@ -78,14 +73,22 @@ export default function UsersItem({
                   name={`first_name_${id}`}
                   placeholder="first name"
                   value={firstNameValue}
+                  onChange={onChangeUserData}
                 />
                 <input
                   type="text"
                   name={`last_name_${id}`}
                   placeholder="last name"
                   value={lastNameValue}
+                  onChange={onChangeUserData}
                 />
-                <input type="text" name={`email_${id}`} placeholder="email" value={emailValue} />
+                <input
+                  type="text"
+                  name={`email_${id}`}
+                  placeholder="email"
+                  value={emailValue}
+                  onChange={onChangeUserData}
+                />
               </div>
             )}
           </div>

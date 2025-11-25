@@ -1,4 +1,12 @@
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type ChangeEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
 import type { OnPostUserData } from './useUsers'
 import type { NewUserData, User, UsersFormValueItem } from '@/types/users'
@@ -20,17 +28,20 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   const newUserDataRef = useRef<NewUserData>(INIT_NEW_USER_DATA)
 
   const usersFormValue = useMemo<UsersFormValueItem[]>(() => {
-    return users.map((item) => {
-      const renamed = {
-        [`first_name_${item.id}`]: item.first_name,
-        [`last_name_${item.id}`]: item.last_name,
-        [`email_${item.id}`]: item.email,
-        [`avatar_${item.id}`]: item.avatar,
-        id: item.id,
-      }
-      return renamed
-    })
+    return users.map(
+      (item) =>
+        ({
+          [`first_name_${item.id}`]: item.first_name,
+          [`last_name_${item.id}`]: item.last_name,
+          [`email_${item.id}`]: item.email,
+          [`avatar_${item.id}`]: item.avatar,
+          id: item.id,
+          isModify: false,
+        }) as UsersFormValueItem,
+    )
   }, [users])
+
+  const usersFormValueRef = useRef(usersFormValue)
 
   useEffect(() => {
     newUserDataRef.current = newUserData
@@ -103,6 +114,10 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     [onCreate],
   )
 
+  const onChangeUserData = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    console.log(usersFormValueRef, e)
+  }, [])
+
   const providerValue = useMemo(
     () => ({
       isAllEditing,
@@ -117,6 +132,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       onPostUserData,
       setNewUserData,
       usersFormValue,
+      onChangeUserData,
     }),
     [
       editingItemArray,
@@ -131,6 +147,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       onPostUserData,
       setNewUserData,
       usersFormValue,
+      onChangeUserData,
     ],
   )
 

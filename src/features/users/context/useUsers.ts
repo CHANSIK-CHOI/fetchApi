@@ -1,5 +1,11 @@
 import type { NewUserData, UsersFormValueItem } from '@/types/users'
-import { createContext, useContext, type Dispatch, type SetStateAction } from 'react'
+import {
+  createContext,
+  useContext,
+  type ChangeEvent,
+  type Dispatch,
+  type SetStateAction,
+} from 'react'
 
 export type OnItemEditing = {
   id: number
@@ -23,6 +29,7 @@ export type UsersContextType = {
   onPostUserData: ({ isShow, isPost }: OnPostUserData) => void
   setNewUserData: Dispatch<SetStateAction<NewUserData>>
   usersFormValue: UsersFormValueItem[]
+  onChangeUserData: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
 export const UsersContext = createContext<UsersContextType | null>(null)
