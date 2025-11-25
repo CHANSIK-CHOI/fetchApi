@@ -59,11 +59,6 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
 
   const [builtUsersData, setBuiltUsersData] = useState(buildUsersData(users)) // [UsersItem] input value (state)
 
-  // reset ui
-  const resetItemEditor = () => {
-    setShowItemEditor([])
-  }
-
   // [A:전체수정] 전체 수정 에디터 show/hide & patch
   const onShowAllEditor = useCallback(
     ({ isShowEditor, isPatch = false }: OnShowAllEditor) => {
@@ -71,7 +66,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
 
       if (isShowEditor) {
         // 전체 에디터 창 show
-        resetItemEditor()
+        setShowItemEditor([])
       } else {
         // 전체 에디터 창 hide
         if (isPatch) {
@@ -100,6 +95,18 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
           // 수정완료(PATCH) : isPatch
         } else {
           // 수정 취소
+          setBuiltUsersData((prev) => {
+            const target = prev[id]
+            if (!target || !target.isModify) return prev
+
+            return {
+              ...prev,
+              [id]: {
+                ...buildUsersData(users)[id],
+                isModify: false,
+              } as UsersFormValueItem,
+            }
+          })
         }
         // id Item 에디터 창 hide
         setShowItemEditor((prev) => {
@@ -117,7 +124,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     if (!isActive) {
       setCheckedDeleteItems([])
     } else {
-      resetItemEditor()
+      setShowItemEditor([])
     }
   }, [])
 
@@ -152,8 +159,9 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     ({ isShow, isPost = false }: OnPostUserData) => {
       if (isShow) {
         // 신규 유저 추가 에디터 창 show
-        resetItemEditor()
+        setShowItemEditor([])
         setIsShowNewUserForm(true)
+        setBuiltUsersData(buildUsersData(users))
       } else {
         // 신규 유저 추가 에디터 창 hide
         setIsShowNewUserForm(false)
@@ -170,10 +178,10 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       }
       setNewUserData(INIT_NEW_USER_DATA)
     },
-    [onCreate],
+    [buildUsersData, onCreate, users],
   )
 
-  // [수정 에디터] builtUsersData update
+  // [수정 에디터] onChange 이벤트 : builtUsersData update
   const onChangeUserData = useCallback(
     (e: ChangeEvent<HTMLInputElement>, id: number) => {
       const { name, value } = e.target
