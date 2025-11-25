@@ -83,15 +83,26 @@ export default function Users({ children, userForm }: UsersProps) {
           {isActiveAllEditing && (
             <>
               {!isAllEditing ? (
-                <button type="button" className="line" onClick={() => onAllEditing(true)}>
+                <button
+                  type="button"
+                  className="line"
+                  onClick={() => onAllEditing({ isEditing: true })}
+                >
                   전체수정
                 </button>
               ) : (
                 <>
-                  <button type="button" className="line" onClick={() => onAllEditing(false)}>
+                  <button
+                    type="button"
+                    className="line"
+                    onClick={() => onAllEditing({ isEditing: false })}
+                  >
                     수정취소
                   </button>
-                  <button type="button" onClick={() => onAllEditing(false)}>
+                  <button
+                    type="button"
+                    onClick={() => onAllEditing({ isEditing: false, isPatch: true })}
+                  >
                     수정완료
                   </button>
                 </>

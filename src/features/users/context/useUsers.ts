@@ -7,18 +7,18 @@ import {
   type SetStateAction,
 } from 'react'
 
-export type OnItemEditing = {
-  id: number
+export type OnAllEditing = {
   isEditing: boolean
   isPatch?: boolean
 }
+export type OnItemEditing = { id: number } & OnAllEditing
 export type OnChangeItem = { checked: boolean; id: number }
 
 export type OnPostUserData = { isShow: boolean; isPost?: boolean }
 
 export type UsersContextType = {
   isAllEditing: boolean
-  onAllEditing: (isEditing: boolean) => void
+  onAllEditing: ({ isEditing, isPatch }: OnAllEditing) => void
   editingItemArray: number[]
   onItemEditing: ({ id, isEditing, isPatch }: OnItemEditing) => void
   isSelectedForDeletion: boolean

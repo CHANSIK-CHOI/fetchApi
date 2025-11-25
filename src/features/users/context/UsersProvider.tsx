@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react'
 import { UsersContext, type OnItemEditing, type OnChangeItem } from '@/features/users'
-import type { OnPostUserData } from './useUsers'
+import type { OnAllEditing, OnPostUserData } from './useUsers'
 import type { NewUserData, User, UsersFormValueItem, UsersFormValueMap } from '@/types/users'
 import { INIT_NEW_USER_DATA } from '@/utils'
 
@@ -51,20 +51,33 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     newUserDataRef.current = newUserData
   }, [newUserData])
 
-  const onAllEditing = useCallback((isEditing: boolean) => {
+  const onAllEditing = useCallback(({ isEditing, isPatch = false }: OnAllEditing) => {
     setIsAllEditing(isEditing)
 
     if (isEditing) {
+      // 에디터 창 show
       setEditingItemArray([])
+    } else {
+      // 에디터 창 hide
+      if (isPatch) {
+        // 수정완료(PATCH) : isPatch
+      } else {
+        // 수정 취소
+        setUsersFormValue(buildUsersFormValue(users))
+      }
     }
   }, [])
 
   const onItemEditing = useCallback(({ id, isEditing, isPatch = false }: OnItemEditing) => {
     if (isEditing) {
+      // 에디터 창 show
       setEditingItemArray((prev) => (prev.includes(id) ? prev : [...prev, id]))
     } else {
+      // 에디터 창 hide
       if (isPatch) {
-        // isPatch : PATCH
+        // 수정완료(PATCH) : isPatch
+      } else {
+        // 수정 취소
       }
       setEditingItemArray((prev) => prev.filter((value) => value !== id))
     }
@@ -118,22 +131,47 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     [onCreate],
   )
 
-  const onChangeUserData = useCallback((e: ChangeEvent<HTMLInputElement>, id: number) => {
-    const { name, value } = e.target
+  const onChangeUserData = useCallback(
+    (e: ChangeEvent<HTMLInputElement>, id: number) => {
+      const { name, value } = e.target
 
-    setUsersFormValue((prev) => {
-      const target = prev[id]
-      if (!target) return prev
+      setUsersFormValue((prev) => {
+        const target = prev[id]
+        if (!target) return prev
 
-      return {
-        ...prev,
-        [id]: {
+        const nextEntry = {
           ...target,
           [name]: value,
-        } as UsersFormValueItem,
-      }
-    })
-  }, [])
+        } as UsersFormValueItem
+
+        const originalUser = users.find((user) => user.id === id)
+        if (originalUser) {
+          const isModify =
+            nextEntry[`first_name_${id}`] !== originalUser.first_name ||
+            nextEntry[`last_name_${id}`] !== originalUser.last_name ||
+            nextEntry[`email_${id}`] !== originalUser.email ||
+            nextEntry[`avatar_${id}`] !== originalUser.avatar
+
+          return {
+            ...prev,
+            [id]: {
+              ...nextEntry,
+              isModify,
+            } as UsersFormValueItem,
+          }
+        }
+
+        return {
+          ...prev,
+          [id]: {
+            ...nextEntry,
+            isModify: true,
+          } as UsersFormValueItem,
+        }
+      })
+    },
+    [users],
+  )
 
   const providerValue = useMemo(
     () => ({
