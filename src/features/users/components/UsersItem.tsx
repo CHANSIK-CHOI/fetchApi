@@ -1,4 +1,3 @@
-import { type ChangeEvent } from 'react'
 import { useUsers } from '@/features/users'
 import { UsersItemProfileView, UsersItemProfileEditor } from '@/features/users'
 
@@ -12,40 +11,37 @@ type UsersItem = {
 
 export default function UsersItem({ profileSrc, firstName, lastName, email, id }: UsersItem) {
   const {
-    isAllEditing,
-    editingItemArray,
-    onItemEditing,
-    isSelectedForDeletion,
-    onChangeItem,
-    isShowUserForm,
-    usersFormValue,
+    isShowAllEditor,
+    showItemEditor,
+    onShowItemEditor,
+    isShowDeleteCheckbox,
+    onCheckedDeleteItems,
+    isShowNewUserForm,
+    builtUsersData,
     onChangeUserData,
   } = useUsers()
 
-  const isItemEditing = editingItemArray.includes(id)
-  const isEditing = isAllEditing || isItemEditing
+  const isItemEditing = showItemEditor.includes(id)
+  const isEditing = isShowAllEditor || isItemEditing
 
-  const handleChangeCheckBox = (e: ChangeEvent<HTMLInputElement>) => {
-    const { checked } = e.target
-    onChangeItem({ checked, id })
-  }
+  const userInputValues = builtUsersData[id]
+  const firstNameValue = userInputValues ? userInputValues[`first_name_${id}`] : ''
+  const lastNameValue = userInputValues ? userInputValues[`last_name_${id}`] : ''
+  const emailValue = userInputValues ? userInputValues[`email_${id}`] : ''
+  const avatarSrc = (userInputValues ? userInputValues[`avatar_${id}`] : '') as string
 
-  const userData = usersFormValue[id]
-  const firstNameValue = userData ? userData[`first_name_${id}`] : ''
-  const lastNameValue = userData ? userData[`last_name_${id}`] : ''
-  const emailValue = userData ? userData[`email_${id}`] : ''
-  const avatarSrc = (userData ? userData[`avatar_${id}`] : '') as string
+  const isShowEditorBtns = !isShowAllEditor && !isShowDeleteCheckbox && !isShowNewUserForm
 
   return (
     <li className="userItem">
       <div className="userItem__box">
-        {isSelectedForDeletion && (
+        {isShowDeleteCheckbox && (
           <div className="userItem__checkbox">
             <input
               type="checkbox"
               name="usersItem"
               id={`checkbox_${id}`}
-              onChange={handleChangeCheckBox}
+              onChange={(e) => onCheckedDeleteItems({ e, id })}
             />
           </div>
         )}
@@ -94,13 +90,13 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
           </div>
         </div>
 
-        {!isAllEditing && !isSelectedForDeletion && !isShowUserForm && (
+        {isShowEditorBtns && (
           <div className="userItem__actions">
             {!isItemEditing ? (
               <button
                 type="button"
                 className="line"
-                onClick={() => onItemEditing({ id, isEditing: true })}
+                onClick={() => onShowItemEditor({ id, isShowEditor: true })}
               >
                 수정하기
               </button>
@@ -109,13 +105,13 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
                 <button
                   type="button"
                   className="line"
-                  onClick={() => onItemEditing({ id, isEditing: false })}
+                  onClick={() => onShowItemEditor({ id, isShowEditor: false })}
                 >
                   수정취소
                 </button>
                 <button
                   type="button"
-                  onClick={() => onItemEditing({ id, isEditing: false, isPatch: true })}
+                  onClick={() => onShowItemEditor({ id, isShowEditor: false, isPatch: true })}
                 >
                   수정완료
                 </button>

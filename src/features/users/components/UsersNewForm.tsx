@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useUsers } from '@/features/users'
 
-export default function UsersForm() {
+export default function UsersNewForm() {
   const [file, setFile] = useState<File | null>(null)
   const { setNewUserData } = useUsers()
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null
     setFile(selected)
   }
@@ -34,7 +34,7 @@ export default function UsersForm() {
     setNewUserData((prev) => ({ ...prev, avatar: previewUrl }))
 
     return () => URL.revokeObjectURL(previewUrl)
-  }, [previewUrl])
+  }, [previewUrl, setNewUserData])
 
   return (
     <div className="userForm">
@@ -64,7 +64,13 @@ export default function UsersForm() {
             </div>
           )}
 
-          <input id="userFormImg" type="file" accept="image/*" hidden onChange={handleChange} />
+          <input
+            id="userFormImg"
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handleChangeImage}
+          />
         </div>
 
         <div className="userForm__editer">

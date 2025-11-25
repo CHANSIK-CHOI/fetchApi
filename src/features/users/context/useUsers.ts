@@ -7,28 +7,28 @@ import {
   type SetStateAction,
 } from 'react'
 
-export type OnAllEditing = {
-  isEditing: boolean
+export type OnShowAllEditor = {
+  isShowEditor: boolean
   isPatch?: boolean
 }
-export type OnItemEditing = { id: number } & OnAllEditing
-export type OnChangeItem = { checked: boolean; id: number }
+export type OnShowItemEditor = { id: number } & OnShowAllEditor
+export type OnCheckedDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: number }
 
 export type OnPostUserData = { isShow: boolean; isPost?: boolean }
 
 export type UsersContextType = {
-  isAllEditing: boolean
-  onAllEditing: ({ isEditing, isPatch }: OnAllEditing) => void
-  editingItemArray: number[]
-  onItemEditing: ({ id, isEditing, isPatch }: OnItemEditing) => void
-  isSelectedForDeletion: boolean
-  onSelectedForDeletion: (isActive: boolean) => void
-  onChangeItem: ({ checked, id }: OnChangeItem) => void
-  onSelectedDelete: () => void
-  isShowUserForm: boolean
-  onPostUserData: ({ isShow, isPost }: OnPostUserData) => void
+  isShowAllEditor: boolean
+  onShowAllEditor: ({ isShowEditor, isPatch }: OnShowAllEditor) => void
+  showItemEditor: number[]
+  onShowItemEditor: ({ id, isShowEditor, isPatch }: OnShowItemEditor) => void
+  isShowDeleteCheckbox: boolean
+  onShowDeleteCheckbox: (isActive: boolean) => void
+  onCheckedDeleteItems: ({ e, id }: OnCheckedDeleteItems) => void
+  onClickDelete: () => void
+  isShowNewUserForm: boolean
+  onIsShowNewUserForm: ({ isShow, isPost }: OnPostUserData) => void
   setNewUserData: Dispatch<SetStateAction<NewUserData>>
-  usersFormValue: UsersFormValueMap
+  builtUsersData: UsersFormValueMap
   onChangeUserData: (e: ChangeEvent<HTMLInputElement>, id: number) => void
 }
 

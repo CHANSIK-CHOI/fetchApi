@@ -10,7 +10,7 @@ export default function UsersItemProfileEditor({ id, profileSrc }: UsersItemProf
   const [file, setFile] = useState<File | null>(null)
   const [isProfileCleared, setIsProfileCleared] = useState(false)
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeImage = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null
     setFile(selected)
     if (selected) {
@@ -61,7 +61,13 @@ export default function UsersItemProfileEditor({ id, profileSrc }: UsersItemProf
           </button>
         )}
       </div>
-      <input id={`userItem_${id}`} type="file" accept="image/*" hidden onChange={handleChange} />
+      <input
+        id={`userItem_${id}`}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={handleChangeImage}
+      />
     </>
   )
 }
