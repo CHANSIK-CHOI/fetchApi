@@ -22,11 +22,12 @@ export type UsersContextType = {
   showItemEditor: number[]
   onItemEditor: ({ id, isShowEditor, isPatch }: OnItemEditor) => void
   isShowDeleteCheckbox: boolean
-  setIsShowDeleteCheckbox: Dispatch<SetStateAction<boolean>>
+  setIsShowDeleteCheckbox: (value: boolean) => void
   onChangeCheckDeleteItems: ({ e, id }: OnChangeCheckDeleteItems) => void
   onClickDeleteItems: () => void
   isShowNewUserForm: boolean
-  onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => void
+  onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => Promise<void>
+  isCreatingUser: boolean
   setNewUserData: Dispatch<SetStateAction<NewUserData>>
   builtUsersData: UsersFormValueMap
   onChangeUserData: (e: ChangeEvent<HTMLInputElement>, id: number) => void

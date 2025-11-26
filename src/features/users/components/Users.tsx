@@ -14,6 +14,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
     onClickDeleteItems,
     isShowNewUserForm,
     onNewUserForm,
+    isCreatingUser,
   } = useUsers()
 
   const resultCount = React.Children.count(children).toString().padStart(2, '0')
@@ -49,8 +50,9 @@ export default function Users({ children, newUserForm }: UsersProps) {
                   <button
                     type="button"
                     onClick={() => onNewUserForm({ isShowEditor: false, isPost: true })}
+                    disabled={isCreatingUser}
                   >
-                    추가완료
+                    {isCreatingUser ? '추가중...' : '추가완료'}
                   </button>
                 </>
               )}
