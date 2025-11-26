@@ -1,6 +1,7 @@
 import { type ChangeEvent, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  UsersContext,
+  UsersActionsContext,
+  UsersStateContext,
   type OnItemEditor,
   type OnChangeCheckDeleteItems,
   type OnAllEditor,
@@ -21,8 +22,8 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show
   const [checkedDeleteItems, setCheckedDeleteItems] = useState<number[]>([]) // 선택 된 items
   const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // [UsersNewForm] show
-  const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA) // [UsersNewForm] input value (state)
-  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false)
+  const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA) // [UsersNewForm] input value
+  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // [UsersNewForm] creating
 
   // users 데이터의 id를 키값으로한 객체 형태로 변경
   const buildUsersData = useCallback((data: User[]) => {
@@ -49,7 +50,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     )
   }, [])
 
-  const [builtUsersData, setBuiltUsersData] = useState<UsersFormValueMap>(buildUsersData(users)) // [UsersItem] input value (state)
+  const [builtUsersData, setBuiltUsersData] = useState<UsersFormValueMap>(buildUsersData(users)) // [UsersItem] input value
 
   // [reset] 전체 유저 데이터 reset
   const resetAllUsersData = useCallback(() => {
@@ -82,9 +83,9 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
 
   // [수정하기 - 전체] 전체 수정 에디터 show/hide & patch
   const onAllEditor = useCallback(
-    ({ isShowEditor, isPatch = false }: OnAllEditor) => {
+    async ({ isShowEditor, isPatch = false }: OnAllEditor) => {
+      // 수정완료(PATCH) : isPatch
       if (isPatch) {
-        // 수정완료(PATCH) : isPatch
         const usersArray = Object.values(builtUsersData)
         const modifiedData = usersArray.filter(({ isModify }) => isModify)
 
@@ -106,22 +107,24 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
 
   // [수정하기 - 개별] item 수정 에디터 show/hide & patch
   const onItemEditor = useCallback(
-    ({ id, isShowEditor, isPatch = false }: OnItemEditor) => {
+    async ({ id, isShowEditor, isPatch = false }: OnItemEditor) => {
+      // 수정완료(PATCH) : isPatch
       if (isPatch) {
-        // 수정완료(PATCH) : isPatch
+        // ...
       }
 
       // 수정취소
       if (!isShowEditor && !isPatch) resetTargetUserData(id)
 
+      // id Item 에디터 창 show
       if (isShowEditor) {
-        // id Item 에디터 창 show
         setShowItemEditor((prev) => {
           const isShowItemIds = prev.includes(id) ? prev : [...prev, id]
           return isShowItemIds
         })
-      } else {
-        // id Item 에디터 창 hide
+      }
+      // id Item 에디터 창 hide
+      else {
         setShowItemEditor((prev) => {
           const isFilteredId = prev.filter((value) => value !== id)
           return isFilteredId
@@ -205,11 +208,26 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     }
   }, [checkedDeleteItems])
 
+  // [삭제하기] 삭제 체크박스 toggle
+  const onToggleDeleteCheckbox = useCallback(
+    (isChecked: boolean) => {
+      setIsShowDeleteCheckbox(isChecked)
+
+      if (isChecked) {
+        setShowItemEditor([])
+        resetAllUsersData()
+      } else {
+        setCheckedDeleteItems([])
+      }
+    },
+    [resetAllUsersData],
+  )
+
   // [추가하기] 신규 유저 추가 에디터 show/hide & post
   const onNewUserForm = useCallback(
     async ({ isShowEditor, isPost = false }: OnNewUserForm) => {
+      // 추가완료(POST) : isPost
       if (isPost) {
-        // 추가완료(POST) : isPost
         if (isCreatingUser) return
 
         const { email, first_name, last_name } = newUserData
@@ -245,54 +263,51 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     [isCreatingUser, newUserData, onCreate, resetAllUsersData],
   )
 
-  const handleSetIsShowDeleteCheckbox = useCallback(
-    (isChecked: boolean) => {
-      setIsShowDeleteCheckbox(isChecked)
-
-      if (isChecked) {
-        setShowItemEditor([])
-        resetAllUsersData()
-      } else {
-        setCheckedDeleteItems([])
-      }
-    },
-    [resetAllUsersData],
-  )
-
-  const providerValue = useMemo(
+  const stateValue = useMemo(
     () => ({
       isShowAllEditor,
-      onAllEditor,
       showItemEditor,
-      onItemEditor,
       isShowDeleteCheckbox,
-      setIsShowDeleteCheckbox: handleSetIsShowDeleteCheckbox,
+      isShowNewUserForm,
+      isCreatingUser,
+      builtUsersData,
+    }),
+    [
+      isShowAllEditor,
+      showItemEditor,
+      isShowDeleteCheckbox,
+      isShowNewUserForm,
+      isCreatingUser,
+      builtUsersData,
+    ],
+  )
+
+  const actionsValue = useMemo(
+    () => ({
+      onAllEditor,
+      onItemEditor,
+      onToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteItems,
-      isShowNewUserForm,
       onNewUserForm,
-      isCreatingUser,
       setNewUserData,
-      builtUsersData,
       onChangeUserData,
     }),
     [
-      showItemEditor,
-      isShowAllEditor,
-      isShowDeleteCheckbox,
       onAllEditor,
-      onChangeCheckDeleteItems,
       onItemEditor,
+      onToggleDeleteCheckbox,
+      onChangeCheckDeleteItems,
       onClickDeleteItems,
-      handleSetIsShowDeleteCheckbox,
-      isShowNewUserForm,
       onNewUserForm,
-      isCreatingUser,
       setNewUserData,
-      builtUsersData,
       onChangeUserData,
     ],
   )
 
-  return <UsersContext.Provider value={providerValue}>{children}</UsersContext.Provider>
+  return (
+    <UsersStateContext.Provider value={stateValue}>
+      <UsersActionsContext.Provider value={actionsValue}>{children}</UsersActionsContext.Provider>
+    </UsersStateContext.Provider>
+  )
 }

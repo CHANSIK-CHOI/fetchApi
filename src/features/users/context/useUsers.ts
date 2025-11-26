@@ -16,27 +16,37 @@ export type OnChangeCheckDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: n
 
 export type OnNewUserForm = { isShowEditor: boolean; isPost?: boolean }
 
-export type UsersContextType = {
+export type UsersStateContextType = {
   isShowAllEditor: boolean
-  onAllEditor: ({ isShowEditor, isPatch }: OnAllEditor) => void
   showItemEditor: number[]
-  onItemEditor: ({ id, isShowEditor, isPatch }: OnItemEditor) => void
   isShowDeleteCheckbox: boolean
-  setIsShowDeleteCheckbox: (value: boolean) => void
+  isShowNewUserForm: boolean
+  isCreatingUser: boolean
+  builtUsersData: UsersFormValueMap
+}
+
+export type UsersActionsContextType = {
+  onAllEditor: ({ isShowEditor, isPatch }: OnAllEditor) => void
+  onItemEditor: ({ id, isShowEditor, isPatch }: OnItemEditor) => void
+  onToggleDeleteCheckbox: (isChecked: boolean) => void
   onChangeCheckDeleteItems: ({ e, id }: OnChangeCheckDeleteItems) => void
   onClickDeleteItems: () => void
-  isShowNewUserForm: boolean
   onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => Promise<void>
-  isCreatingUser: boolean
   setNewUserData: Dispatch<SetStateAction<NewUserData>>
-  builtUsersData: UsersFormValueMap
   onChangeUserData: (e: ChangeEvent<HTMLInputElement>, id: number) => void
 }
 
-export const UsersContext = createContext<UsersContextType | null>(null)
+export const UsersStateContext = createContext<UsersStateContextType | null>(null)
+export const UsersActionsContext = createContext<UsersActionsContextType | null>(null)
 
-export function useUsers() {
-  const ctx = useContext(UsersContext)
-  if (!ctx) throw new Error('useUsers must be used inside UsersProvider')
+export function useUsersState() {
+  const ctx = useContext(UsersStateContext)
+  if (!ctx) throw new Error('useUsersState must be used inside UsersProvider')
+  return ctx
+}
+
+export function useUsersActions() {
+  const ctx = useContext(UsersActionsContext)
+  if (!ctx) throw new Error('useUsersActions must be used inside UsersProvider')
   return ctx
 }

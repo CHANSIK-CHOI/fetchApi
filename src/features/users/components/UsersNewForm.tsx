@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useUsers } from '@/features/users'
+import { useUsersActions } from '@/features/users'
 
 export default function UsersNewForm() {
   const [file, setFile] = useState<File | null>(null)
-  const { setNewUserData } = useUsers()
+  const { setNewUserData } = useUsersActions()
 
   const handleChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null

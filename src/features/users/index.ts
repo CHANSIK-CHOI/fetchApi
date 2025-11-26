@@ -5,5 +5,10 @@ export { default as UsersItemProfileEditor } from './components/UsersItemProfile
 export { default as UsersItemProfileView } from './components/UsersItemProfileView'
 export { default as UsersNewForm } from './components/UsersNewForm'
 export { default as UsersProvider } from './context/UsersProvider'
-export { UsersContext, useUsers } from './context/useUsers'
+export {
+  UsersStateContext,
+  UsersActionsContext,
+  useUsersActions,
+  useUsersState,
+} from './context/useUsers'
 export type * from './context/useUsers'

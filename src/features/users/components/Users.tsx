@@ -1,21 +1,15 @@
 import React from 'react'
-import { UsersItem, UsersNewForm, useUsers } from '@/features/users'
+import { UsersItem, UsersNewForm, useUsersActions, useUsersState } from '@/features/users'
 
 type UsersProps = {
   children: React.ReactNode
   newUserForm: React.ReactNode
 }
 export default function Users({ children, newUserForm }: UsersProps) {
-  const {
-    isShowAllEditor,
-    onAllEditor,
-    isShowDeleteCheckbox,
-    setIsShowDeleteCheckbox,
-    onClickDeleteItems,
-    isShowNewUserForm,
-    onNewUserForm,
-    isCreatingUser,
-  } = useUsers()
+  const { isShowAllEditor, isShowDeleteCheckbox, isShowNewUserForm, isCreatingUser } =
+    useUsersState()
+  const { onAllEditor, onToggleDeleteCheckbox, onClickDeleteItems, onNewUserForm } =
+    useUsersActions()
 
   const resultCount = React.Children.count(children).toString().padStart(2, '0')
   const isShowNewUserFormEl = !isShowAllEditor && !isShowDeleteCheckbox
@@ -62,11 +56,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
           {isShowDeleteCheckboxEl && (
             <>
               {!isShowDeleteCheckbox ? (
-                <button
-                  type="button"
-                  className="line"
-                  onClick={() => setIsShowDeleteCheckbox(true)}
-                >
+                <button type="button" className="line" onClick={() => onToggleDeleteCheckbox(true)}>
                   선택하기
                 </button>
               ) : (
@@ -74,7 +64,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
                   <button
                     type="button"
                     className="line"
-                    onClick={() => setIsShowDeleteCheckbox(false)}
+                    onClick={() => onToggleDeleteCheckbox(false)}
                   >
                     선택취소
                   </button>
