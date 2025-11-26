@@ -14,7 +14,7 @@ export type OnAllEditor = {
 export type OnItemEditor = { id: number } & OnAllEditor
 export type OnChangeCheckDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: number }
 
-export type OnNewUserForm = { isShow: boolean; isPost?: boolean }
+export type OnNewUserForm = { isShowEditor: boolean; isPost?: boolean }
 
 export type UsersContextType = {
   isShowAllEditor: boolean
@@ -22,11 +22,11 @@ export type UsersContextType = {
   showItemEditor: number[]
   onItemEditor: ({ id, isShowEditor, isPatch }: OnItemEditor) => void
   isShowDeleteCheckbox: boolean
-  toggleDeleteCheckbox: (isShow: boolean) => void
+  setIsShowDeleteCheckbox: Dispatch<SetStateAction<boolean>>
   onChangeCheckDeleteItems: ({ e, id }: OnChangeCheckDeleteItems) => void
   onClickDeleteItems: () => void
   isShowNewUserForm: boolean
-  onNewUserForm: ({ isShow, isPost }: OnNewUserForm) => void
+  onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => void
   setNewUserData: Dispatch<SetStateAction<NewUserData>>
   builtUsersData: UsersFormValueMap
   onChangeUserData: (e: ChangeEvent<HTMLInputElement>, id: number) => void

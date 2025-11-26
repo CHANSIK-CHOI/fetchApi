@@ -7,7 +7,7 @@ export default function UsersContainer() {
 
   useEffect(() => {
     void getUsers()
-  }, [])
+  }, [getUsers])
 
   return (
     <UsersProvider users={users} onCreate={createUsers}>

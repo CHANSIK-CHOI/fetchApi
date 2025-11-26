@@ -57,9 +57,9 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     )
   }, [])
 
-  const [builtUsersData, setBuiltUsersData] = useState(buildUsersData(users)) // [UsersItem] input value (state)
+  const [builtUsersData, setBuiltUsersData] = useState<UsersFormValueMap>(buildUsersData(users)) // [UsersItem] input value (state)
 
-  // [reset] 수정된 전체 유저 데이터 reset
+  // [reset] 전체 유저 데이터 reset
   const resetAllUsersData = useCallback(() => {
     setBuiltUsersData((prev) => {
       const hasModified = Object.values(prev).some(({ isModify }) => isModify)
@@ -91,20 +91,17 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   // [수정하기 - 전체] 전체 수정 에디터 show/hide & patch
   const onAllEditor = useCallback(
     ({ isShowEditor, isPatch = false }: OnAllEditor) => {
-      setIsShowAllEditor(isShowEditor)
-
-      if (isShowEditor) {
-        // 전체 에디터 창 show
-        setShowItemEditor([])
-      } else {
-        // 전체 에디터 창 hide
-        if (isPatch) {
-          // 수정완료(PATCH) : isPatch
-        } else {
-          // 수정 취소
-          resetAllUsersData()
-        }
+      if (isPatch) {
+        // 수정완료(PATCH) : isPatch
       }
+
+      if (!isShowEditor && !isPatch) {
+        // 수정취소
+        resetAllUsersData()
+      }
+
+      // toggle
+      setIsShowAllEditor(isShowEditor)
     },
     [resetAllUsersData],
   )
@@ -112,6 +109,15 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   // [수정하기 - 개별] item 수정 에디터 show/hide & patch
   const onItemEditor = useCallback(
     ({ id, isShowEditor, isPatch = false }: OnItemEditor) => {
+      if (isPatch) {
+        // 수정완료(PATCH) : isPatch
+      }
+
+      if (!isShowEditor && !isPatch) {
+        // 수정취소
+        resetTargetUserData(id)
+      }
+
       if (isShowEditor) {
         // id Item 에디터 창 show
         setShowItemEditor((prev) => {
@@ -119,13 +125,6 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
           return isShowItemIds
         })
       } else {
-        // Item  에디터 창 hide
-        if (isPatch) {
-          // 수정완료(PATCH) : isPatch
-        } else {
-          // 수정 취소
-          resetTargetUserData(id)
-        }
         // id Item 에디터 창 hide
         setShowItemEditor((prev) => {
           const isFilteredId = prev.filter((value) => value !== id)
@@ -134,69 +133,6 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       }
     },
     [resetTargetUserData],
-  )
-
-  // [삭제하기] 삭제 할 item을 선택하는 checkbox show
-  const toggleDeleteCheckbox = useCallback((isShow: boolean) => {
-    setIsShowDeleteCheckbox(isShow)
-    if (!isShow) {
-      setCheckedDeleteItems([])
-    } else {
-      setShowItemEditor([])
-    }
-  }, [])
-
-  // [삭제하기] Checkbox Change Event
-  const onChangeCheckDeleteItems = useCallback(({ e, id }: OnChangeCheckDeleteItems) => {
-    const { checked } = e.target
-    if (checked) {
-      setCheckedDeleteItems((prev) => {
-        const isCheckedItemIds = prev.includes(id) ? prev : [...prev, id]
-        return isCheckedItemIds
-      })
-    } else {
-      setCheckedDeleteItems((prev) => {
-        const isFilteredId = prev.filter((value) => value !== id)
-        return isFilteredId
-      })
-    }
-  }, [])
-
-  // [삭제하기] 선택된 item 데이터 삭제
-  const onClickDeleteItems = useCallback(() => {
-    if (checkedDeleteItems.length === 0) {
-      // 선택 된 데이터가 없을 때
-      alert('선택한 데이터가 없습니다.')
-    } else {
-      // 삭제하기(DELETE)
-    }
-  }, [checkedDeleteItems])
-
-  // [추가하기] 신규 유저 추가 에디터 show/hide & post
-  const onNewUserForm = useCallback(
-    ({ isShow, isPost = false }: OnNewUserForm) => {
-      if (isShow) {
-        // 신규 유저 추가 에디터 창 show
-        setShowItemEditor([])
-        setIsShowNewUserForm(true)
-        resetAllUsersData()
-      } else {
-        // 신규 유저 추가 에디터 창 hide
-        setIsShowNewUserForm(false)
-
-        if (isPost) {
-          // 추가완료(POST) : isPost
-          const { email, first_name, last_name } = newUserDataRef.current
-          if (!email || !first_name || !last_name) {
-            alert('이메일, 이름, 성을 모두 입력해주세요.')
-            return
-          }
-          onCreate(newUserDataRef.current)
-        }
-      }
-      setNewUserData(INIT_NEW_USER_DATA)
-    },
-    [resetAllUsersData, onCreate],
   )
 
   // [수정하기] input onChange Event : builtUsersData update
@@ -242,15 +178,90 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     [users],
   )
 
-  // users 업데이트 시 builtUsersData도 업데이트
+  // [수정하기] users 업데이트 시 builtUsersData도 업데이트
   useEffect(() => {
     setBuiltUsersData(buildUsersData(users))
   }, [buildUsersData, users])
 
-  // [UsersNewForm] change event > ref update
+  // [삭제하기] Checkbox Change Event
+  const onChangeCheckDeleteItems = useCallback(({ e, id }: OnChangeCheckDeleteItems) => {
+    const { checked } = e.target
+    if (checked) {
+      setCheckedDeleteItems((prev) => {
+        const isCheckedItemIds = prev.includes(id) ? prev : [...prev, id]
+        return isCheckedItemIds
+      })
+    } else {
+      setCheckedDeleteItems((prev) => {
+        const isFilteredId = prev.filter((value) => value !== id)
+        return isFilteredId
+      })
+    }
+  }, [])
+
+  // [삭제하기] 선택된 item 데이터 삭제
+  const onClickDeleteItems = useCallback(() => {
+    if (checkedDeleteItems.length === 0) {
+      // 선택 된 데이터가 없을 때
+      alert('선택한 데이터가 없습니다.')
+    } else {
+      // 삭제하기(DELETE)
+    }
+  }, [checkedDeleteItems])
+
+  // [추가하기] 신규 유저 추가 에디터 show/hide & post
+  const onNewUserForm = useCallback(
+    ({ isShowEditor, isPost = false }: OnNewUserForm) => {
+      if (isPost) {
+        // 추가완료(POST) : isPost
+        const { email, first_name, last_name } = newUserDataRef.current
+        if (!email || !first_name || !last_name) {
+          alert('이메일, 이름, 성을 모두 입력해주세요.')
+          return
+        }
+        onCreate(newUserDataRef.current)
+      }
+
+      if (!isShowEditor && !isPost) {
+        // 추가취소
+        setNewUserData(INIT_NEW_USER_DATA)
+      }
+
+      // toggle
+      setIsShowNewUserForm(isShowEditor)
+    },
+    [onCreate],
+  )
+
+  // [추가하기] 신규 유저 추가 에디터 change event > ref update
   useEffect(() => {
     newUserDataRef.current = newUserData
   }, [newUserData])
+
+  // [UI Case] 전체수정 버튼 클릭 시
+  useEffect(() => {
+    if (isShowAllEditor) {
+      setShowItemEditor([])
+    }
+  }, [isShowAllEditor])
+
+  // [UI Case] 선택하기 버튼 클릭 시
+  useEffect(() => {
+    if (isShowDeleteCheckbox) {
+      setShowItemEditor([])
+      resetAllUsersData()
+    } else {
+      setCheckedDeleteItems([])
+    }
+  }, [isShowDeleteCheckbox, resetAllUsersData])
+
+  // [UI Case] 추가하기 버튼 클릭 시
+  useEffect(() => {
+    if (isShowNewUserForm) {
+      setShowItemEditor([])
+      resetAllUsersData()
+    }
+  }, [isShowNewUserForm, resetAllUsersData])
 
   const providerValue = useMemo(
     () => ({
@@ -259,7 +270,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       showItemEditor,
       onItemEditor,
       isShowDeleteCheckbox,
-      toggleDeleteCheckbox,
+      setIsShowDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteItems,
       isShowNewUserForm,
@@ -276,7 +287,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       onChangeCheckDeleteItems,
       onItemEditor,
       onClickDeleteItems,
-      toggleDeleteCheckbox,
+      setIsShowDeleteCheckbox,
       isShowNewUserForm,
       onNewUserForm,
       setNewUserData,

@@ -10,7 +10,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
     isShowAllEditor,
     onAllEditor,
     isShowDeleteCheckbox,
-    toggleDeleteCheckbox,
+    setIsShowDeleteCheckbox,
     onClickDeleteItems,
     isShowNewUserForm,
     onNewUserForm,
@@ -33,7 +33,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
                 <button
                   type="button"
                   className="line"
-                  onClick={() => onNewUserForm({ isShow: true })}
+                  onClick={() => onNewUserForm({ isShowEditor: true })}
                 >
                   추가하기
                 </button>
@@ -42,13 +42,13 @@ export default function Users({ children, newUserForm }: UsersProps) {
                   <button
                     type="button"
                     className="line"
-                    onClick={() => onNewUserForm({ isShow: false })}
+                    onClick={() => onNewUserForm({ isShowEditor: false })}
                   >
                     추가취소
                   </button>
                   <button
                     type="button"
-                    onClick={() => onNewUserForm({ isShow: false, isPost: true })}
+                    onClick={() => onNewUserForm({ isShowEditor: false, isPost: true })}
                   >
                     추가완료
                   </button>
@@ -60,7 +60,11 @@ export default function Users({ children, newUserForm }: UsersProps) {
           {isShowDeleteCheckboxEl && (
             <>
               {!isShowDeleteCheckbox ? (
-                <button type="button" className="line" onClick={() => toggleDeleteCheckbox(true)}>
+                <button
+                  type="button"
+                  className="line"
+                  onClick={() => setIsShowDeleteCheckbox(true)}
+                >
                   선택하기
                 </button>
               ) : (
@@ -68,7 +72,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
                   <button
                     type="button"
                     className="line"
-                    onClick={() => toggleDeleteCheckbox(false)}
+                    onClick={() => setIsShowDeleteCheckbox(false)}
                   >
                     선택취소
                   </button>
