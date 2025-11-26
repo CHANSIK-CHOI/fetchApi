@@ -61,7 +61,12 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
 
   // [reset] 수정된 전체 유저 데이터 reset
   const resetAllUsersData = useCallback(() => {
-    setBuiltUsersData(buildUsersData(users))
+    setBuiltUsersData((prev) => {
+      const hasModified = Object.values(prev).some(({ isModify }) => isModify)
+      if (!hasModified) return prev
+
+      return buildUsersData(users)
+    })
   }, [buildUsersData, users])
 
   // [reset] 특정 유저 데이터 reset
