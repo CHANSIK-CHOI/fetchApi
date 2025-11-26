@@ -8,12 +8,12 @@ type UsersProps = {
 export default function Users({ children, newUserForm }: UsersProps) {
   const {
     isShowAllEditor,
-    onShowAllEditor,
+    onAllEditor,
     isShowDeleteCheckbox,
-    onShowDeleteCheckbox,
-    onClickDelete,
+    toggleDeleteCheckbox,
+    onClickDeleteItems,
     isShowNewUserForm,
-    onIsShowNewUserForm,
+    onNewUserForm,
   } = useUsers()
 
   const resultCount = React.Children.count(children).toString().padStart(2, '0')
@@ -33,7 +33,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
                 <button
                   type="button"
                   className="line"
-                  onClick={() => onIsShowNewUserForm({ isShow: true })}
+                  onClick={() => onNewUserForm({ isShow: true })}
                 >
                   추가하기
                 </button>
@@ -42,13 +42,13 @@ export default function Users({ children, newUserForm }: UsersProps) {
                   <button
                     type="button"
                     className="line"
-                    onClick={() => onIsShowNewUserForm({ isShow: false })}
+                    onClick={() => onNewUserForm({ isShow: false })}
                   >
                     추가취소
                   </button>
                   <button
                     type="button"
-                    onClick={() => onIsShowNewUserForm({ isShow: false, isPost: true })}
+                    onClick={() => onNewUserForm({ isShow: false, isPost: true })}
                   >
                     추가완료
                   </button>
@@ -60,7 +60,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
           {isShowDeleteCheckboxEl && (
             <>
               {!isShowDeleteCheckbox ? (
-                <button type="button" className="line" onClick={() => onShowDeleteCheckbox(true)}>
+                <button type="button" className="line" onClick={() => toggleDeleteCheckbox(true)}>
                   선택하기
                 </button>
               ) : (
@@ -68,11 +68,11 @@ export default function Users({ children, newUserForm }: UsersProps) {
                   <button
                     type="button"
                     className="line"
-                    onClick={() => onShowDeleteCheckbox(false)}
+                    onClick={() => toggleDeleteCheckbox(false)}
                   >
                     선택취소
                   </button>
-                  <button type="button" onClick={onClickDelete}>
+                  <button type="button" onClick={onClickDeleteItems}>
                     삭제하기
                   </button>
                 </>
@@ -86,7 +86,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
                 <button
                   type="button"
                   className="line"
-                  onClick={() => onShowAllEditor({ isShowEditor: true })}
+                  onClick={() => onAllEditor({ isShowEditor: true })}
                 >
                   전체수정
                 </button>
@@ -95,13 +95,13 @@ export default function Users({ children, newUserForm }: UsersProps) {
                   <button
                     type="button"
                     className="line"
-                    onClick={() => onShowAllEditor({ isShowEditor: false })}
+                    onClick={() => onAllEditor({ isShowEditor: false })}
                   >
                     수정취소
                   </button>
                   <button
                     type="button"
-                    onClick={() => onShowAllEditor({ isShowEditor: false, isPatch: true })}
+                    onClick={() => onAllEditor({ isShowEditor: false, isPatch: true })}
                   >
                     수정완료
                   </button>

@@ -13,9 +13,9 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
   const {
     isShowAllEditor,
     showItemEditor,
-    onShowItemEditor,
+    onItemEditor,
     isShowDeleteCheckbox,
-    onCheckedDeleteItems,
+    onChangeCheckDeleteItems,
     isShowNewUserForm,
     builtUsersData,
     onChangeUserData,
@@ -41,7 +41,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
               type="checkbox"
               name="usersItem"
               id={`checkbox_${id}`}
-              onChange={(e) => onCheckedDeleteItems({ e, id })}
+              onChange={(e) => onChangeCheckDeleteItems({ e, id })}
             />
           </div>
         )}
@@ -96,7 +96,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
               <button
                 type="button"
                 className="line"
-                onClick={() => onShowItemEditor({ id, isShowEditor: true })}
+                onClick={() => onItemEditor({ id, isShowEditor: true })}
               >
                 수정하기
               </button>
@@ -105,13 +105,13 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
                 <button
                   type="button"
                   className="line"
-                  onClick={() => onShowItemEditor({ id, isShowEditor: false })}
+                  onClick={() => onItemEditor({ id, isShowEditor: false })}
                 >
                   수정취소
                 </button>
                 <button
                   type="button"
-                  onClick={() => onShowItemEditor({ id, isShowEditor: false, isPatch: true })}
+                  onClick={() => onItemEditor({ id, isShowEditor: false, isPatch: true })}
                 >
                   수정완료
                 </button>
