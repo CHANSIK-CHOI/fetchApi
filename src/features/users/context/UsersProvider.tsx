@@ -30,8 +30,10 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show
   const [checkedDeleteItems, setCheckedDeleteItems] = useState<number[]>([]) // 선택 된 items
   const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // [UsersNewForm] show
-  const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA) // [UsersNewForm] input value
-  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // [UsersNewForm] creating
+  const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA) // [UsersNewForm] input value (state)
+  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // [UsersNewForm] creating (state)
+  const newUserDataRef = useRef<NewUserData>(newUserData) // [UsersNewForm] input value (ref)
+  const isCreatingUserRef = useRef<boolean>(isCreatingUser) // [UsersNewForm] creating (ref)
 
   // users 데이터의 id를 키값으로한 객체 형태로 변경
   const buildUsersData = useCallback((data: User[]) => {
@@ -58,9 +60,9 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     )
   }, [])
 
-  const initialBuiltUsersData = useMemo(() => buildUsersData(users), [buildUsersData, users])
-  const [builtUsersData, setBuiltUsersData] = useState<UsersFormValueMap>(initialBuiltUsersData) // [UsersItem] input value
-  const builtUsersDataRef = useRef<UsersFormValueMap>(initialBuiltUsersData)
+  const initialBuiltUsersData = useMemo(() => buildUsersData(users), [buildUsersData, users]) // users 데이터 캐싱
+  const [builtUsersData, setBuiltUsersData] = useState<UsersFormValueMap>(initialBuiltUsersData) // [UsersItem] input value (state)
+  const builtUsersDataRef = useRef<UsersFormValueMap>(initialBuiltUsersData) // [UsersItem] input value (ref)
 
   // [reset] 전체 유저 데이터 reset
   const resetAllUsersData = useCallback(() => {
@@ -243,9 +245,9 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     async ({ isShowEditor, isPost = false }: OnNewUserForm) => {
       // 추가완료(POST) : isPost
       if (isPost) {
-        if (isCreatingUser) return
+        if (isCreatingUserRef.current) return
 
-        const { email, first_name, last_name } = newUserData
+        const { email, first_name, last_name } = newUserDataRef.current
         if (!email || !first_name || !last_name) {
           alert('이메일, 이름, 성을 모두 입력해주세요.')
           return
@@ -253,7 +255,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
 
         try {
           setIsCreatingUser(true)
-          await onCreate(newUserData)
+          await onCreate(newUserDataRef.current)
           setNewUserData(INIT_NEW_USER_DATA)
           setIsShowNewUserForm(false)
         } catch (error) {
@@ -275,8 +277,18 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       // toggle
       setIsShowNewUserForm(isShowEditor)
     },
-    [isCreatingUser, newUserData, onCreate, resetAllUsersData],
+    [onCreate, resetAllUsersData],
   )
+
+  // [추가하기] newUserData 업데이트 시 newUserDataRef도 업데이트
+  useEffect(() => {
+    newUserDataRef.current = newUserData
+  }, [newUserData])
+
+  // [추가하기] isCreatingUser 업데이트 시 isCreatingUserRef도 업데이트
+  useEffect(() => {
+    isCreatingUserRef.current = isCreatingUser
+  }, [isCreatingUser])
 
   const stateValue = useMemo(
     () => ({
