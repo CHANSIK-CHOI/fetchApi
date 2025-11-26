@@ -1,6 +1,7 @@
 import {
   type ChangeEvent,
   type ReactNode,
+  type RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -58,24 +59,25 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   }, [])
 
   const [builtUsersData, setBuiltUsersData] = useState<UsersFormValueMap>(buildUsersData(users)) // [UsersItem] input value (state)
+  const builtUsersDataRef: RefObject<UsersFormValueMap> = useRef(buildUsersData(users)) // [UsersItem] input value (state)
 
   // [reset] 전체 유저 데이터 reset
   const resetAllUsersData = useCallback(() => {
-    setBuiltUsersData((prev) => {
-      const hasModified = Object.values(prev).some(({ isModify }) => isModify)
-      if (!hasModified) return prev
+    const usersObject = builtUsersDataRef.current
+    const hasModified = Object.values(usersObject).some(({ isModify }) => isModify)
+    if (!hasModified) return
 
-      return buildUsersData(users)
-    })
+    setBuiltUsersData(buildUsersData(users))
   }, [buildUsersData, users])
 
   // [reset] 특정 유저 데이터 reset
   const resetTargetUserData = useCallback(
     (id: number) => {
-      setBuiltUsersData((prev) => {
-        const target = prev[id]
-        if (!target || !target.isModify) return prev
+      const usersObject = builtUsersDataRef.current
+      const target = usersObject[id]
+      if (!target || !target.isModify) return
 
+      setBuiltUsersData((prev) => {
         return {
           ...prev,
           [id]: {
@@ -93,6 +95,12 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     ({ isShowEditor, isPatch = false }: OnAllEditor) => {
       if (isPatch) {
         // 수정완료(PATCH) : isPatch
+        const usersObject = builtUsersDataRef.current
+        const usersArray = Object.values(usersObject)
+        const modifiedData = usersArray.filter(({ isModify }) => isModify)
+
+        if (modifiedData.length === 0) return
+        console.log('수정된 데이터는', modifiedData)
       }
 
       if (!isShowEditor && !isPatch) {
@@ -182,6 +190,11 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
   useEffect(() => {
     setBuiltUsersData(buildUsersData(users))
   }, [buildUsersData, users])
+
+  // [추가하기] 신규 유저 추가 에디터 change event > ref update
+  useEffect(() => {
+    builtUsersDataRef.current = builtUsersData
+  }, [builtUsersData])
 
   // [삭제하기] Checkbox Change Event
   const onChangeCheckDeleteItems = useCallback(({ e, id }: OnChangeCheckDeleteItems) => {
