@@ -20,6 +20,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     isShowDeleteCheckbox,
     isShowNewUserForm,
     builtUsersData,
+    isPatching,
   } = useUsersState()
   const { onItemEditor, onChangeCheckDeleteItems, onChangeUserData } = useUsersActions()
 
@@ -114,8 +115,9 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
                 <button
                   type="button"
                   onClick={() => onItemEditor({ id, isShowEditor: false, isPatch: true })}
+                  disabled={isPatching == 'all' || isPatching == id}
                 >
-                  수정완료
+                  {isPatching == 'all' || isPatching == id ? '수정중...' : '수정완료'}
                 </button>
               </>
             )}

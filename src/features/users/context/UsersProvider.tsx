@@ -14,6 +14,7 @@ import {
   type OnChangeCheckDeleteItems,
   type OnAllEditor,
   type OnNewUserForm,
+  type IsPatching,
 } from './useUsers'
 import type {
   FilteredModifiedData,
@@ -43,6 +44,8 @@ export default function UsersProvider({ children, onCreate, users, onModify }: U
   const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // [UsersNewForm] creating (state)
   const newUserDataRef = useRef<NewUserData>(newUserData) // [UsersNewForm] input value (ref)
   const isCreatingUserRef = useRef<boolean>(isCreatingUser) // [UsersNewForm] creating (ref)
+  const [isPatching, setIsPatching] = useState<IsPatching>(null)
+  const isPatchingRef = useRef<IsPatching>(null)
 
   // users 데이터의 id를 키값으로한 객체 형태로 변경
   const buildUsersData = useCallback((data: User[]) => {
@@ -146,13 +149,23 @@ export default function UsersProvider({ children, onCreate, users, onModify }: U
     async ({ id, isShowEditor, isPatch = false }: OnItemEditor) => {
       // 수정완료(PATCH) : isPatch
       if (isPatch) {
+        if (isPatchingRef.current !== null) return
+
         const filteredModifiedData = filterModifiedData()
         const payload = filteredModifiedData[id]
 
+        if (!payload) {
+          alert('수정된 내역이 없습니다.')
+          return
+        }
+
         try {
+          setIsPatching(id)
           await onModify(id, payload)
         } catch (err) {
           console.error(err)
+        } finally {
+          setIsPatching(null)
         }
       }
 
@@ -174,8 +187,12 @@ export default function UsersProvider({ children, onCreate, users, onModify }: U
         })
       }
     },
-    [filterModifiedData, resetTargetUserData],
+    [filterModifiedData, resetTargetUserData, onModify],
   )
+
+  useEffect(() => {
+    isPatchingRef.current = isPatching
+  }, [isPatching])
 
   // [수정하기] input onChange Event : builtUsersData update
   const onChangeUserData = useCallback(
@@ -287,15 +304,12 @@ export default function UsersProvider({ children, onCreate, users, onModify }: U
         try {
           setIsCreatingUser(true)
           await onCreate(newUserDataRef.current)
-          setNewUserData(INIT_NEW_USER_DATA)
-          setIsShowNewUserForm(false)
         } catch (error) {
           console.error(error)
           alert('유저 생성에 실패했습니다. 다시 시도해주세요.')
         } finally {
           setIsCreatingUser(false)
         }
-        return
       }
 
       if (isShowEditor) {
@@ -329,6 +343,7 @@ export default function UsersProvider({ children, onCreate, users, onModify }: U
       isShowNewUserForm,
       isCreatingUser,
       builtUsersData,
+      isPatching,
     }),
     [
       isShowAllEditor,
@@ -337,6 +352,7 @@ export default function UsersProvider({ children, onCreate, users, onModify }: U
       isShowNewUserForm,
       isCreatingUser,
       builtUsersData,
+      isPatching,
     ],
   )
 

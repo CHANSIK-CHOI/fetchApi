@@ -16,6 +16,8 @@ export type OnChangeCheckDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: n
 
 export type OnNewUserForm = { isShowEditor: boolean; isPost?: boolean }
 
+export type IsPatching = number | 'all' | null
+
 export type UsersStateContextType = {
   isShowAllEditor: boolean
   showItemEditor: number[]
@@ -23,6 +25,7 @@ export type UsersStateContextType = {
   isShowNewUserForm: boolean
   isCreatingUser: boolean
   builtUsersData: UsersFormValueMap
+  isPatching: IsPatching
 }
 
 export type UsersActionsContextType = {

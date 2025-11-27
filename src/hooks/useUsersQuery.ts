@@ -45,8 +45,7 @@ export function useUsersQuery() {
       const result = await patchUserApi(id, payload)
       if (!result) return
 
-      // updatedAt을 안 쓸 거면 구조분해도 생략
-      const { updatedAt: _omit, ...rest } = result // _omit으로 받아서 사용 안 함 표시
+      const { updatedAt: _, ...rest } = result
 
       setUsers((prev) =>
         prev.map((user) =>
