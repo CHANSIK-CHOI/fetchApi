@@ -15,7 +15,13 @@ import {
   type OnAllEditor,
   type OnNewUserForm,
 } from './useUsers'
-import type { NewUserData, User, UsersFormValueItem, UsersFormValueMap } from '@/types/users'
+import type {
+  FilteredModifiedData,
+  NewUserData,
+  User,
+  UsersFormValueItem,
+  UsersFormValueMap,
+} from '@/types/users'
 import { INIT_NEW_USER_DATA } from '@/utils'
 
 type UsersProviderProps = {
@@ -93,16 +99,33 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     [initialBuiltUsersData],
   )
 
+  const filterModifiedData = () => {
+    const usersArray = Object.values(builtUsersDataRef.current)
+    const modifiedData = usersArray.filter(({ isModify }) => isModify)
+    const filterModifiedData = modifiedData.reduce((acc, user) => {
+      const original: Record<string, unknown> = initialBuiltUsersData[user.id] ?? {}
+      const changed = Object.entries(user).reduce(
+        (fieldAcc, [k, v]) => {
+          if (k !== 'isModify' && original[k] !== v) {
+            fieldAcc[k] = { from: original[k], to: v }
+          }
+          return fieldAcc
+        },
+        {} as Record<string, { from: unknown; to: unknown }>,
+      )
+      if (Object.keys(changed).length) acc[user.id] = changed
+      return acc
+    }, {} as FilteredModifiedData)
+
+    return filterModifiedData
+  }
+
   // [수정하기 - 전체] 전체 수정 에디터 show/hide & patch
   const onAllEditor = useCallback(
     async ({ isShowEditor, isPatch = false }: OnAllEditor) => {
       // 수정완료(PATCH) : isPatch
       if (isPatch) {
-        const usersArray = Object.values(builtUsersDataRef.current)
-        const modifiedData = usersArray.filter(({ isModify }) => isModify)
-
-        if (modifiedData.length === 0) return
-        console.log('수정된 데이터는', modifiedData)
+        const filterModifiedData = filterModifiedData()
       }
 
       // 수정취소
