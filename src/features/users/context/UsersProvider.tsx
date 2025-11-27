@@ -17,6 +17,8 @@ import {
 } from './useUsers'
 import type {
   FilteredModifiedData,
+  FilteredModifiedItemData,
+  ModifiedUserData,
   NewUserData,
   User,
   UsersFormValueItem,
@@ -28,9 +30,10 @@ type UsersProviderProps = {
   children: ReactNode
   onCreate: (userData: NewUserData) => Promise<void>
   users: User[]
+  onModify: (id: number, payload: ModifiedUserData) => Promise<void>
 }
 
-export default function UsersProvider({ children, onCreate, users }: UsersProviderProps) {
+export default function UsersProvider({ children, onCreate, users, onModify }: UsersProviderProps) {
   const [isShowAllEditor, setIsShowAllEditor] = useState<boolean>(false) // 전체 수정 에디터 show
   const [showItemEditor, setShowItemEditor] = useState<number[]>([]) // item 수정 에디터 show
   const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show
@@ -104,15 +107,12 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     const modifiedData = usersArray.filter(({ isModify }) => isModify)
     const filteredModifiedData = modifiedData.reduce((acc, user) => {
       const original: Record<string, unknown> = initialBuiltUsersData[user.id] ?? {}
-      const changed = Object.entries(user).reduce(
-        (fieldAcc, [k, v]) => {
-          if (k !== 'isModify' && original[k] !== v) {
-            fieldAcc[k] = { from: original[k], to: v }
-          }
-          return fieldAcc
-        },
-        {} as Record<string, { from: unknown; to: unknown }>,
-      )
+      const changed = Object.entries(user).reduce((fieldAcc, [k, v]) => {
+        if (k !== 'isModify' && original[k] !== v) {
+          fieldAcc[k.replace(/_\d+$/, '')] = v
+        }
+        return fieldAcc
+      }, {} as FilteredModifiedItemData)
       if (Object.keys(changed).length) acc[user.id] = changed
       return acc
     }, {} as FilteredModifiedData)
@@ -147,8 +147,13 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       // 수정완료(PATCH) : isPatch
       if (isPatch) {
         const filteredModifiedData = filterModifiedData()
-        const targetData = filteredModifiedData[id]
-        console.log(targetData)
+        const payload = filteredModifiedData[id]
+
+        try {
+          await onModify(id, payload)
+        } catch (err) {
+          console.error(err)
+        }
       }
 
       // 수정취소

@@ -1,5 +1,5 @@
-import { createUsersApi, getUsersApi } from '@/api/users.api'
-import { type NewUserData, type User } from '@/types/users'
+import { createUsersApi, getUsersApi, patchUserApi } from '@/api/users.api'
+import { type ModifiedUserData, type NewUserData, type User } from '@/types/users'
 import { useCallback, useState } from 'react'
 
 export function useUsersQuery() {
@@ -40,5 +40,29 @@ export function useUsersQuery() {
     }
   }, [])
 
-  return { users, getUsers, isLoading, error, createUsers }
+  const modifyUser = useCallback(async (id: number, payload: ModifiedUserData) => {
+    try {
+      const result = await patchUserApi(id, payload)
+      if (!result) return
+
+      // updatedAt을 안 쓸 거면 구조분해도 생략
+      const { updatedAt: _omit, ...rest } = result // _omit으로 받아서 사용 안 함 표시
+
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === id
+            ? {
+                ...user,
+                ...rest,
+              }
+            : user,
+        ),
+      )
+    } catch (err) {
+      console.error(err)
+      if (err instanceof Error) setError(err.message)
+    }
+  }, [])
+
+  return { users, getUsers, isLoading, error, createUsers, modifyUser }
 }

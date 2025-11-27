@@ -15,4 +15,8 @@ export type UsersFormValueItem = {
 } & { isModify: boolean }
 export type UsersFormValueMap = Record<number, UsersFormValueItem>
 
-export type FilteredModifiedData = Record<number, Record<string, { from: unknown; to: unknown }>>
+export type FilteredModifiedItemData = Record<string, unknown>
+export type FilteredModifiedData = Record<number, FilteredModifiedItemData>
+
+export type ModifiedUserData = Partial<Omit<User, 'id'>>
+export type ResultModifiedUserData = ModifiedUserData & { updatedAt: string }

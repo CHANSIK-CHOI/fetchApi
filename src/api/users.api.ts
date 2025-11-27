@@ -1,4 +1,10 @@
-import type { NewUserData, ResultNewUserData, User } from '@/types/users'
+import type {
+  ModifiedUserData,
+  NewUserData,
+  ResultModifiedUserData,
+  ResultNewUserData,
+  User,
+} from '@/types/users'
 
 export const getUsersApi = async () => {
   const response = await fetch('https://reqres.in/api/users', {
@@ -25,5 +31,21 @@ export const createUsersApi = async (payload: NewUserData) => {
   if (!response.ok) throw Error('유저 데이터를 추가할 수 없습니다.')
 
   const result: ResultNewUserData = await response.json()
+  return result
+}
+
+export const patchUserApi = async (id: number, payload: ModifiedUserData) => {
+  const response = await fetch(`https://reqres.in/api/users/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'x-api-key': 'reqres-free-v1',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) throw Error('유저 데이터를 수정할 수 없습니다.')
+  const result: ResultModifiedUserData = await response.json()
+  console.log('api', result)
   return result
 }
