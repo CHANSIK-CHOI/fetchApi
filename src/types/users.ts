@@ -14,3 +14,5 @@ export type UsersFormValueItem = {
   [K in UserKeys as K extends 'id' ? K : `${K}_${number}`]: User[K]
 } & { isModify: boolean }
 export type UsersFormValueMap = Record<number, UsersFormValueItem>
+
+export type FilteredModifiedData = Record<number, Record<string, { from: unknown; to: unknown }>>

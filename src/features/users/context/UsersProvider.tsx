@@ -99,10 +99,10 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     [initialBuiltUsersData],
   )
 
-  const filterModifiedData = () => {
+  const filterModifiedData = useCallback(() => {
     const usersArray = Object.values(builtUsersDataRef.current)
     const modifiedData = usersArray.filter(({ isModify }) => isModify)
-    const filterModifiedData = modifiedData.reduce((acc, user) => {
+    const filteredModifiedData = modifiedData.reduce((acc, user) => {
       const original: Record<string, unknown> = initialBuiltUsersData[user.id] ?? {}
       const changed = Object.entries(user).reduce(
         (fieldAcc, [k, v]) => {
@@ -117,15 +117,16 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       return acc
     }, {} as FilteredModifiedData)
 
-    return filterModifiedData
-  }
+    return filteredModifiedData
+  }, [initialBuiltUsersData])
 
   // [수정하기 - 전체] 전체 수정 에디터 show/hide & patch
   const onAllEditor = useCallback(
     async ({ isShowEditor, isPatch = false }: OnAllEditor) => {
       // 수정완료(PATCH) : isPatch
       if (isPatch) {
-        const filterModifiedData = filterModifiedData()
+        const filteredModifiedData = filterModifiedData()
+        console.log(filteredModifiedData)
       }
 
       // 수정취소
@@ -137,7 +138,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
       // toggle
       setIsShowAllEditor(isShowEditor)
     },
-    [resetAllUsersData],
+    [filterModifiedData, resetAllUsersData],
   )
 
   // [수정하기 - 개별] item 수정 에디터 show/hide & patch
@@ -145,7 +146,9 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
     async ({ id, isShowEditor, isPatch = false }: OnItemEditor) => {
       // 수정완료(PATCH) : isPatch
       if (isPatch) {
-        // ...
+        const filteredModifiedData = filterModifiedData()
+        const targetData = filteredModifiedData[id]
+        console.log(targetData)
       }
 
       // 수정취소
@@ -166,7 +169,7 @@ export default function UsersProvider({ children, onCreate, users }: UsersProvid
         })
       }
     },
-    [resetTargetUserData],
+    [filterModifiedData, resetTargetUserData],
   )
 
   // [수정하기] input onChange Event : builtUsersData update
