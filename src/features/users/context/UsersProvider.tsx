@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from 'react'
+
 import {
   UsersActionsContext,
   UsersStateContext,
@@ -15,7 +16,8 @@ import {
   type OnAllEditor,
   type OnNewUserForm,
   type IsPatching,
-} from './useUsers'
+} from '@/features/users'
+
 import type {
   FilteredModifiedData,
   FilteredModifiedItemData,
@@ -24,6 +26,7 @@ import type {
   User,
   UsersFormValueItem,
   UsersFormValueMap,
+  ModifiedUsersData,
 } from '@/types/users'
 import { INIT_NEW_USER_DATA } from '@/utils'
 
@@ -32,18 +35,28 @@ type UsersProviderProps = {
   onCreate: (userData: NewUserData) => Promise<void>
   users: User[]
   onModify: (id: number, payload: ModifiedUserData) => Promise<void>
+  onAllModify: (data: ModifiedUsersData) => Promise<void>
 }
 
-export default function UsersProvider({ children, onCreate, users, onModify }: UsersProviderProps) {
-  const [isShowAllEditor, setIsShowAllEditor] = useState<boolean>(false) // 전체 수정 에디터 show
-  const [showItemEditor, setShowItemEditor] = useState<number[]>([]) // item 수정 에디터 show
+export default function UsersProvider({
+  children,
+  onCreate,
+  users,
+  onModify,
+  onAllModify,
+}: UsersProviderProps) {
   const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show
   const [checkedDeleteItems, setCheckedDeleteItems] = useState<number[]>([]) // 선택 된 items
+
   const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // [UsersNewForm] show
   const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA) // [UsersNewForm] input value (state)
-  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // [UsersNewForm] creating (state)
   const newUserDataRef = useRef<NewUserData>(newUserData) // [UsersNewForm] input value (ref)
+  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // [UsersNewForm] creating (state)
   const isCreatingUserRef = useRef<boolean>(isCreatingUser) // [UsersNewForm] creating (ref)
+
+  const [isShowAllEditor, setIsShowAllEditor] = useState<boolean>(false) // 전체 수정 에디터 show
+  const [showItemEditor, setShowItemEditor] = useState<number[]>([]) // item 수정 에디터 show
+  const showItemEditorRef = useRef<number[]>([])
   const [isPatching, setIsPatching] = useState<IsPatching>(null)
   const isPatchingRef = useRef<IsPatching>(null)
 
@@ -129,7 +142,11 @@ export default function UsersProvider({ children, onCreate, users, onModify }: U
       // 수정완료(PATCH) : isPatch
       if (isPatch) {
         const filteredModifiedData = filterModifiedData()
-        console.log(filteredModifiedData)
+        const data = Object.entries(filteredModifiedData).map(([id, payload]) => {
+          const numId = Number(id)
+          return { id: numId, payload }
+        })
+        console.log(data)
       }
 
       // 수정취소
@@ -239,6 +256,7 @@ export default function UsersProvider({ children, onCreate, users, onModify }: U
 
   // [수정하기] users 업데이트 시 builtUsersData도 업데이트
   useEffect(() => {
+    if (showItemEditorRef.current.length > 0) return
     setBuiltUsersData(initialBuiltUsersData)
   }, [initialBuiltUsersData])
 
@@ -287,6 +305,10 @@ export default function UsersProvider({ children, onCreate, users, onModify }: U
     },
     [resetAllUsersData],
   )
+
+  useEffect(() => {
+    showItemEditorRef.current = showItemEditor
+  }, [showItemEditor])
 
   // [추가하기] 신규 유저 추가 에디터 show/hide & post
   const onNewUserForm = useCallback(

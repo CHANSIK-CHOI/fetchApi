@@ -3,14 +3,20 @@ import { useUsersQuery } from '@/hooks/useUsersQuery'
 import { useEffect } from 'react'
 
 export default function UsersContainer() {
-  const { users, getUsers, isLoading, error, createUsers, modifyUser } = useUsersQuery()
+  const { users, getUsers, isLoading, error, createUsers, modifyUser, modifyAllUsers } =
+    useUsersQuery()
 
   useEffect(() => {
     void getUsers()
   }, [getUsers])
 
   return (
-    <UsersProvider users={users} onCreate={createUsers} onModify={modifyUser}>
+    <UsersProvider
+      users={users}
+      onCreate={createUsers}
+      onModify={modifyUser}
+      onAllModify={modifyAllUsers}
+    >
       <Users newUserForm={<Users.NewForm />}>
         {isLoading && <img src="src/assets/loading.gif" className="loading" />}
         {error.length > 0 && (

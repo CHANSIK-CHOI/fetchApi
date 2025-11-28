@@ -1,5 +1,10 @@
-import { createUsersApi, getUsersApi, patchUserApi } from '@/api/users.api'
-import { type ModifiedUserData, type NewUserData, type User } from '@/types/users'
+import { createUsersApi, getUsersApi, patchAllUsersApi, patchUserApi } from '@/api/users.api'
+import {
+  type ModifiedUserData,
+  type ModifiedUsersData,
+  type NewUserData,
+  type User,
+} from '@/types/users'
 import { useCallback, useState } from 'react'
 
 export function useUsersQuery() {
@@ -63,5 +68,15 @@ export function useUsersQuery() {
     }
   }, [])
 
-  return { users, getUsers, isLoading, error, createUsers, modifyUser }
+  const modifyAllUsers = useCallback(async (data: ModifiedUsersData) => {
+    try {
+      const results = await patchAllUsersApi(data)
+      console.log(results)
+    } catch (err) {
+      console.error(err)
+      if (err instanceof Error) setError(err.message)
+    }
+  }, [])
+
+  return { users, getUsers, isLoading, error, createUsers, modifyUser, modifyAllUsers }
 }
