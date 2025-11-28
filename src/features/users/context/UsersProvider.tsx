@@ -146,7 +146,20 @@ export default function UsersProvider({
           const numId = Number(id)
           return { id: numId, payload }
         })
-        console.log(data)
+
+        if (data.length === 0) {
+          alert('수정된 내역이 없습니다.')
+          return
+        }
+
+        try {
+          setIsPatching('all')
+          await onAllModify(data)
+        } catch (err) {
+          console.error(err)
+        } finally {
+          setIsPatching(null)
+        }
       }
 
       // 수정취소
@@ -158,7 +171,7 @@ export default function UsersProvider({
       // toggle
       setIsShowAllEditor(isShowEditor)
     },
-    [filterModifiedData, resetAllUsersData],
+    [filterModifiedData, resetAllUsersData, onAllModify],
   )
 
   // [수정하기 - 개별] item 수정 에디터 show/hide & patch

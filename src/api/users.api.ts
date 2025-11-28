@@ -3,6 +3,7 @@ import type {
   ModifiedUsersData,
   NewUserData,
   ResultModifiedUserData,
+  ResultModifiedUsersData,
   ResultNewUserData,
   User,
 } from '@/types/users'
@@ -52,23 +53,25 @@ export const patchUserApi = async (id: number, payload: ModifiedUserData) => {
 }
 
 export const patchAllUsersApi = async (data: ModifiedUsersData) => {
-  try {
-    const responses = await Promise.all(
-      data.map(({ id, payload }) =>
-        fetch(`https://reqres.in/api/users/${id}`, {
-          headers: {
-            'x-api-key': 'reqres-free-v1',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        }),
-      ),
-    )
+  const responses = await Promise.all(
+    data.map(({ id, payload }) =>
+      fetch(`https://reqres.in/api/users/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'x-api-key': 'reqres-free-v1',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      }),
+    ),
+  )
+  const isError = responses.some((res) => !res.ok)
+  if (isError) throw Error('유저 데이터를 수정할 수 없습니다.')
 
-    const response = await Promise.all(responses.map((res) => res.json()))
-    console.log(response)
-    // if (!response.ok) throw Error('유저 데이터를 수정할 수 없습니다.')
-  } catch (err) {
-    console.error('에러 발생:', err)
-  }
+  const results: ResultModifiedUsersData = await Promise.all(
+    responses.map((res, idx) =>
+      res.json().then((body) => ({ id: data[idx].id, result: { ...body } })),
+    ),
+  )
+  return results
 }

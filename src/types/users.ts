@@ -20,4 +20,8 @@ export type FilteredModifiedData = Record<number, FilteredModifiedItemData>
 
 export type ModifiedUserData = Partial<Omit<User, 'id'>>
 export type ResultModifiedUserData = ModifiedUserData & { updatedAt: string }
-export type ModifiedUsersData = { id: number; payload: Record<string, ModifiedUserData> }[]
+export type ModifiedUsersData = { id: number; payload: FilteredModifiedItemData }[]
+export type ResultModifiedUsersData = {
+  id: number
+  result: ModifiedUserData & { updatedAt: string }
+}[]

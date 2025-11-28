@@ -71,7 +71,18 @@ export function useUsersQuery() {
   const modifyAllUsers = useCallback(async (data: ModifiedUsersData) => {
     try {
       const results = await patchAllUsersApi(data)
-      console.log(results)
+
+      setUsers((prev) => {
+        const resultMap = new Map(results.map(({ id, result }) => [id, result]))
+
+        return prev.map((user) => {
+          const patched = resultMap.get(user.id)
+          if (!patched) return user
+
+          const { updatedAt: _, ...rest } = patched
+          return { ...user, ...rest }
+        })
+      })
     } catch (err) {
       console.error(err)
       if (err instanceof Error) setError(err.message)
