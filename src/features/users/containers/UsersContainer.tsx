@@ -1,19 +1,19 @@
+import { useEffect } from 'react'
 import { UsersProvider, Users } from '@/features/users'
 import { useUsersQuery } from '@/hooks/useUsersQuery'
-import { useEffect } from 'react'
 
 export default function UsersContainer() {
-  const { users, getUsers, isLoading, error, createUsers, modifyUser, modifyAllUsers } =
+  const { users, getAllUsers, isLoading, error, createUser, modifyUser, modifyAllUsers } =
     useUsersQuery()
 
   useEffect(() => {
-    void getUsers()
-  }, [getUsers])
+    void getAllUsers()
+  }, [getAllUsers])
 
   return (
     <UsersProvider
       users={users}
-      onCreate={createUsers}
+      onCreate={createUser}
       onModify={modifyUser}
       onAllModify={modifyAllUsers}
     >

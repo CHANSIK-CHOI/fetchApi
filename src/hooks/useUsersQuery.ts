@@ -1,22 +1,22 @@
-import { createUsersApi, getUsersApi, patchAllUsersApi, patchUserApi } from '@/api/users.api'
+import { useCallback, useState } from 'react'
+import { createUserApi, getAllUsersApi, patchAllUsersApi, patchUserApi } from '@/api/users.api'
 import {
-  type ModifiedUserData,
-  type ModifiedUsersData,
-  type NewUserData,
+  type PayloadModifiedUser,
+  type PayloadAllModifiedUsers,
+  type PayloadNewUser,
   type User,
 } from '@/types/users'
-import { useCallback, useState } from 'react'
 
 export function useUsersQuery() {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
 
-  const getUsers = useCallback(async () => {
+  const getAllUsers = useCallback(async () => {
     setIsLoading(true)
     setError('')
     try {
-      const { data } = await getUsersApi()
+      const { data } = await getAllUsersApi()
       setUsers(data)
     } catch (err) {
       console.error(err)
@@ -26,9 +26,9 @@ export function useUsersQuery() {
     }
   }, [])
 
-  const createUsers = useCallback(async (userData: NewUserData) => {
+  const createUser = useCallback(async (payload: PayloadNewUser) => {
     try {
-      const result = await createUsersApi(userData)
+      const result = await createUserApi(payload)
       const { id, ...rest } = result
       const numericId = Number(id)
       const newUser: User = {
@@ -45,7 +45,7 @@ export function useUsersQuery() {
     }
   }, [])
 
-  const modifyUser = useCallback(async (id: number, payload: ModifiedUserData) => {
+  const modifyUser = useCallback(async (id: number, payload: PayloadModifiedUser) => {
     try {
       const result = await patchUserApi(id, payload)
       if (!result) return
@@ -68,7 +68,7 @@ export function useUsersQuery() {
     }
   }, [])
 
-  const modifyAllUsers = useCallback(async (data: ModifiedUsersData) => {
+  const modifyAllUsers = useCallback(async (data: PayloadAllModifiedUsers) => {
     try {
       const results = await patchAllUsersApi(data)
 
@@ -89,5 +89,5 @@ export function useUsersQuery() {
     }
   }, [])
 
-  return { users, getUsers, isLoading, error, createUsers, modifyUser, modifyAllUsers }
+  return { users, getAllUsers, isLoading, error, createUser, modifyUser, modifyAllUsers }
 }

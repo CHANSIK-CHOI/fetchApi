@@ -21,21 +21,21 @@ import {
 import type {
   FilteredModifiedData,
   FilteredModifiedItemData,
-  ModifiedUserData,
-  NewUserData,
+  PayloadModifiedUser,
+  PayloadNewUser,
   User,
-  UsersFormValueItem,
-  UsersFormValueMap,
-  ModifiedUsersData,
+  PersonalUserValue,
+  BuildAllUsersValue,
+  PayloadAllModifiedUsers,
 } from '@/types/users'
 import { INIT_NEW_USER_DATA } from '@/utils'
 
 type UsersProviderProps = {
   children: ReactNode
-  onCreate: (userData: NewUserData) => Promise<void>
+  onCreate: (payload: PayloadNewUser) => Promise<void>
   users: User[]
-  onModify: (id: number, payload: ModifiedUserData) => Promise<void>
-  onAllModify: (data: ModifiedUsersData) => Promise<void>
+  onModify: (id: number, payload: PayloadModifiedUser) => Promise<void>
+  onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
 }
 
 export default function UsersProvider({
@@ -49,8 +49,8 @@ export default function UsersProvider({
   const [checkedDeleteItems, setCheckedDeleteItems] = useState<number[]>([]) // 선택 된 items
 
   const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // [UsersNewForm] show
-  const [newUserData, setNewUserData] = useState<NewUserData>(INIT_NEW_USER_DATA) // [UsersNewForm] input value (state)
-  const newUserDataRef = useRef<NewUserData>(newUserData) // [UsersNewForm] input value (ref)
+  const [newUserData, setNewUserData] = useState<PayloadNewUser>(INIT_NEW_USER_DATA) // [UsersNewForm] input value (state)
+  const newUserDataRef = useRef<PayloadNewUser>(newUserData) // [UsersNewForm] input value (ref)
   const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // [UsersNewForm] creating (state)
   const isCreatingUserRef = useRef<boolean>(isCreatingUser) // [UsersNewForm] creating (ref)
 
@@ -62,7 +62,7 @@ export default function UsersProvider({
 
   // users 데이터의 id를 키값으로한 객체 형태로 변경
   const buildUsersData = useCallback((data: User[]) => {
-    return data.reduce<UsersFormValueMap>(
+    return data.reduce<BuildAllUsersValue>(
       (acc, cur) => {
         /*
         reduce 매개변수 : acc, cur, index, array
@@ -78,7 +78,7 @@ export default function UsersProvider({
           [`avatar_${cur.id}`]: cur.avatar,
           id: cur.id,
           isModify: false,
-        } as UsersFormValueItem
+        } as PersonalUserValue
         return acc
       },
       {}, // 초기값: acc의 시작 값
@@ -86,8 +86,8 @@ export default function UsersProvider({
   }, [])
 
   const initialBuiltUsersData = useMemo(() => buildUsersData(users), [buildUsersData, users]) // users 데이터 캐싱
-  const [builtUsersData, setBuiltUsersData] = useState<UsersFormValueMap>(initialBuiltUsersData) // [UsersItem] input value (state)
-  const builtUsersDataRef = useRef<UsersFormValueMap>(initialBuiltUsersData) // [UsersItem] input value (ref)
+  const [builtUsersData, setBuiltUsersData] = useState<BuildAllUsersValue>(initialBuiltUsersData) // [UsersItem] input value (state)
+  const builtUsersDataRef = useRef<BuildAllUsersValue>(initialBuiltUsersData) // [UsersItem] input value (ref)
 
   // [reset] 전체 유저 데이터 reset
   const resetAllUsersData = useCallback(() => {
@@ -111,13 +111,14 @@ export default function UsersProvider({
           [id]: {
             ...initialBuiltUsersData[id],
             isModify: false,
-          } as UsersFormValueItem,
+          } as PersonalUserValue,
         }
       })
     },
     [initialBuiltUsersData],
   )
 
+  // [수정하기] 수정된 데이터 필터링 후 반환
   const filterModifiedData = useCallback(() => {
     const usersArray = Object.values(builtUsersDataRef.current)
     const modifiedData = usersArray.filter(({ isModify }) => isModify)
@@ -224,6 +225,7 @@ export default function UsersProvider({
     isPatchingRef.current = isPatching
   }, [isPatching])
 
+  // [수정하기]  builtUsersData update
   const updateBuiltUserData = useCallback(
     (id: number, name: string, value: string) => {
       setBuiltUsersData((prev) => {
@@ -233,7 +235,7 @@ export default function UsersProvider({
         const nextEntry = {
           ...target,
           [name]: value,
-        } as UsersFormValueItem
+        } as PersonalUserValue
 
         const originalUser = users.find((user) => user.id === id)
         if (originalUser) {
@@ -248,7 +250,7 @@ export default function UsersProvider({
             [id]: {
               ...nextEntry,
               isModify,
-            } as UsersFormValueItem,
+            } as PersonalUserValue,
           }
         }
 
@@ -257,7 +259,7 @@ export default function UsersProvider({
           [id]: {
             ...nextEntry,
             isModify: true,
-          } as UsersFormValueItem,
+          } as PersonalUserValue,
         }
       })
     },

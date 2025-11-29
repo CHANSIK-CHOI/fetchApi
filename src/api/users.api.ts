@@ -1,14 +1,14 @@
 import type {
-  ModifiedUserData,
-  ModifiedUsersData,
-  NewUserData,
-  ResultModifiedUserData,
-  ResultModifiedUsersData,
-  ResultNewUserData,
+  PayloadModifiedUser,
+  PayloadAllModifiedUsers,
+  PayloadNewUser,
+  ApiResultModifiedUser,
+  ApiResultAllModifiedUsers,
+  ApiResultNewUser,
   User,
 } from '@/types/users'
 
-export const getUsersApi = async () => {
+export const getAllUsersApi = async () => {
   const response = await fetch('https://reqres.in/api/users', {
     headers: {
       'x-api-key': 'reqres-free-v1',
@@ -16,11 +16,11 @@ export const getUsersApi = async () => {
   })
 
   if (!response.ok) throw Error('유저 데이터를 받아올 수 없습니다.')
-  const json: { data: User[] } = await response.json()
-  return json
+  const result: { data: User[] } = await response.json()
+  return result
 }
 
-export const createUsersApi = async (payload: NewUserData) => {
+export const createUserApi = async (payload: PayloadNewUser) => {
   const response = await fetch('https://reqres.in/api/users', {
     method: 'POST',
     headers: {
@@ -31,12 +31,11 @@ export const createUsersApi = async (payload: NewUserData) => {
   })
 
   if (!response.ok) throw Error('유저 데이터를 추가할 수 없습니다.')
-
-  const result: ResultNewUserData = await response.json()
+  const result: ApiResultNewUser = await response.json()
   return result
 }
 
-export const patchUserApi = async (id: number, payload: ModifiedUserData) => {
+export const patchUserApi = async (id: number, payload: PayloadModifiedUser) => {
   const response = await fetch(`https://reqres.in/api/users/${id}`, {
     method: 'PATCH',
     headers: {
@@ -47,12 +46,11 @@ export const patchUserApi = async (id: number, payload: ModifiedUserData) => {
   })
 
   if (!response.ok) throw Error('유저 데이터를 수정할 수 없습니다.')
-  const result: ResultModifiedUserData = await response.json()
-  console.log('api', result)
+  const result: ApiResultModifiedUser = await response.json()
   return result
 }
 
-export const patchAllUsersApi = async (data: ModifiedUsersData) => {
+export const patchAllUsersApi = async (data: PayloadAllModifiedUsers) => {
   const responses = await Promise.all(
     data.map(({ id, payload }) =>
       fetch(`https://reqres.in/api/users/${id}`, {
@@ -68,7 +66,7 @@ export const patchAllUsersApi = async (data: ModifiedUsersData) => {
   const isError = responses.some((res) => !res.ok)
   if (isError) throw Error('유저 데이터를 수정할 수 없습니다.')
 
-  const results: ResultModifiedUsersData = await Promise.all(
+  const results: ApiResultAllModifiedUsers = await Promise.all(
     responses.map((res, idx) =>
       res.json().then((body) => ({ id: data[idx].id, result: { ...body } })),
     ),

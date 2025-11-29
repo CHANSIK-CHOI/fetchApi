@@ -1,4 +1,4 @@
-import type { NewUserData, UsersFormValueMap } from '@/types/users'
+import type { PayloadNewUser, BuildAllUsersValue } from '@/types/users'
 import {
   createContext,
   useContext,
@@ -24,7 +24,7 @@ export type UsersStateContextType = {
   isShowDeleteCheckbox: boolean
   isShowNewUserForm: boolean
   isCreatingUser: boolean
-  builtUsersData: UsersFormValueMap
+  builtUsersData: BuildAllUsersValue
   isPatching: IsPatching
 }
 
@@ -35,7 +35,7 @@ export type UsersActionsContextType = {
   onChangeCheckDeleteItems: ({ e, id }: OnChangeCheckDeleteItems) => void
   onClickDeleteItems: () => void
   onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => Promise<void>
-  setNewUserData: Dispatch<SetStateAction<NewUserData>>
+  setNewUserData: Dispatch<SetStateAction<PayloadNewUser>>
   onChangeUserData: (e: ChangeEvent<HTMLInputElement>, id: number) => void
   onChangeUserAvatar: (id: number, avatarSrc: string | null) => void
 }

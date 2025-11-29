@@ -35,4 +35,26 @@ button,
     outline: 2px solid #c2e1ff;
     outline-offset: 3px;
   }
+
+  &:disabled {
+    background-color: #d9e7f7;
+    color: #92a7c1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  &.line:disabled {
+    background-color: #f7f9fc;
+    border-color: #d1deef;
+    color: #9ab0ce;
+  }
+
+  &:disabled:hover,
+  &.line:disabled:hover,
+  &:disabled:active,
+  &.line:disabled:active {
+    background-color: inherit;
+    transform: none;
+  }
 }

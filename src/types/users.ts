@@ -6,22 +6,22 @@ export type User = {
   last_name: string
 }
 
-export type NewUserData = Omit<User, 'id' | 'avatar'> & { avatar?: string }
-export type ResultNewUserData = User & { createdAt: string }
+export type PayloadNewUser = Omit<User, 'id' | 'avatar'> & { avatar?: string }
+export type ApiResultNewUser = User & { createdAt: string }
 
 type UserKeys = keyof User
-export type UsersFormValueItem = {
+export type PersonalUserValue = {
   [K in UserKeys as K extends 'id' ? K : `${K}_${number}`]: User[K]
 } & { isModify: boolean }
-export type UsersFormValueMap = Record<number, UsersFormValueItem>
+export type BuildAllUsersValue = Record<number, PersonalUserValue>
 
 export type FilteredModifiedItemData = Record<string, unknown>
 export type FilteredModifiedData = Record<number, FilteredModifiedItemData>
 
-export type ModifiedUserData = Partial<Omit<User, 'id'>>
-export type ResultModifiedUserData = ModifiedUserData & { updatedAt: string }
-export type ModifiedUsersData = { id: number; payload: FilteredModifiedItemData }[]
-export type ResultModifiedUsersData = {
+export type PayloadModifiedUser = Partial<Omit<User, 'id'>>
+export type ApiResultModifiedUser = PayloadModifiedUser & { updatedAt: string }
+export type PayloadAllModifiedUsers = { id: number; payload: FilteredModifiedItemData }[]
+export type ApiResultAllModifiedUsers = {
   id: number
-  result: ModifiedUserData & { updatedAt: string }
+  result: PayloadModifiedUser & { updatedAt: string }
 }[]
