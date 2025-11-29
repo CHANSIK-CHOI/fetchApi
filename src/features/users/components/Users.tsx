@@ -6,7 +6,7 @@ type UsersProps = {
   newUserForm: React.ReactNode
 }
 export default function Users({ children, newUserForm }: UsersProps) {
-  const { isShowAllEditor, isShowDeleteCheckbox, isShowNewUserForm, isCreatingUser } =
+  const { isShowAllEditor, isShowDeleteCheckbox, isShowNewUserForm, isCreatingUser, isPatching } =
     useUsersState()
   const { onAllEditor, onToggleDeleteCheckbox, onClickDeleteItems, onNewUserForm } =
     useUsersActions()
@@ -98,8 +98,9 @@ export default function Users({ children, newUserForm }: UsersProps) {
                   <button
                     type="button"
                     onClick={() => onAllEditor({ isShowEditor: false, isPatch: true })}
+                    disabled={isPatching === 'all'}
                   >
-                    수정완료
+                    {isPatching === 'all' ? '수정중...' : '수정완료'}
                   </button>
                 </>
               )}

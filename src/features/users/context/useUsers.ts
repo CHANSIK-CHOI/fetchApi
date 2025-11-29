@@ -37,6 +37,7 @@ export type UsersActionsContextType = {
   onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => Promise<void>
   setNewUserData: Dispatch<SetStateAction<NewUserData>>
   onChangeUserData: (e: ChangeEvent<HTMLInputElement>, id: number) => void
+  onChangeUserAvatar: (id: number, avatarSrc: string | null) => void
 }
 
 export const UsersStateContext = createContext<UsersStateContextType | null>(null)

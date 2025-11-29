@@ -224,11 +224,8 @@ export default function UsersProvider({
     isPatchingRef.current = isPatching
   }, [isPatching])
 
-  // [수정하기] input onChange Event : builtUsersData update
-  const onChangeUserData = useCallback(
-    (e: ChangeEvent<HTMLInputElement>, id: number) => {
-      const { name, value } = e.target
-
+  const updateBuiltUserData = useCallback(
+    (id: number, name: string, value: string) => {
       setBuiltUsersData((prev) => {
         const target = prev[id]
         if (!target) return prev
@@ -265,6 +262,23 @@ export default function UsersProvider({
       })
     },
     [users],
+  )
+
+  // [수정하기] input onChange Event : builtUsersData update
+  const onChangeUserData = useCallback(
+    (e: ChangeEvent<HTMLInputElement>, id: number) => {
+      const { name, value } = e.target
+      updateBuiltUserData(id, name, value)
+    },
+    [updateBuiltUserData],
+  )
+
+  // [수정하기] 프로필 이미지 변경 이벤트 : builtUsersData update
+  const onChangeUserAvatar = useCallback(
+    (id: number, avatarSrc: string | null) => {
+      updateBuiltUserData(id, `avatar_${id}`, avatarSrc ?? '')
+    },
+    [updateBuiltUserData],
   )
 
   // [수정하기] users 업데이트 시 builtUsersData도 업데이트
@@ -401,6 +415,7 @@ export default function UsersProvider({
       onNewUserForm,
       setNewUserData,
       onChangeUserData,
+      onChangeUserAvatar,
     }),
     [
       onAllEditor,
@@ -411,6 +426,7 @@ export default function UsersProvider({
       onNewUserForm,
       setNewUserData,
       onChangeUserData,
+      onChangeUserAvatar,
     ],
   )
 

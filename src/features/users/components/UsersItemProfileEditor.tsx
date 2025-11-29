@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
+import { useUsersActions } from '@/features/users'
 import { PLACEHOLDER_SRC } from '@/utils'
 
 type UsersItemProfileEditorProps = {
@@ -7,6 +8,7 @@ type UsersItemProfileEditorProps = {
 }
 
 export default function UsersItemProfileEditor({ id, profileSrc }: UsersItemProfileEditorProps) {
+  const { onChangeUserAvatar } = useUsersActions()
   const [file, setFile] = useState<File | null>(null)
   const [isProfileCleared, setIsProfileCleared] = useState(false)
 
@@ -19,14 +21,9 @@ export default function UsersItemProfileEditor({ id, profileSrc }: UsersItemProf
   }
 
   const handleRemoveImage = () => {
-    if (file) {
-      setFile(null)
-      return
-    }
-
-    if (!isProfileCleared) {
-      setIsProfileCleared(true)
-    }
+    setFile(null)
+    if (!isProfileCleared) setIsProfileCleared(true)
+    onChangeUserAvatar(id, '')
   }
 
   const previewUrl = useMemo(() => {
@@ -36,8 +33,9 @@ export default function UsersItemProfileEditor({ id, profileSrc }: UsersItemProf
 
   useEffect(() => {
     if (!previewUrl) return
+    onChangeUserAvatar(id, previewUrl)
     return () => URL.revokeObjectURL(previewUrl)
-  }, [previewUrl])
+  }, [id, onChangeUserAvatar, previewUrl])
 
   const hasPreview = Boolean(previewUrl)
   const hasProfileSrc = Boolean(profileSrc) && !isProfileCleared
