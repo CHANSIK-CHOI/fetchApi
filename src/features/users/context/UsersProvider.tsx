@@ -19,16 +19,16 @@ import {
 } from '@/features/users'
 
 import type {
-  FilteredModifiedData,
+  FilteredModifiedAllData,
   FilteredModifiedItemData,
   PayloadModifiedUser,
   PayloadNewUser,
   User,
   PersonalUserValue,
-  BuildAllUsersValue,
+  BuiltAllUsersValue,
   PayloadAllModifiedUsers,
 } from '@/types/users'
-import { INIT_NEW_USER_DATA } from '@/utils'
+import { INIT_NEW_USER_VALUE } from '@/utils'
 
 type UsersProviderProps = {
   children: ReactNode
@@ -45,24 +45,24 @@ export default function UsersProvider({
   onModify,
   onAllModify,
 }: UsersProviderProps) {
-  const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show
-  const [checkedDeleteItems, setCheckedDeleteItems] = useState<number[]>([]) // 선택 된 items
+  const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show/hide 여부
+  const [checkedDeleteItems, setCheckedDeleteItems] = useState<number[]>([]) // 체크박스가 선택 된 유저의 id 배열
 
-  const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // [UsersNewForm] show
-  const [newUserData, setNewUserData] = useState<PayloadNewUser>(INIT_NEW_USER_DATA) // [UsersNewForm] input value (state)
-  const newUserDataRef = useRef<PayloadNewUser>(newUserData) // [UsersNewForm] input value (ref)
-  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // [UsersNewForm] creating (state)
-  const isCreatingUserRef = useRef<boolean>(isCreatingUser) // [UsersNewForm] creating (ref)
+  const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // UsersNewForm 마운트 여부
+  const [newUserValue, setNewUserValue] = useState<PayloadNewUser>(INIT_NEW_USER_VALUE) // UsersNewForm 컴포넌트 내부 input들의 value
+  const newUserValueRef = useRef<PayloadNewUser>(newUserValue) // newUserValue ref
+  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // 새로운 유저 데이터 생성 중 여부
+  const isCreatingUserRef = useRef<boolean>(isCreatingUser) // isCreatingUser ref
 
-  const [isShowAllEditor, setIsShowAllEditor] = useState<boolean>(false) // 전체 수정 에디터 show
-  const [showItemEditor, setShowItemEditor] = useState<number[]>([]) // item 수정 에디터 show
-  const showItemEditorRef = useRef<number[]>([])
-  const [isPatching, setIsPatching] = useState<IsPatching>(null)
-  const isPatchingRef = useRef<IsPatching>(null)
+  const [isShowAllEditor, setIsShowAllEditor] = useState<boolean>(false) // 전체 유저의 수정 에디터 show/hide 여부
+  const [displayItemEditor, setDisplayItemEditor] = useState<number[]>([]) // 개별 수정 시 에디터가 보여지고 있는 유저의 id 배열
+  const displayItemEditorRef = useRef<number[]>([]) // displayItemEditor ref
+  const [isPatching, setIsPatching] = useState<IsPatching>(null) // 유저 데이터의 수정 여부
+  const isPatchingRef = useRef<IsPatching>(null) // isPatching ref
 
-  // users 데이터의 id를 키값으로한 객체 형태로 변경
+  // 각 유저의 데이터를 id값과 조합하여 가공한 데이터 : UsersItem 컴포넌트 내부 input 태그의 value값으로 연결
   const buildUsersData = useCallback((data: User[]) => {
-    return data.reduce<BuildAllUsersValue>(
+    return data.reduce<BuiltAllUsersValue>(
       (acc, cur) => {
         /*
         reduce 매개변수 : acc, cur, index, array
@@ -85,21 +85,22 @@ export default function UsersProvider({
     )
   }, [])
 
-  const initialBuiltUsersData = useMemo(() => buildUsersData(users), [buildUsersData, users]) // users 데이터 캐싱
-  const [builtUsersData, setBuiltUsersData] = useState<BuildAllUsersValue>(initialBuiltUsersData) // [UsersItem] input value (state)
-  const builtUsersDataRef = useRef<BuildAllUsersValue>(initialBuiltUsersData) // [UsersItem] input value (ref)
+  const initialBuiltAllUsersValue = useMemo(() => buildUsersData(users), [buildUsersData, users]) // users 업데이트 시 전체 유저의 데이터를 BuiltAllUsersValue 타입으로 캐싱
+  const [builtAllUsersValue, setBuiltUsersData] =
+    useState<BuiltAllUsersValue>(initialBuiltAllUsersValue) // 각 유저의 데이터를 id값과 조합하여 가공한 데이터 : UsersItem 컴포넌트 내부 input 태그의 value값으로 연결
+  const builtAllUsersValueRef = useRef<BuiltAllUsersValue>(initialBuiltAllUsersValue) // builtAllUsersValue ref
 
-  // [reset] 전체 유저 데이터 reset
+  // [reset] 전체 유저의 input value를 reset
   const resetAllUsersData = useCallback(() => {
     setBuiltUsersData((prev) => {
       const hasModified = Object.values(prev).some(({ isModify }) => isModify)
       if (!hasModified) return prev
 
-      return initialBuiltUsersData
+      return initialBuiltAllUsersValue
     })
-  }, [initialBuiltUsersData])
+  }, [initialBuiltAllUsersValue])
 
-  // [reset] 특정 유저 데이터 reset
+  // [reset] 특정 유저의 input value를 reset
   const resetTargetUserData = useCallback(
     (id: number) => {
       setBuiltUsersData((prev) => {
@@ -109,21 +110,21 @@ export default function UsersProvider({
         return {
           ...prev,
           [id]: {
-            ...initialBuiltUsersData[id],
+            ...initialBuiltAllUsersValue[id],
             isModify: false,
           } as PersonalUserValue,
         }
       })
     },
-    [initialBuiltUsersData],
+    [initialBuiltAllUsersValue],
   )
 
-  // [수정하기] 수정된 데이터 필터링 후 반환
+  // [수정하기] 수정된 데이터만 필터링 후 반환
   const filterModifiedData = useCallback(() => {
-    const usersArray = Object.values(builtUsersDataRef.current)
+    const usersArray = Object.values(builtAllUsersValueRef.current)
     const modifiedData = usersArray.filter(({ isModify }) => isModify)
     const filteredModifiedData = modifiedData.reduce((acc, user) => {
-      const original: Record<string, unknown> = initialBuiltUsersData[user.id] ?? {}
+      const original: Record<string, unknown> = initialBuiltAllUsersValue[user.id] ?? {}
       const changed = Object.entries(user).reduce((fieldAcc, [k, v]) => {
         if (k !== 'isModify' && original[k] !== v) {
           fieldAcc[k.replace(/_\d+$/, '')] = v
@@ -132,10 +133,10 @@ export default function UsersProvider({
       }, {} as FilteredModifiedItemData)
       if (Object.keys(changed).length) acc[user.id] = changed
       return acc
-    }, {} as FilteredModifiedData)
+    }, {} as FilteredModifiedAllData)
 
     return filteredModifiedData
-  }, [initialBuiltUsersData])
+  }, [initialBuiltAllUsersValue])
 
   // [수정하기 - 전체] 전체 수정 에디터 show/hide & patch
   const onAllEditor = useCallback(
@@ -167,7 +168,7 @@ export default function UsersProvider({
       if (!isShowEditor && !isPatch) resetAllUsersData()
 
       // 열릴 때 Item Editor reset
-      if (isShowEditor) setShowItemEditor([])
+      if (isShowEditor) setDisplayItemEditor([])
 
       // toggle
       setIsShowAllEditor(isShowEditor)
@@ -205,14 +206,14 @@ export default function UsersProvider({
 
       // id Item 에디터 창 show
       if (isShowEditor) {
-        setShowItemEditor((prev) => {
+        setDisplayItemEditor((prev) => {
           const isShowItemIds = prev.includes(id) ? prev : [...prev, id]
           return isShowItemIds
         })
       }
       // id Item 에디터 창 hide
       else {
-        setShowItemEditor((prev) => {
+        setDisplayItemEditor((prev) => {
           const isFilteredId = prev.filter((value) => value !== id)
           return isFilteredId
         })
@@ -225,7 +226,7 @@ export default function UsersProvider({
     isPatchingRef.current = isPatching
   }, [isPatching])
 
-  // [수정하기]  builtUsersData update
+  // [수정하기]  builtAllUsersValue update
   const updateBuiltUserData = useCallback(
     (id: number, name: string, value: string) => {
       setBuiltUsersData((prev) => {
@@ -266,7 +267,7 @@ export default function UsersProvider({
     [users],
   )
 
-  // [수정하기] input onChange Event : builtUsersData update
+  // [수정하기] input onChange Event : builtAllUsersValue update
   const onChangeUserData = useCallback(
     (e: ChangeEvent<HTMLInputElement>, id: number) => {
       const { name, value } = e.target
@@ -275,7 +276,7 @@ export default function UsersProvider({
     [updateBuiltUserData],
   )
 
-  // [수정하기] 프로필 이미지 변경 이벤트 : builtUsersData update
+  // [수정하기] 프로필 이미지 변경 이벤트 : builtAllUsersValue update
   const onChangeUserAvatar = useCallback(
     (id: number, avatarSrc: string | null) => {
       updateBuiltUserData(id, `avatar_${id}`, avatarSrc ?? '')
@@ -283,16 +284,16 @@ export default function UsersProvider({
     [updateBuiltUserData],
   )
 
-  // [수정하기] users 업데이트 시 builtUsersData도 업데이트
+  // [수정하기] users 업데이트 시 builtAllUsersValue도 업데이트
   useEffect(() => {
-    if (showItemEditorRef.current.length > 0) return
-    setBuiltUsersData(initialBuiltUsersData)
-  }, [initialBuiltUsersData])
+    if (displayItemEditorRef.current.length > 0) return
+    setBuiltUsersData(initialBuiltAllUsersValue)
+  }, [initialBuiltAllUsersValue])
 
-  // [수정하기] builtUsersData 업데이트 시 builtUsersDataRef도 업데이트
+  // [수정하기] builtAllUsersValue 업데이트 시 builtAllUsersValueRef도 업데이트
   useEffect(() => {
-    builtUsersDataRef.current = builtUsersData
-  }, [builtUsersData])
+    builtAllUsersValueRef.current = builtAllUsersValue
+  }, [builtAllUsersValue])
 
   // [삭제하기] Checkbox Change Event
   const onChangeCheckDeleteItems = useCallback(({ e, id }: OnChangeCheckDeleteItems) => {
@@ -326,7 +327,7 @@ export default function UsersProvider({
       setIsShowDeleteCheckbox(isChecked)
 
       if (isChecked) {
-        setShowItemEditor([])
+        setDisplayItemEditor([])
         resetAllUsersData()
       } else {
         setCheckedDeleteItems([])
@@ -336,8 +337,8 @@ export default function UsersProvider({
   )
 
   useEffect(() => {
-    showItemEditorRef.current = showItemEditor
-  }, [showItemEditor])
+    displayItemEditorRef.current = displayItemEditor
+  }, [displayItemEditor])
 
   // [추가하기] 신규 유저 추가 에디터 show/hide & post
   const onNewUserForm = useCallback(
@@ -346,7 +347,7 @@ export default function UsersProvider({
       if (isPost) {
         if (isCreatingUserRef.current) return
 
-        const { email, first_name, last_name } = newUserDataRef.current
+        const { email, first_name, last_name } = newUserValueRef.current
         if (!email || !first_name || !last_name) {
           alert('이메일, 이름, 성을 모두 입력해주세요.')
           return
@@ -354,7 +355,7 @@ export default function UsersProvider({
 
         try {
           setIsCreatingUser(true)
-          await onCreate(newUserDataRef.current)
+          await onCreate(newUserValueRef.current)
         } catch (error) {
           console.error(error)
           alert('유저 생성에 실패했습니다. 다시 시도해주세요.')
@@ -364,10 +365,10 @@ export default function UsersProvider({
       }
 
       if (isShowEditor) {
-        setShowItemEditor([])
+        setDisplayItemEditor([])
         resetAllUsersData()
       } else {
-        setNewUserData(INIT_NEW_USER_DATA)
+        setNewUserValue(INIT_NEW_USER_VALUE)
       }
 
       // toggle
@@ -376,10 +377,10 @@ export default function UsersProvider({
     [onCreate, resetAllUsersData],
   )
 
-  // [추가하기] newUserData 업데이트 시 newUserDataRef도 업데이트
+  // [추가하기] newUserValue 업데이트 시 newUserValueRef도 업데이트
   useEffect(() => {
-    newUserDataRef.current = newUserData
-  }, [newUserData])
+    newUserValueRef.current = newUserValue
+  }, [newUserValue])
 
   // [추가하기] isCreatingUser 업데이트 시 isCreatingUserRef도 업데이트
   useEffect(() => {
@@ -389,20 +390,20 @@ export default function UsersProvider({
   const stateValue = useMemo(
     () => ({
       isShowAllEditor,
-      showItemEditor,
+      displayItemEditor,
       isShowDeleteCheckbox,
       isShowNewUserForm,
       isCreatingUser,
-      builtUsersData,
+      builtAllUsersValue,
       isPatching,
     }),
     [
       isShowAllEditor,
-      showItemEditor,
+      displayItemEditor,
       isShowDeleteCheckbox,
       isShowNewUserForm,
       isCreatingUser,
-      builtUsersData,
+      builtAllUsersValue,
       isPatching,
     ],
   )
@@ -415,7 +416,7 @@ export default function UsersProvider({
       onChangeCheckDeleteItems,
       onClickDeleteItems,
       onNewUserForm,
-      setNewUserData,
+      setNewUserValue,
       onChangeUserData,
       onChangeUserAvatar,
     }),
@@ -426,7 +427,7 @@ export default function UsersProvider({
       onChangeCheckDeleteItems,
       onClickDeleteItems,
       onNewUserForm,
-      setNewUserData,
+      setNewUserValue,
       onChangeUserData,
       onChangeUserAvatar,
     ],

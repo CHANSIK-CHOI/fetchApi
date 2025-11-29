@@ -16,18 +16,18 @@ type UsersItem = {
 export default function UsersItem({ profileSrc, firstName, lastName, email, id }: UsersItem) {
   const {
     isShowAllEditor,
-    showItemEditor,
+    displayItemEditor,
     isShowDeleteCheckbox,
     isShowNewUserForm,
-    builtUsersData,
+    builtAllUsersValue,
     isPatching,
   } = useUsersState()
   const { onItemEditor, onChangeCheckDeleteItems, onChangeUserData } = useUsersActions()
 
-  const isItemEditing = showItemEditor.includes(id)
+  const isItemEditing = displayItemEditor.includes(id)
   const isEditing = isShowAllEditor || isItemEditing
 
-  const userInputValues = builtUsersData[id]
+  const userInputValues = builtAllUsersValue[id]
   const firstNameValue = userInputValues ? userInputValues[`first_name_${id}`] : ''
   const lastNameValue = userInputValues ? userInputValues[`last_name_${id}`] : ''
   const emailValue = userInputValues ? userInputValues[`email_${id}`] : ''

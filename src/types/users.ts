@@ -13,10 +13,10 @@ type UserKeys = keyof User
 export type PersonalUserValue = {
   [K in UserKeys as K extends 'id' ? K : `${K}_${number}`]: User[K]
 } & { isModify: boolean }
-export type BuildAllUsersValue = Record<number, PersonalUserValue>
+export type BuiltAllUsersValue = Record<number, PersonalUserValue>
 
 export type FilteredModifiedItemData = Record<string, unknown>
-export type FilteredModifiedData = Record<number, FilteredModifiedItemData>
+export type FilteredModifiedAllData = Record<User['id'], FilteredModifiedItemData>
 
 export type PayloadModifiedUser = Partial<Omit<User, 'id'>>
 export type ApiResultModifiedUser = PayloadModifiedUser & { updatedAt: string }

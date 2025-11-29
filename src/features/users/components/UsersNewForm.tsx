@@ -3,7 +3,7 @@ import { useUsersActions } from '@/features/users'
 
 export default function UsersNewForm() {
   const [file, setFile] = useState<File | null>(null)
-  const { setNewUserData } = useUsersActions()
+  const { setNewUserValue } = useUsersActions()
 
   const handleChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null
@@ -13,7 +13,7 @@ export default function UsersNewForm() {
   const handleRemoveImage = () => {
     if (!file) return
     setFile(null)
-    setNewUserData((prev) => ({ ...prev, avatar: undefined }))
+    setNewUserValue((prev) => ({ ...prev, avatar: undefined }))
   }
 
   const previewUrl = useMemo(() => {
@@ -26,15 +26,15 @@ export default function UsersNewForm() {
 
     const name = newDataName.replace(/_userForm$/, '')
 
-    setNewUserData((prev) => ({ ...prev, [name]: value }))
+    setNewUserValue((prev) => ({ ...prev, [name]: value }))
   }
 
   useEffect(() => {
     if (!previewUrl) return
-    setNewUserData((prev) => ({ ...prev, avatar: previewUrl }))
+    setNewUserValue((prev) => ({ ...prev, avatar: previewUrl }))
 
     return () => URL.revokeObjectURL(previewUrl)
-  }, [previewUrl, setNewUserData])
+  }, [previewUrl, setNewUserValue])
 
   return (
     <div className="userForm">
