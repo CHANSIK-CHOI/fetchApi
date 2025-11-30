@@ -5,12 +5,14 @@ import {
   UsersItemProfileEditor,
 } from '@/features/users'
 
+import type { User } from '@/types/users'
+
 type UsersItem = {
-  profileSrc: string | undefined
-  firstName: string
-  lastName: string
-  email: string
-  id: number
+  profileSrc?: User['avatar']
+  firstName: User['first_name']
+  lastName: User['last_name']
+  email: User['email']
+  id: User['id']
 }
 
 export default function UsersItem({ profileSrc, firstName, lastName, email, id }: UsersItem) {

@@ -35,7 +35,7 @@ export const createUserApi = async (payload: PayloadNewUser) => {
   return result
 }
 
-export const patchUserApi = async (id: number, payload: PayloadModifiedUser) => {
+export const patchUserApi = async (id: User['id'], payload: PayloadModifiedUser) => {
   const response = await fetch(`https://reqres.in/api/users/${id}`, {
     method: 'PATCH',
     headers: {

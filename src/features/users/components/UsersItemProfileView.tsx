@@ -1,7 +1,8 @@
+import type { User } from '@/types/users'
 import { PLACEHOLDER_SRC } from '@/utils'
 
 type UsersItemProfileViewProps = {
-  profileSrc?: string
+  profileSrc?: User['avatar']
 }
 
 export default function UsersItemProfileView({ profileSrc }: UsersItemProfileViewProps) {

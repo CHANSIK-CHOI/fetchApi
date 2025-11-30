@@ -1,12 +1,4 @@
-import {
-  type ChangeEvent,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import {
   UsersActionsContext,
@@ -16,6 +8,8 @@ import {
   type OnAllEditor,
   type OnNewUserForm,
   type IsPatching,
+  type OnChangeUserAvatar,
+  type OnChangeUserData,
 } from '@/features/users'
 
 import type {
@@ -28,6 +22,8 @@ import type {
   PayloadAllModifiedUsers,
   EditableUserKey,
   EditableUserFormObject,
+  PersonalEditableUserKey,
+  PersonalEditableUserValue,
 } from '@/types/users'
 import { EDITABLE_USER_KEYS, INIT_NEW_USER_VALUE } from '@/utils'
 
@@ -103,7 +99,7 @@ export default function UsersProvider({
 
   // [reset] 특정 유저의 input value를 reset
   const resetTargetUserData = useCallback(
-    (id: number) => {
+    (id: User['id']) => {
       setBuiltUsersData((prev) => {
         const target = prev[id]
         if (!target || !target.isModify) return prev
@@ -139,8 +135,6 @@ export default function UsersProvider({
       return acc
     }, {} as FilteredModifiedAllData)
 
-    console.log(filteredModifiedData)
-
     return filteredModifiedData
   }, [initialBuiltAllUsersValue])
 
@@ -149,6 +143,8 @@ export default function UsersProvider({
     async ({ isShowEditor, isPatch = false }: OnAllEditor) => {
       // 수정완료(PATCH) : isPatch
       if (isPatch) {
+        if (isPatchingRef.current !== null) return
+
         const filteredModifiedData = filterModifiedData()
         const data = Object.entries(filteredModifiedData).map(([id, payload]) => {
           const numId = Number(id)
@@ -173,10 +169,10 @@ export default function UsersProvider({
       // 수정취소
       if (!isShowEditor && !isPatch) resetAllUsersData()
 
-      // 열릴 때 Item Editor reset
+      // 전체 Editor가 열릴 때 Item Editor reset
       if (isShowEditor) setDisplayItemEditor([])
 
-      // toggle
+      // Editor toggle(show/hide)
       setIsShowAllEditor(isShowEditor)
     },
     [filterModifiedData, resetAllUsersData, onAllModify],
@@ -196,6 +192,8 @@ export default function UsersProvider({
           alert('수정된 내역이 없습니다.')
           return
         }
+
+        console.log('all', payload)
 
         try {
           setIsPatching(id)
@@ -228,13 +226,18 @@ export default function UsersProvider({
     [filterModifiedData, resetTargetUserData, onModify],
   )
 
+  // isPatchingRef update
   useEffect(() => {
     isPatchingRef.current = isPatching
   }, [isPatching])
 
   // [수정하기]  builtAllUsersValue update
   const updateBuiltUserData = useCallback(
-    (id: number, name: string, value: string) => {
+    (
+      id: User['id'],
+      name: PersonalEditableUserKey,
+      value: PersonalEditableUserValue[PersonalEditableUserKey],
+    ) => {
       setBuiltUsersData((prev) => {
         const target = prev[id]
         if (!target) return prev
@@ -274,17 +277,17 @@ export default function UsersProvider({
   )
 
   // [수정하기] input onChange Event : builtAllUsersValue update
-  const onChangeUserData = useCallback(
-    (e: ChangeEvent<HTMLInputElement>, id: number) => {
+  const onChangeUserData = useCallback<OnChangeUserData>(
+    (e, id) => {
       const { name, value } = e.target
-      updateBuiltUserData(id, name, value)
+      updateBuiltUserData(id, name as PersonalEditableUserKey, value)
     },
     [updateBuiltUserData],
   )
 
   // [수정하기] 프로필 이미지 변경 이벤트 : builtAllUsersValue update
-  const onChangeUserAvatar = useCallback(
-    (id: number, avatarSrc: string | null) => {
+  const onChangeUserAvatar = useCallback<OnChangeUserAvatar>(
+    (id, avatarSrc) => {
       updateBuiltUserData(id, `avatar_${id}`, avatarSrc ?? '')
     },
     [updateBuiltUserData],
@@ -292,6 +295,7 @@ export default function UsersProvider({
 
   // [수정하기] users 업데이트 시 builtAllUsersValue도 업데이트
   useEffect(() => {
+    // item 에디터가 열려있을 땐 return
     if (displayItemEditorRef.current.length > 0) return
     setBuiltUsersData(initialBuiltAllUsersValue)
   }, [initialBuiltAllUsersValue])
@@ -327,7 +331,7 @@ export default function UsersProvider({
     }
   }, [checkedDeleteItems])
 
-  // [삭제하기] 삭제 체크박스 toggle
+  // [삭제하기] 삭제하기 버튼 클릭 시 item 옆 checkbox show/hide toggle
   const onToggleDeleteCheckbox = useCallback(
     (isChecked: boolean) => {
       setIsShowDeleteCheckbox(isChecked)
@@ -342,6 +346,7 @@ export default function UsersProvider({
     [resetAllUsersData],
   )
 
+  // displayItemEditorRef 업데이트
   useEffect(() => {
     displayItemEditorRef.current = displayItemEditor
   }, [displayItemEditor])

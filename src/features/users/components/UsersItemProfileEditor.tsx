@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useUsersActions } from '@/features/users'
 import { PLACEHOLDER_SRC } from '@/utils'
+import type { User } from '@/types/users'
 
 type UsersItemProfileEditorProps = {
-  id: number
-  profileSrc?: string
+  id: User['id']
+  profileSrc?: User['avatar']
 }
 
 export default function UsersItemProfileEditor({ id, profileSrc }: UsersItemProfileEditorProps) {

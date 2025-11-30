@@ -1,4 +1,4 @@
-import type { PayloadNewUser, BuiltAllUsersValue } from '@/types/users'
+import type { PayloadNewUser, BuiltAllUsersValue, User } from '@/types/users'
 import {
   createContext,
   useContext,
@@ -11,16 +11,19 @@ export type OnAllEditor = {
   isShowEditor: boolean
   isPatch?: boolean
 }
-export type OnItemEditor = { id: number } & OnAllEditor
-export type OnChangeCheckDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: number }
+export type OnItemEditor = { id: User['id'] } & OnAllEditor
+export type OnChangeCheckDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: User['id'] }
 
 export type OnNewUserForm = { isShowEditor: boolean; isPost?: boolean }
 
-export type IsPatching = number | 'all' | null
+export type IsPatching = User['id'] | 'all' | null
+
+export type OnChangeUserData = (e: ChangeEvent<HTMLInputElement>, id: User['id']) => void
+export type OnChangeUserAvatar = (id: User['id'], avatarSrc: User['avatar'] | null) => void
 
 export type UsersStateContextType = {
   isShowAllEditor: boolean
-  displayItemEditor: number[]
+  displayItemEditor: User['id'][]
   isShowDeleteCheckbox: boolean
   isShowNewUserForm: boolean
   isCreatingUser: boolean
@@ -36,8 +39,8 @@ export type UsersActionsContextType = {
   onClickDeleteItems: () => void
   onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => Promise<void>
   setNewUserValue: Dispatch<SetStateAction<PayloadNewUser>>
-  onChangeUserData: (e: ChangeEvent<HTMLInputElement>, id: number) => void
-  onChangeUserAvatar: (id: number, avatarSrc: string | null) => void
+  onChangeUserData: OnChangeUserData
+  onChangeUserAvatar: OnChangeUserAvatar
 }
 
 export const UsersStateContext = createContext<UsersStateContextType | null>(null)
