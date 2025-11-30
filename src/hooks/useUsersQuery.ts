@@ -62,6 +62,7 @@ export function useUsersQuery() {
             : user,
         ),
       )
+      void _
     } catch (err) {
       console.error(err)
       if (err instanceof Error) setError(err.message)
@@ -80,6 +81,7 @@ export function useUsersQuery() {
           if (!patched) return user
 
           const { updatedAt: _, ...rest } = patched
+          void _
           return { ...user, ...rest }
         })
       })

@@ -20,15 +20,16 @@ import {
 
 import type {
   FilteredModifiedAllData,
-  FilteredModifiedItemData,
   PayloadModifiedUser,
   PayloadNewUser,
   User,
   PersonalUserValue,
   BuiltAllUsersValue,
   PayloadAllModifiedUsers,
+  EditableUserKey,
+  EditableUserFormObject,
 } from '@/types/users'
-import { INIT_NEW_USER_VALUE } from '@/utils'
+import { EDITABLE_USER_KEYS, INIT_NEW_USER_VALUE } from '@/utils'
 
 type UsersProviderProps = {
   children: ReactNode
@@ -127,13 +128,18 @@ export default function UsersProvider({
       const original: Record<string, unknown> = initialBuiltAllUsersValue[user.id] ?? {}
       const changed = Object.entries(user).reduce((fieldAcc, [k, v]) => {
         if (k !== 'isModify' && original[k] !== v) {
-          fieldAcc[k.replace(/_\d+$/, '')] = v
+          const baseKey = k.replace(/_\d+$/, '')
+          if (EDITABLE_USER_KEYS.includes(baseKey as EditableUserKey)) {
+            fieldAcc[baseKey as EditableUserKey] = v as string
+          }
         }
         return fieldAcc
-      }, {} as FilteredModifiedItemData)
+      }, {} as EditableUserFormObject)
       if (Object.keys(changed).length) acc[user.id] = changed
       return acc
     }, {} as FilteredModifiedAllData)
+
+    console.log(filteredModifiedData)
 
     return filteredModifiedData
   }, [initialBuiltAllUsersValue])
