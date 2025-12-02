@@ -11,7 +11,7 @@ import type {
 export const getAllUsersApi = async () => {
   const response = await fetch('https://reqres.in/api/users', {
     headers: {
-      'x-api-key': 'reqres-free-v1',
+      'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
     },
   })
 
@@ -24,7 +24,7 @@ export const createUserApi = async (payload: PayloadNewUser) => {
   const response = await fetch('https://reqres.in/api/users', {
     method: 'POST',
     headers: {
-      'x-api-key': 'reqres-free-v1',
+      'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(payload),
@@ -39,7 +39,7 @@ export const patchUserApi = async (id: User['id'], payload: PayloadModifiedUser)
   const response = await fetch(`https://reqres.in/api/users/${id}`, {
     method: 'PATCH',
     headers: {
-      'x-api-key': 'reqres-free-v1',
+      'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(payload),
@@ -56,7 +56,7 @@ export const patchAllUsersApi = async (data: PayloadAllModifiedUsers) => {
       fetch(`https://reqres.in/api/users/${id}`, {
         method: 'PATCH',
         headers: {
-          'x-api-key': 'reqres-free-v1',
+          'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),

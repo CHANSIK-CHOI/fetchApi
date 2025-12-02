@@ -25,7 +25,7 @@ import type {
   PersonalEditableUserKey,
   PersonalEditableUserValue,
 } from '@/types/users'
-import { EDITABLE_USER_KEYS, INIT_NEW_USER_VALUE } from '@/utils'
+import { EDITABLE_USER_KEYS, INIT_NEW_USER_VALUE, REQUIRED_USER_KEYS } from '@/utils'
 
 type UsersProviderProps = {
   children: ReactNode
@@ -138,6 +138,13 @@ export default function UsersProvider({
     return filteredModifiedData
   }, [initialBuiltAllUsersValue])
 
+  const hasEmptyRequiredField = useCallback((data: EditableUserFormObject) => {
+    const hasEmpty = REQUIRED_USER_KEYS.some((key) => {
+      if (data[key] !== undefined) return data[key].trim() === ''
+    })
+    return hasEmpty
+  }, [])
+
   // [수정하기 - 전체] 전체 수정 에디터 show/hide & patch
   const onAllEditor = useCallback(
     async ({ isShowEditor, isPatch = false }: OnAllEditor) => {
@@ -153,6 +160,16 @@ export default function UsersProvider({
 
         if (data.length === 0) {
           alert('수정된 내역이 없습니다.')
+          return
+        }
+
+        const hasEmpty = Object.entries(filteredModifiedData).some(([id, payload]) => {
+          void id
+          return hasEmptyRequiredField(payload)
+        })
+
+        if (hasEmpty) {
+          alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
           return
         }
 
@@ -175,7 +192,7 @@ export default function UsersProvider({
       // Editor toggle(show/hide)
       setIsShowAllEditor(isShowEditor)
     },
-    [filterModifiedData, resetAllUsersData, onAllModify],
+    [filterModifiedData, resetAllUsersData, onAllModify, hasEmptyRequiredField],
   )
 
   // [수정하기 - 개별] item 수정 에디터 show/hide & patch
@@ -193,7 +210,11 @@ export default function UsersProvider({
           return
         }
 
-        console.log('all', payload)
+        const hasEmpty = hasEmptyRequiredField(payload)
+        if (hasEmpty) {
+          alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
+          return
+        }
 
         try {
           setIsPatching(id)
@@ -223,7 +244,7 @@ export default function UsersProvider({
         })
       }
     },
-    [filterModifiedData, resetTargetUserData, onModify],
+    [filterModifiedData, resetTargetUserData, onModify, hasEmptyRequiredField],
   )
 
   // isPatchingRef update
