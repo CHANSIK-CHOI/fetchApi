@@ -20,7 +20,6 @@ import type {
   PersonalUserValue,
   BuiltAllUsersValue,
   PayloadAllModifiedUsers,
-  EditableUserKey,
   EditableUserFormObject,
   PersonalEditableUserKey,
   PersonalEditableUserValue,
@@ -121,16 +120,14 @@ export default function UsersProvider({
     const usersArray = Object.values(builtAllUsersValueRef.current)
     const modifiedData = usersArray.filter(({ isModify }) => isModify)
     const filteredModifiedData = modifiedData.reduce((acc, user) => {
-      const original: Record<string, unknown> = initialBuiltAllUsersValue[user.id] ?? {}
-      const changed = Object.entries(user).reduce((fieldAcc, [k, v]) => {
-        if (k !== 'isModify' && original[k] !== v) {
-          const baseKey = k.replace(/_\d+$/, '')
-          if (EDITABLE_USER_KEYS.includes(baseKey as EditableUserKey)) {
-            fieldAcc[baseKey as EditableUserKey] = v as string
-          }
+      const original = initialBuiltAllUsersValue[user.id]
+      const changed = EDITABLE_USER_KEYS.reduce<EditableUserFormObject>((fieldAcc, key) => {
+        const personalKey = `${key}_${user.id}` as PersonalEditableUserKey
+        if (!original || user[personalKey] !== original[personalKey]) {
+          fieldAcc[key] = user[personalKey]
         }
         return fieldAcc
-      }, {} as EditableUserFormObject)
+      }, {})
       if (Object.keys(changed).length) acc[user.id] = changed
       return acc
     }, {} as FilteredModifiedAllData)
@@ -138,12 +135,12 @@ export default function UsersProvider({
     return filteredModifiedData
   }, [initialBuiltAllUsersValue])
 
-  const hasEmptyRequiredField = useCallback((data: EditableUserFormObject) => {
+  const hasEmptyRequiredField = (data: EditableUserFormObject) => {
     const hasEmpty = REQUIRED_USER_KEYS.some((key) => {
-      if (data[key] !== undefined) return data[key].trim() === ''
+      return data[key] !== undefined && data[key].trim() === ''
     })
     return hasEmpty
-  }, [])
+  }
 
   // [수정하기 - 전체] 전체 수정 에디터 show/hide & patch
   const onAllEditor = useCallback(
@@ -163,10 +160,7 @@ export default function UsersProvider({
           return
         }
 
-        const hasEmpty = Object.entries(filteredModifiedData).some(([id, payload]) => {
-          void id
-          return hasEmptyRequiredField(payload)
-        })
+        const hasEmpty = Object.values(filteredModifiedData).some(hasEmptyRequiredField)
 
         if (hasEmpty) {
           alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
@@ -192,7 +186,7 @@ export default function UsersProvider({
       // Editor toggle(show/hide)
       setIsShowAllEditor(isShowEditor)
     },
-    [filterModifiedData, resetAllUsersData, onAllModify, hasEmptyRequiredField],
+    [filterModifiedData, resetAllUsersData, onAllModify],
   )
 
   // [수정하기 - 개별] item 수정 에디터 show/hide & patch
@@ -244,7 +238,7 @@ export default function UsersProvider({
         })
       }
     },
-    [filterModifiedData, resetTargetUserData, onModify, hasEmptyRequiredField],
+    [filterModifiedData, resetTargetUserData, onModify],
   )
 
   // isPatchingRef update
