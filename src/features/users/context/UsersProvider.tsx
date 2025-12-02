@@ -20,11 +20,15 @@ import type {
   PersonalUserValue,
   BuiltAllUsersValue,
   PayloadAllModifiedUsers,
+  EditableUserKey,
   EditableUserFormObject,
   PersonalEditableUserKey,
   PersonalEditableUserValue,
 } from '@/types/users'
 import { EDITABLE_USER_KEYS, INIT_NEW_USER_VALUE, REQUIRED_USER_KEYS } from '@/utils'
+
+const toPersonalKey = <K extends EditableUserKey>(key: K, id: User['id']) =>
+  `${key}_${id}` as `${K}_${number}`
 
 type UsersProviderProps = {
   children: ReactNode
@@ -60,21 +64,18 @@ export default function UsersProvider({
   const buildUsersData = useCallback((data: User[]) => {
     return data.reduce<BuiltAllUsersValue>(
       (acc, cur) => {
-        /*
-        reduce 매개변수 : acc, cur, index, array
-        - acc: 누적값 (accumulator)
-        - cur: 현재 요소
-        - index: 현재 위치
-        - array: 원본 배열 전체
-      */
+        const personalValue = {
+          [toPersonalKey('first_name', cur.id)]: cur.first_name,
+          [toPersonalKey('last_name', cur.id)]: cur.last_name,
+          [toPersonalKey('email', cur.id)]: cur.email,
+          [toPersonalKey('avatar', cur.id)]: cur.avatar ?? '',
+        } satisfies PersonalEditableUserValue
+
         acc[cur.id] = {
-          [`first_name_${cur.id}`]: cur.first_name,
-          [`last_name_${cur.id}`]: cur.last_name,
-          [`email_${cur.id}`]: cur.email,
-          [`avatar_${cur.id}`]: cur.avatar,
+          ...personalValue,
           id: cur.id,
           isModify: false,
-        } as PersonalUserValue
+        }
         return acc
       },
       {}, // 초기값: acc의 시작 값
@@ -373,8 +374,16 @@ export default function UsersProvider({
       if (isPost) {
         if (isCreatingUserRef.current) return
 
-        const { email, first_name, last_name } = newUserValueRef.current
-        if (!email || !first_name || !last_name) {
+        // hasEmptyRequiredField로 교체함
+        // const { email, first_name, last_name } = newUserValueRef.current
+        // if (!email || !first_name || !last_name) {
+        //   alert('이메일, 이름, 성을 모두 입력해주세요.')
+        //   return
+        // }
+
+        const hasEmpty = hasEmptyRequiredField(newUserValueRef.current)
+
+        if (hasEmpty) {
           alert('이메일, 이름, 성을 모두 입력해주세요.')
           return
         }

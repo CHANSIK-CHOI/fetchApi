@@ -22,7 +22,7 @@ export default function UsersNewForm() {
   }, [file])
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, name: newDataName } = e.target
+    const { name: newDataName, value } = e.target
 
     const name = newDataName.replace(/_userForm$/, '')
 

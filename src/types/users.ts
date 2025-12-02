@@ -1,5 +1,5 @@
 export type User = {
-  avatar?: string
+  avatar: string
   email: string
   first_name: string
   id: number
@@ -7,14 +7,13 @@ export type User = {
 }
 
 type UserKeys = keyof User
+export type RequiredEditableUserKey = Exclude<EditableUserKey, 'avatar'>
 
-export type PayloadNewUser = Omit<User, 'id'>
+export type PayloadNewUser = Pick<User, RequiredEditableUserKey> & { avatar?: User['avatar'] }
 export type ApiResultNewUser = User & { createdAt: string }
 
 export type EditableUserKey = Exclude<UserKeys, 'id'>
 export type EditableUserFormObject = Partial<Omit<User, 'id'>>
-
-export type RequiredEditableUserKey = Exclude<EditableUserKey, 'avatar'>
 
 export type PersonalEditableUserValue = { [K in EditableUserKey as `${K}_${number}`]: User[K] }
 export type PersonalEditableUserKey = keyof PersonalEditableUserValue
