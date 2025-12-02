@@ -4,8 +4,9 @@ import {
   UsersItemProfileView,
   UsersItemProfileEditor,
 } from '@/features/users'
+import type { ChangeEvent } from 'react'
 
-import type { User } from '@/types/users'
+import type { PersonalEditableUserKey, User } from '@/types/users'
 
 type UsersItem = {
   profileSrc?: User['avatar']
@@ -36,6 +37,9 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
   const avatarSrc = (userInputValues ? userInputValues[`avatar_${id}`] : '') as string
 
   const isShowEditorBtns = !isShowAllEditor && !isShowDeleteCheckbox && !isShowNewUserForm
+  const handleChangeUserData = (
+    e: ChangeEvent<HTMLInputElement & { name: PersonalEditableUserKey }>,
+  ) => onChangeUserData(e, id)
 
   return (
     <li className="userItem">
@@ -74,21 +78,21 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
                   name={`first_name_${id}`}
                   placeholder="first name"
                   value={firstNameValue}
-                  onChange={(e) => onChangeUserData(e, id)}
+                  onChange={handleChangeUserData}
                 />
                 <input
                   type="text"
                   name={`last_name_${id}`}
                   placeholder="last name"
                   value={lastNameValue}
-                  onChange={(e) => onChangeUserData(e, id)}
+                  onChange={handleChangeUserData}
                 />
                 <input
                   type="text"
                   name={`email_${id}`}
                   placeholder="email"
                   value={emailValue}
-                  onChange={(e) => onChangeUserData(e, id)}
+                  onChange={handleChangeUserData}
                 />
               </div>
             )}

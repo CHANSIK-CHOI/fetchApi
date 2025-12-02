@@ -1,4 +1,9 @@
-import type { PayloadNewUser, BuiltAllUsersValue, User } from '@/types/users'
+import type {
+  PayloadNewUser,
+  BuiltAllUsersValue,
+  User,
+  PersonalEditableUserKey,
+} from '@/types/users'
 import {
   createContext,
   useContext,
@@ -18,7 +23,10 @@ export type OnNewUserForm = { isShowEditor: boolean; isPost?: boolean }
 
 export type IsPatching = User['id'] | 'all' | null
 
-export type OnChangeUserData = (e: ChangeEvent<HTMLInputElement>, id: User['id']) => void
+export type OnChangeUserData = (
+  e: ChangeEvent<HTMLInputElement & { name: PersonalEditableUserKey }>,
+  id: User['id'],
+) => void
 export type OnChangeUserAvatar = (id: User['id'], avatarSrc: User['avatar'] | null) => void
 
 export type UsersStateContextType = {
@@ -29,6 +37,7 @@ export type UsersStateContextType = {
   isCreatingUser: boolean
   builtAllUsersValue: BuiltAllUsersValue
   isPatching: IsPatching
+  newUserValue: PayloadNewUser
 }
 
 export type UsersActionsContextType = {

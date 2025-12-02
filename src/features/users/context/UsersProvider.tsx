@@ -296,7 +296,7 @@ export default function UsersProvider({
   const onChangeUserData = useCallback<OnChangeUserData>(
     (e, id) => {
       const { name, value } = e.target
-      updateBuiltUserData(id, name as PersonalEditableUserKey, value)
+      updateBuiltUserData(id, name as PersonalEditableUserKey, value.trim())
     },
     [updateBuiltUserData],
   )
@@ -431,6 +431,7 @@ export default function UsersProvider({
       isCreatingUser,
       builtAllUsersValue,
       isPatching,
+      newUserValue,
     }),
     [
       isShowAllEditor,
@@ -440,6 +441,7 @@ export default function UsersProvider({
       isCreatingUser,
       builtAllUsersValue,
       isPatching,
+      newUserValue,
     ],
   )
 

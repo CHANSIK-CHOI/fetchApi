@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useUsersActions } from '@/features/users'
+import { useUsersActions, useUsersState } from '@/features/users'
+import type { RequiredEditableUserKey } from '@/types/users'
 
 export default function UsersNewForm() {
   const [file, setFile] = useState<File | null>(null)
   const { setNewUserValue } = useUsersActions()
+  const { newUserValue } = useUsersState()
 
   const handleChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null
@@ -23,10 +25,9 @@ export default function UsersNewForm() {
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name: newDataName, value } = e.target
-
-    const name = newDataName.replace(/_userForm$/, '')
-
-    setNewUserValue((prev) => ({ ...prev, [name]: value }))
+    const key = newDataName.replace(/_userForm$/, '') as RequiredEditableUserKey
+    const trimmed = value.trim()
+    setNewUserValue((prev) => ({ ...prev, [key]: trimmed }))
   }
 
   useEffect(() => {
@@ -78,18 +79,21 @@ export default function UsersNewForm() {
             type="text"
             name={`first_name_userForm`}
             placeholder="first name"
+            value={newUserValue.first_name ?? ''}
             onChange={handleChangeInput}
           />
           <input
             type="text"
             name={`last_name_userForm`}
             placeholder="last name"
+            value={newUserValue.last_name ?? ''}
             onChange={handleChangeInput}
           />
           <input
             type="text"
             name={`email_userForm`}
             placeholder="email"
+            value={newUserValue.email ?? ''}
             onChange={handleChangeInput}
           />
         </div>
