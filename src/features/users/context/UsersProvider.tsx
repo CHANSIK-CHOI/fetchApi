@@ -69,7 +69,7 @@ export default function UsersProvider({
           [toPersonalKey('last_name', cur.id)]: cur.last_name,
           [toPersonalKey('email', cur.id)]: cur.email,
           [toPersonalKey('avatar', cur.id)]: cur.avatar ?? '',
-        } satisfies PersonalEditableUserValue
+        }
 
         acc[cur.id] = {
           ...personalValue,
