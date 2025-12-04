@@ -34,7 +34,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
   const firstNameValue = userInputValues ? userInputValues[`first_name_${id}`] : ''
   const lastNameValue = userInputValues ? userInputValues[`last_name_${id}`] : ''
   const emailValue = userInputValues ? userInputValues[`email_${id}`] : ''
-  const avatarSrc = (userInputValues ? userInputValues[`avatar_${id}`] : '') as string
+  const avatarSrc = userInputValues ? userInputValues[`avatar_${id}`] : ''
 
   const isShowEditorBtns = !isShowAllEditor && !isShowDeleteCheckbox && !isShowNewUserForm
   const handleChangeUserData = (

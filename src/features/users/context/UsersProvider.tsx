@@ -83,13 +83,13 @@ export default function UsersProvider({
   }, [])
 
   const initialBuiltAllUsersValue = useMemo(() => buildUsersData(users), [buildUsersData, users]) // users 업데이트 시 전체 유저의 데이터를 BuiltAllUsersValue 타입으로 캐싱
-  const [builtAllUsersValue, setBuiltUsersData] =
+  const [builtAllUsersValue, setBuiltAllUsersValue] =
     useState<BuiltAllUsersValue>(initialBuiltAllUsersValue) // 각 유저의 데이터를 id값과 조합하여 가공한 데이터 : UsersItem 컴포넌트 내부 input 태그의 value값으로 연결
   const builtAllUsersValueRef = useRef<BuiltAllUsersValue>(initialBuiltAllUsersValue) // builtAllUsersValue ref
 
   // [reset] 전체 유저의 input value를 reset
   const resetAllUsersData = useCallback(() => {
-    setBuiltUsersData((prev) => {
+    setBuiltAllUsersValue((prev) => {
       const hasModified = Object.values(prev).some(({ isModify }) => isModify)
       if (!hasModified) return prev
 
@@ -100,7 +100,7 @@ export default function UsersProvider({
   // [reset] 특정 유저의 input value를 reset
   const resetTargetUserData = useCallback(
     (id: User['id']) => {
-      setBuiltUsersData((prev) => {
+      setBuiltAllUsersValue((prev) => {
         const target = prev[id]
         if (!target || !target.isModify) return prev
 
@@ -123,7 +123,7 @@ export default function UsersProvider({
     const filteredModifiedData = modifiedData.reduce((acc, user) => {
       const original = initialBuiltAllUsersValue[user.id]
       const changed = EDITABLE_USER_KEYS.reduce<EditableUserFormObject>((fieldAcc, key) => {
-        const personalKey = `${key}_${user.id}` as PersonalEditableUserKey
+        const personalKey: PersonalEditableUserKey = `${key}_${user.id}`
         if (!original || user[personalKey] !== original[personalKey]) {
           fieldAcc[key] = user[personalKey]
         }
@@ -254,14 +254,14 @@ export default function UsersProvider({
       name: PersonalEditableUserKey,
       value: PersonalEditableUserValue[PersonalEditableUserKey],
     ) => {
-      setBuiltUsersData((prev) => {
+      setBuiltAllUsersValue((prev) => {
         const target = prev[id]
         if (!target) return prev
 
-        const nextEntry = {
+        const nextEntry: PersonalUserValue = {
           ...target,
           [name]: value,
-        } as PersonalUserValue
+        }
 
         const originalUser = users.find((user) => user.id === id)
         if (originalUser) {
@@ -276,7 +276,7 @@ export default function UsersProvider({
             [id]: {
               ...nextEntry,
               isModify,
-            } as PersonalUserValue,
+            },
           }
         }
 
@@ -285,7 +285,7 @@ export default function UsersProvider({
           [id]: {
             ...nextEntry,
             isModify: true,
-          } as PersonalUserValue,
+          },
         }
       })
     },
@@ -296,7 +296,7 @@ export default function UsersProvider({
   const onChangeUserData = useCallback<OnChangeUserData>(
     (e, id) => {
       const { name, value } = e.target
-      updateBuiltUserData(id, name as PersonalEditableUserKey, value.trim())
+      updateBuiltUserData(id, name, value.trim())
     },
     [updateBuiltUserData],
   )
@@ -313,7 +313,7 @@ export default function UsersProvider({
   useEffect(() => {
     // item 에디터가 열려있을 땐 return
     if (displayItemEditorRef.current.length > 0) return
-    setBuiltUsersData(initialBuiltAllUsersValue)
+    setBuiltAllUsersValue(initialBuiltAllUsersValue)
   }, [initialBuiltAllUsersValue])
 
   // [수정하기] builtAllUsersValue 업데이트 시 builtAllUsersValueRef도 업데이트
