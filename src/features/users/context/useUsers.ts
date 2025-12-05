@@ -45,11 +45,12 @@ export type UsersActionsContextType = {
   onItemEditor: ({ id, isShowEditor, isPatch }: OnItemEditor) => void
   onToggleDeleteCheckbox: (isChecked: boolean) => void
   onChangeCheckDeleteItems: ({ e, id }: OnChangeCheckDeleteItems) => void
-  onClickDeleteItems: () => void
+  onClickDeleteSelectedItems: () => void
   onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => Promise<void>
   setNewUserValue: Dispatch<SetStateAction<PayloadNewUser>>
   onChangeUserData: OnChangeUserData
   onChangeUserAvatar: OnChangeUserAvatar
+  onClickDeleteItem: (id: User['id']) => Promise<void>
 }
 
 export const UsersStateContext = createContext<UsersStateContextType | null>(null)

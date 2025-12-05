@@ -34,8 +34,9 @@ type UsersProviderProps = {
   children: ReactNode
   onCreate: (payload: PayloadNewUser) => Promise<void>
   users: User[]
-  onModify: (id: number, payload: PayloadModifiedUser) => Promise<void>
+  onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
   onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
+  onDeleteUser: (id: User['id']) => Promise<void>
 }
 
 export default function UsersProvider({
@@ -44,9 +45,11 @@ export default function UsersProvider({
   users,
   onModify,
   onAllModify,
+  onDeleteUser,
 }: UsersProviderProps) {
   const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show/hide 여부
-  const [checkedDeleteItems, setCheckedDeleteItems] = useState<number[]>([]) // 체크박스가 선택 된 유저의 id 배열
+  const [checkedDeleteItems, setCheckedDeleteItems] = useState<User['id'][]>([]) // 체크박스가 선택 된 유저의 id 배열
+  const checkedDeleteItemsRef = useRef<User['id'][]>([])
 
   const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // UsersNewForm 마운트 여부
   const [newUserValue, setNewUserValue] = useState<PayloadNewUser>(INIT_NEW_USER_VALUE) // UsersNewForm 컴포넌트 내부 input들의 value
@@ -55,8 +58,8 @@ export default function UsersProvider({
   const isCreatingUserRef = useRef<boolean>(isCreatingUser) // isCreatingUser ref
 
   const [isShowAllEditor, setIsShowAllEditor] = useState<boolean>(false) // 전체 유저의 수정 에디터 show/hide 여부
-  const [displayItemEditor, setDisplayItemEditor] = useState<number[]>([]) // 개별 수정 시 에디터가 보여지고 있는 유저의 id 배열
-  const displayItemEditorRef = useRef<number[]>([]) // displayItemEditor ref
+  const [displayItemEditor, setDisplayItemEditor] = useState<User['id'][]>([]) // 개별 수정 시 에디터가 보여지고 있는 유저의 id 배열
+  const displayItemEditorRef = useRef<User['id'][]>([]) // displayItemEditor ref
   const [isPatching, setIsPatching] = useState<IsPatching>(null) // 유저 데이터의 수정 여부
   const isPatchingRef = useRef<IsPatching>(null) // isPatching ref
 
@@ -338,14 +341,34 @@ export default function UsersProvider({
   }, [])
 
   // [삭제하기] 선택된 item 데이터 삭제
-  const onClickDeleteItems = useCallback(() => {
-    if (checkedDeleteItems.length === 0) {
+  const onClickDeleteSelectedItems = useCallback(() => {
+    if (checkedDeleteItemsRef.current.length === 0) {
       // 선택 된 데이터가 없을 때
       alert('선택한 데이터가 없습니다.')
     } else {
       // 삭제하기(DELETE)
     }
+  }, [])
+
+  useEffect(() => {
+    checkedDeleteItemsRef.current = checkedDeleteItems
   }, [checkedDeleteItems])
+
+  const onClickDeleteItem = useCallback(
+    async (id: User['id']) => {
+      const target = initialBuiltAllUsersValue[id]
+      const confirmMsg = `${target[`first_name_${id}`]} ${target[`last_name_${id}`]}님의 데이터를 삭제하시겠습니끼?`
+
+      if (!confirm(confirmMsg)) return
+
+      try {
+        await onDeleteUser(id)
+      } catch (err) {
+        console.error(err)
+      }
+    },
+    [initialBuiltAllUsersValue, onDeleteUser],
+  )
 
   // [삭제하기] 삭제하기 버튼 클릭 시 item 옆 checkbox show/hide toggle
   const onToggleDeleteCheckbox = useCallback(
@@ -451,22 +474,24 @@ export default function UsersProvider({
       onItemEditor,
       onToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
-      onClickDeleteItems,
+      onClickDeleteSelectedItems,
       onNewUserForm,
       setNewUserValue,
       onChangeUserData,
       onChangeUserAvatar,
+      onClickDeleteItem,
     }),
     [
       onAllEditor,
       onItemEditor,
       onToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
-      onClickDeleteItems,
+      onClickDeleteSelectedItems,
       onNewUserForm,
       setNewUserValue,
       onChangeUserData,
       onChangeUserAvatar,
+      onClickDeleteItem,
     ],
   )
 

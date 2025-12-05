@@ -8,7 +8,7 @@ type UsersProps = {
 export default function Users({ children, newUserForm }: UsersProps) {
   const { isShowAllEditor, isShowDeleteCheckbox, isShowNewUserForm, isCreatingUser, isPatching } =
     useUsersState()
-  const { onAllEditor, onToggleDeleteCheckbox, onClickDeleteItems, onNewUserForm } =
+  const { onAllEditor, onToggleDeleteCheckbox, onClickDeleteSelectedItems, onNewUserForm } =
     useUsersActions()
 
   const resultCount = React.Children.count(children).toString().padStart(2, '0')
@@ -68,7 +68,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
                   >
                     선택취소
                   </button>
-                  <button type="button" onClick={onClickDeleteItems}>
+                  <button type="button" onClick={onClickDeleteSelectedItems}>
                     삭제하기
                   </button>
                 </>

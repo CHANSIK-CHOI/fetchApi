@@ -1,5 +1,11 @@
 import { useCallback, useState } from 'react'
-import { createUserApi, getAllUsersApi, patchAllUsersApi, patchUserApi } from '@/api/users.api'
+import {
+  createUserApi,
+  deleteUserApi,
+  getAllUsersApi,
+  patchAllUsersApi,
+  patchUserApi,
+} from '@/api/users.api'
 import {
   type PayloadModifiedUser,
   type PayloadAllModifiedUsers,
@@ -91,5 +97,24 @@ export function useUsersQuery() {
     }
   }, [])
 
-  return { users, getAllUsers, isLoading, error, createUser, modifyUser, modifyAllUsers }
+  const deleteUser = useCallback(async (id: User['id']) => {
+    try {
+      const result = await deleteUserApi(id)
+      console.log('hook', result)
+    } catch (err) {
+      console.error(err)
+      if (err instanceof Error) setError(err.message)
+    }
+  }, [])
+
+  return {
+    users,
+    getAllUsers,
+    isLoading,
+    error,
+    createUser,
+    modifyUser,
+    modifyAllUsers,
+    deleteUser,
+  }
 }

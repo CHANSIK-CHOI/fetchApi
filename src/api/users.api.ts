@@ -73,3 +73,16 @@ export const patchAllUsersApi = async (data: PayloadAllModifiedUsers) => {
   )
   return results
 }
+
+export const deleteUserApi = async (id: User['id']) => {
+  const response = await fetch(`https://reqres.in/api/users/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
+    },
+  })
+
+  if (!response.ok) throw Error('유저 데이터를 삭제할 수 없습니다.')
+
+  console.log('api', response)
+}
