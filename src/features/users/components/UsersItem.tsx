@@ -24,6 +24,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     isShowNewUserForm,
     builtAllUsersValue,
     isPatching,
+    isDeleting,
   } = useUsersState()
   const { onItemEditor, onChangeCheckDeleteItems, onChangeUserData, onClickDeleteItem } =
     useUsersActions()
@@ -130,8 +131,13 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
             )}
 
             {!isItemEditing && (
-              <button type="button" className="line" onClick={() => onClickDeleteItem(id)}>
-                삭제
+              <button
+                type="button"
+                className="line"
+                onClick={() => onClickDeleteItem(id)}
+                disabled={isDeleting == id}
+              >
+                {isDeleting == id ? '삭제중...' : '삭제하기'}
               </button>
             )}
           </div>

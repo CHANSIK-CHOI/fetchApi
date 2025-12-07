@@ -99,8 +99,8 @@ export function useUsersQuery() {
 
   const deleteUser = useCallback(async (id: User['id']) => {
     try {
-      const result = await deleteUserApi(id)
-      console.log('hook', result)
+      await deleteUserApi(id)
+      setUsers((prev) => prev.filter((user) => user.id !== id))
     } catch (err) {
       console.error(err)
       if (err instanceof Error) setError(err.message)

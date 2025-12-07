@@ -22,6 +22,7 @@ export type OnChangeCheckDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: U
 export type OnNewUserForm = { isShowEditor: boolean; isPost?: boolean }
 
 export type IsPatching = User['id'] | 'all' | null
+export type IsDeleting = User['id'] | null
 
 export type OnChangeUserData = (
   e: ChangeEvent<HTMLInputElement & { name: PersonalEditableUserKey }>,
@@ -38,6 +39,7 @@ export type UsersStateContextType = {
   builtAllUsersValue: BuiltAllUsersValue
   isPatching: IsPatching
   newUserValue: PayloadNewUser
+  isDeleting: IsDeleting
 }
 
 export type UsersActionsContextType = {

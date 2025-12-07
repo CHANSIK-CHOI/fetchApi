@@ -10,6 +10,7 @@ import {
   type IsPatching,
   type OnChangeUserAvatar,
   type OnChangeUserData,
+  type IsDeleting,
 } from '@/features/users'
 
 import type {
@@ -62,6 +63,9 @@ export default function UsersProvider({
   const displayItemEditorRef = useRef<User['id'][]>([]) // displayItemEditor ref
   const [isPatching, setIsPatching] = useState<IsPatching>(null) // 유저 데이터의 수정 여부
   const isPatchingRef = useRef<IsPatching>(null) // isPatching ref
+
+  const [isDeleting, setIsDeleting] = useState<IsDeleting>(null) // 유저 데이터의 삭제 여부
+  const isDeletingRef = useRef<IsDeleting>(null)
 
   // 각 유저의 데이터를 id값과 조합하여 가공한 데이터 : UsersItem 컴포넌트 내부 input 태그의 value값으로 연결
   const buildUsersData = useCallback((data: User[]) => {
@@ -341,7 +345,7 @@ export default function UsersProvider({
   }, [])
 
   // [삭제하기] 선택된 item 데이터 삭제
-  const onClickDeleteSelectedItems = useCallback(() => {
+  const onClickDeleteSelectedItems = useCallback(async () => {
     if (checkedDeleteItemsRef.current.length === 0) {
       // 선택 된 데이터가 없을 때
       alert('선택한 데이터가 없습니다.')
@@ -356,15 +360,21 @@ export default function UsersProvider({
 
   const onClickDeleteItem = useCallback(
     async (id: User['id']) => {
+      if (isDeletingRef.current !== null) return
+
       const target = initialBuiltAllUsersValue[id]
       const confirmMsg = `${target[`first_name_${id}`]} ${target[`last_name_${id}`]}님의 데이터를 삭제하시겠습니끼?`
 
       if (!confirm(confirmMsg)) return
 
       try {
+        setIsDeleting(id)
         await onDeleteUser(id)
       } catch (err) {
         console.error(err)
+      } finally {
+        setIsDeleting(null)
+        alert('삭제를 완료하였습니다.')
       }
     },
     [initialBuiltAllUsersValue, onDeleteUser],
@@ -384,6 +394,10 @@ export default function UsersProvider({
     },
     [resetAllUsersData],
   )
+
+  useEffect(() => {
+    isDeletingRef.current = isDeleting
+  }, [isDeleting])
 
   // displayItemEditorRef 업데이트
   useEffect(() => {
@@ -455,6 +469,7 @@ export default function UsersProvider({
       builtAllUsersValue,
       isPatching,
       newUserValue,
+      isDeleting,
     }),
     [
       isShowAllEditor,
@@ -465,6 +480,7 @@ export default function UsersProvider({
       builtAllUsersValue,
       isPatching,
       newUserValue,
+      isDeleting,
     ],
   )
 
