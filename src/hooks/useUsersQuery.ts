@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import {
   createUserApi,
+  deleteSelectedUsersApi,
   deleteUserApi,
   getAllUsersApi,
   patchAllUsersApi,
@@ -99,8 +100,18 @@ export function useUsersQuery() {
 
   const deleteUser = useCallback(async (id: User['id']) => {
     try {
-      await deleteUserApi(id)
-      setUsers((prev) => prev.filter((user) => user.id !== id))
+      const isSuccess = await deleteUserApi(id)
+      if (isSuccess) setUsers((prev) => prev.filter((user) => user.id !== id))
+    } catch (err) {
+      console.error(err)
+      if (err instanceof Error) setError(err.message)
+    }
+  }, [])
+
+  const deleteSelectedUsers = useCallback(async (ids: User['id'][]) => {
+    try {
+      const isAllSuccess = await deleteSelectedUsersApi(ids)
+      if (isAllSuccess) setUsers((prev) => prev.filter((user) => !ids.includes(user.id)))
     } catch (err) {
       console.error(err)
       if (err instanceof Error) setError(err.message)
@@ -116,5 +127,6 @@ export function useUsersQuery() {
     modifyUser,
     modifyAllUsers,
     deleteUser,
+    deleteSelectedUsers,
   }
 }

@@ -96,6 +96,11 @@
     display: block;
     margin-top: 1rem;
   }
+  &__checkLabel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 
 .userForm {

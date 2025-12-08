@@ -12,6 +12,7 @@ export default function UsersContainer() {
     modifyUser,
     modifyAllUsers,
     deleteUser,
+    deleteSelectedUsers,
   } = useUsersQuery()
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function UsersContainer() {
       onModify={modifyUser}
       onAllModify={modifyAllUsers}
       onDeleteUser={deleteUser}
+      onDeleteSelectedUsers={deleteSelectedUsers}
     >
       <Users newUserForm={<Users.NewForm />}>
         {isLoading && <img src="src/assets/loading.gif" className="loading" />}

@@ -38,6 +38,7 @@ type UsersProviderProps = {
   onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
   onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
   onDeleteUser: (id: User['id']) => Promise<void>
+  onDeleteSelectedUsers: (ids: User['id'][]) => Promise<void>
 }
 
 export default function UsersProvider({
@@ -47,6 +48,7 @@ export default function UsersProvider({
   onModify,
   onAllModify,
   onDeleteUser,
+  onDeleteSelectedUsers,
 }: UsersProviderProps) {
   const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show/hide 여부
   const [checkedDeleteItems, setCheckedDeleteItems] = useState<User['id'][]>([]) // 체크박스가 선택 된 유저의 id 배열
@@ -350,9 +352,17 @@ export default function UsersProvider({
       // 선택 된 데이터가 없을 때
       alert('선택한 데이터가 없습니다.')
     } else {
-      // 삭제하기(DELETE)
+      try {
+        console.log(initialBuiltAllUsersValue)
+        await onDeleteSelectedUsers(checkedDeleteItemsRef.current)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setCheckedDeleteItems([])
+        alert('삭제를 완료하였습니다.')
+      }
     }
-  }, [])
+  }, [onDeleteSelectedUsers, initialBuiltAllUsersValue])
 
   useEffect(() => {
     checkedDeleteItemsRef.current = checkedDeleteItems

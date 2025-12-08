@@ -43,6 +43,15 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     e: ChangeEvent<HTMLInputElement & { name: PersonalEditableUserKey }>,
   ) => onChangeUserData(e, id)
 
+  const userNameEl = (
+    <>
+      <span className="userItem__name">
+        {firstName} {lastName}
+      </span>
+      <span className="userItem__email">{email}</span>
+    </>
+  )
+
   return (
     <li className="userItem">
       <div className="userItem__box">
@@ -67,12 +76,13 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
 
           <div className="userItem__texts">
             {!isEditing ? (
-              <>
-                <span className="userItem__name">
-                  {firstName} {lastName}
-                </span>
-                <span className="userItem__email">{email}</span>
-              </>
+              isShowDeleteCheckbox ? (
+                <label htmlFor={`checkbox_${id}`} className="userItem__checkLabel">
+                  {userNameEl}
+                </label>
+              ) : (
+                userNameEl
+              )
             ) : (
               <div className="userItem__editer">
                 <input
