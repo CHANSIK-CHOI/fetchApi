@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { UsersProvider, Users } from '@/features/users'
 import { useUsersQuery } from '@/hooks/useUsersQuery'
 
@@ -19,6 +19,8 @@ export default function UsersContainer() {
     void getAllUsers()
   }, [getAllUsers])
 
+  const resultCount = users.length.toString().padStart(2, '0')
+
   return (
     <UsersProvider
       users={users}
@@ -28,7 +30,7 @@ export default function UsersContainer() {
       onDeleteUser={deleteUser}
       onDeleteSelectedUsers={deleteSelectedUsers}
     >
-      <Users newUserForm={<Users.NewForm />}>
+      <Users newUserForm={<Users.NewForm />} count={resultCount}>
         {isLoading && <img src="src/assets/loading.gif" className="loading" />}
         {error.length > 0 && (
           <>

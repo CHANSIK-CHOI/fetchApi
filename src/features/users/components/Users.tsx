@@ -4,14 +4,14 @@ import { UsersItem, UsersNewForm, useUsersActions, useUsersState } from '@/featu
 type UsersProps = {
   children: React.ReactNode
   newUserForm: React.ReactNode
+  count: string
 }
-export default function Users({ children, newUserForm }: UsersProps) {
+export default function Users({ children, newUserForm, count }: UsersProps) {
   const { isShowAllEditor, isShowDeleteCheckbox, isShowNewUserForm, isCreatingUser, isPatching } =
     useUsersState()
   const { onAllEditor, onToggleDeleteCheckbox, onClickDeleteSelectedItems, onNewUserForm } =
     useUsersActions()
 
-  const resultCount = React.Children.count(children).toString().padStart(2, '0')
   const isShowNewUserFormEl = !isShowAllEditor && !isShowDeleteCheckbox
   const isShowDeleteCheckboxEl = !isShowNewUserForm && !isShowAllEditor
   const isShowAllEditorEl = !isShowNewUserForm && !isShowDeleteCheckbox
@@ -19,7 +19,7 @@ export default function Users({ children, newUserForm }: UsersProps) {
   return (
     <div className="users">
       <div className="users__head">
-        <span className="users__result">검색 결과 : {resultCount}건</span>
+        <span className="users__result">검색 결과 : {count}건</span>
 
         <div className="users__actions">
           {isShowNewUserFormEl && (

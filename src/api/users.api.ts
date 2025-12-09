@@ -84,7 +84,6 @@ export const deleteUserApi = async (id: User['id']) => {
 
   if (!response.ok) throw Error('유저 데이터를 삭제할 수 없습니다.')
   const isSuccess = response.status === 204 ? true : false
-  // reqres DELETE 응답은 204로 body가 없는 경우가 있어서 명시적으로 성공 여부만 반환
   return isSuccess
 }
 

@@ -353,7 +353,7 @@ export default function UsersProvider({
       alert('선택한 데이터가 없습니다.')
     } else {
       try {
-        console.log(initialBuiltAllUsersValue)
+        console.log(initialBuiltAllUsersValue, checkedDeleteItemsRef.current)
         await onDeleteSelectedUsers(checkedDeleteItemsRef.current)
       } catch (err) {
         console.error(err)
