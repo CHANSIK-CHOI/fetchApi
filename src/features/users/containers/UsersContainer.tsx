@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react'
 import { UsersProvider, Users } from '@/features/users'
 import { useUsersQuery } from '@/hooks/useUsersQuery'
+import loadingGif from '@/assets/loading.gif'
+import errorImg from '@/assets/error.jpeg'
 
 export default function UsersContainer() {
   const {
@@ -31,11 +33,11 @@ export default function UsersContainer() {
       onDeleteSelectedUsers={deleteSelectedUsers}
     >
       <Users newUserForm={<Users.NewForm />} count={resultCount}>
-        {isLoading && <img src="src/assets/loading.gif" className="loading" />}
+        {isLoading && <img src={loadingGif} className="loading" alt="loading" />}
         {error.length > 0 && (
           <>
             <div className="error">
-              <img src="src/assets/error.jpeg" alt="" className="error__img" />
+              <img src={errorImg} alt="error" className="error__img" />
               <span className="error__text">{error}</span>
             </div>
           </>

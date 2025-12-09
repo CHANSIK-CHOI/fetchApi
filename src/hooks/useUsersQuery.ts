@@ -19,6 +19,11 @@ export function useUsersQuery() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
 
+  const setErrorMessage = useCallback((err: unknown, fallback: string) => {
+    console.error(err)
+    setError(err instanceof Error ? err.message : fallback)
+  }, [])
+
   const getAllUsers = useCallback(async () => {
     setIsLoading(true)
     setError('')
@@ -26,14 +31,14 @@ export function useUsersQuery() {
       const { data } = await getAllUsersApi()
       setUsers(data)
     } catch (err) {
-      console.error(err)
-      if (err instanceof Error) setError(err.message)
+      setErrorMessage(err, '유저 데이터를 받아올 수 없습니다.')
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [setErrorMessage])
 
   const createUser = useCallback(async (payload: PayloadNewUser) => {
+    setError('')
     try {
       const result = await createUserApi(payload)
       const { id, ...rest } = result
@@ -47,12 +52,12 @@ export function useUsersQuery() {
       }
       setUsers((prev) => [newUser, ...prev])
     } catch (err) {
-      console.error(err)
-      if (err instanceof Error) setError(err.message)
+      setErrorMessage(err, '유저 데이터를 추가할 수 없습니다.')
     }
-  }, [])
+  }, [setErrorMessage])
 
   const modifyUser = useCallback(async (id: number, payload: PayloadModifiedUser) => {
+    setError('')
     try {
       const result = await patchUserApi(id, payload)
       if (!result) return
@@ -71,12 +76,12 @@ export function useUsersQuery() {
       )
       void _
     } catch (err) {
-      console.error(err)
-      if (err instanceof Error) setError(err.message)
+      setErrorMessage(err, '유저 데이터를 수정할 수 없습니다.')
     }
-  }, [])
+  }, [setErrorMessage])
 
   const modifyAllUsers = useCallback(async (data: PayloadAllModifiedUsers) => {
+    setError('')
     try {
       const results = await patchAllUsersApi(data)
 
@@ -93,30 +98,29 @@ export function useUsersQuery() {
         })
       })
     } catch (err) {
-      console.error(err)
-      if (err instanceof Error) setError(err.message)
+      setErrorMessage(err, '유저 데이터를 수정할 수 없습니다.')
     }
-  }, [])
+  }, [setErrorMessage])
 
   const deleteUser = useCallback(async (id: User['id']) => {
+    setError('')
     try {
       const isSuccess = await deleteUserApi(id)
       if (isSuccess) setUsers((prev) => prev.filter((user) => user.id !== id))
     } catch (err) {
-      console.error(err)
-      if (err instanceof Error) setError(err.message)
+      setErrorMessage(err, '유저 데이터를 삭제할 수 없습니다.')
     }
-  }, [])
+  }, [setErrorMessage])
 
   const deleteSelectedUsers = useCallback(async (ids: User['id'][]) => {
+    setError('')
     try {
       const isAllSuccess = await deleteSelectedUsersApi(ids)
       if (isAllSuccess) setUsers((prev) => prev.filter((user) => !ids.includes(user.id)))
     } catch (err) {
-      console.error(err)
-      if (err instanceof Error) setError(err.message)
+      setErrorMessage(err, '유저 데이터를 삭제할 수 없습니다.')
     }
-  }, [])
+  }, [setErrorMessage])
 
   return {
     users,

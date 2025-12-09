@@ -52,7 +52,7 @@ export default function UsersProvider({
 }: UsersProviderProps) {
   const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show/hide 여부
   const [checkedDeleteItems, setCheckedDeleteItems] = useState<User['id'][]>([]) // 체크박스가 선택 된 유저의 id 배열
-  const checkedDeleteItemsRef = useRef<User['id'][]>([])
+  const checkedDeleteItemsRef = useRef<User['id'][]>([]) // checkedDeleteItems ref
 
   const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // UsersNewForm 마운트 여부
   const [newUserValue, setNewUserValue] = useState<PayloadNewUser>(INIT_NEW_USER_VALUE) // UsersNewForm 컴포넌트 내부 input들의 value
@@ -67,7 +67,10 @@ export default function UsersProvider({
   const isPatchingRef = useRef<IsPatching>(null) // isPatching ref
 
   const [isDeleting, setIsDeleting] = useState<IsDeleting>(null) // 유저 데이터의 삭제 여부
-  const isDeletingRef = useRef<IsDeleting>(null)
+  const isDeletingRef = useRef<IsDeleting>(null) // isDeleting ref
+
+  const [isCheckedDeleting, setisCheckedDeleting] = useState<boolean>(false) // 선택된 유저 데이터의 삭제 여부
+  const isCheckedDeletingRef = useRef<boolean>(false)
 
   // 각 유저의 데이터를 id값과 조합하여 가공한 데이터 : UsersItem 컴포넌트 내부 input 태그의 value값으로 연결
   const buildUsersData = useCallback((data: User[]) => {
@@ -145,6 +148,7 @@ export default function UsersProvider({
     return filteredModifiedData
   }, [initialBuiltAllUsersValue])
 
+  // [추가하기, 수정하기] 필수 입력란이 빈값인지 여부 확인
   const hasEmptyRequiredField = (data: EditableUserFormObject) => {
     const hasEmpty = REQUIRED_USER_KEYS.some((key) => {
       return data[key] !== undefined && data[key].trim() === ''
@@ -177,11 +181,22 @@ export default function UsersProvider({
           return
         }
 
+        const names = data
+          .map((u) => u.id)
+          .map((id) => initialBuiltAllUsersValue[id])
+          .filter(Boolean)
+          .map((u) => `${u[`first_name_${u.id}`]} ${u[`last_name_${u.id}`]}`)
+          .join(', ')
+        const confirmMsg = `${names} 유저들을 수정하시겠습니까?`
+        if (!confirm(confirmMsg)) return
+
         try {
           setIsPatching('all')
           await onAllModify(data)
+          alert('수정을 완료하였습니다.')
         } catch (err) {
           console.error(err)
+          alert('수정에 실패했습니다. 다시 시도해주세요.')
         } finally {
           setIsPatching(null)
         }
@@ -196,7 +211,7 @@ export default function UsersProvider({
       // Editor toggle(show/hide)
       setIsShowAllEditor(isShowEditor)
     },
-    [filterModifiedData, resetAllUsersData, onAllModify],
+    [filterModifiedData, resetAllUsersData, onAllModify, initialBuiltAllUsersValue],
   )
 
   // [수정하기 - 개별] item 수정 에디터 show/hide & patch
@@ -220,11 +235,16 @@ export default function UsersProvider({
           return
         }
 
+        const confirmMsg = `${initialBuiltAllUsersValue[id][`first_name_${id}`]} ${initialBuiltAllUsersValue[id][`last_name_${id}`]}님의 데이터를 수정하시겠습니까?`
+        if (!confirm(confirmMsg)) return
+
         try {
           setIsPatching(id)
           await onModify(id, payload)
+          alert('수정을 완료하였습니다.')
         } catch (err) {
           console.error(err)
+          alert('수정에 실패했습니다. 다시 시도해주세요.')
         } finally {
           setIsPatching(null)
         }
@@ -248,7 +268,7 @@ export default function UsersProvider({
         })
       }
     },
-    [filterModifiedData, resetTargetUserData, onModify],
+    [filterModifiedData, resetTargetUserData, onModify, initialBuiltAllUsersValue],
   )
 
   // isPatchingRef update
@@ -256,7 +276,7 @@ export default function UsersProvider({
     isPatchingRef.current = isPatching
   }, [isPatching])
 
-  // [수정하기]  builtAllUsersValue update
+  // [수정하기] builtAllUsersValue update
   const updateBuiltUserData = useCallback(
     (
       id: User['id'],
@@ -301,7 +321,7 @@ export default function UsersProvider({
     [users],
   )
 
-  // [수정하기] input onChange Event : builtAllUsersValue update
+  // [수정하기] 이름, 이메일 변경 이벤트 : builtAllUsersValue update
   const onChangeUserData = useCallback<OnChangeUserData>(
     (e, id) => {
       const { name, value } = e.target
@@ -352,17 +372,33 @@ export default function UsersProvider({
       // 선택 된 데이터가 없을 때
       alert('선택한 데이터가 없습니다.')
     } else {
+      if (!isCheckedDeletingRef.current) return
+
+      const names = checkedDeleteItemsRef.current
+        .map((id) => initialBuiltAllUsersValue[id])
+        .filter(Boolean)
+        .map((u) => `${u[`first_name_${u.id}`]} ${u[`last_name_${u.id}`]}`)
+        .join(', ')
+      const confirmMsg = `${names} 유저들을 삭제하시겠습니까?`
+      if (!confirm(confirmMsg)) return
+
       try {
-        console.log(initialBuiltAllUsersValue, checkedDeleteItemsRef.current)
+        setisCheckedDeleting(true)
         await onDeleteSelectedUsers(checkedDeleteItemsRef.current)
-      } catch (err) {
-        console.error(err)
-      } finally {
         setCheckedDeleteItems([])
         alert('삭제를 완료하였습니다.')
+      } catch (err) {
+        console.error(err)
+        alert('삭제에 실패했습니다. 다시 시도해주세요.')
+      } finally {
+        setisCheckedDeleting(false)
       }
     }
-  }, [onDeleteSelectedUsers, initialBuiltAllUsersValue])
+  }, [initialBuiltAllUsersValue, onDeleteSelectedUsers])
+
+  useEffect(() => {
+    isCheckedDeletingRef.current = isCheckedDeleting
+  }, [isCheckedDeleting])
 
   useEffect(() => {
     checkedDeleteItemsRef.current = checkedDeleteItems
@@ -373,18 +409,19 @@ export default function UsersProvider({
       if (isDeletingRef.current !== null) return
 
       const target = initialBuiltAllUsersValue[id]
-      const confirmMsg = `${target[`first_name_${id}`]} ${target[`last_name_${id}`]}님의 데이터를 삭제하시겠습니끼?`
+      const confirmMsg = `${target[`first_name_${id}`]} ${target[`last_name_${id}`]}님의 데이터를 삭제하시겠습니까?`
 
       if (!confirm(confirmMsg)) return
 
       try {
         setIsDeleting(id)
         await onDeleteUser(id)
+        alert('삭제를 완료하였습니다.')
       } catch (err) {
         console.error(err)
+        alert('삭제에 실패했습니다. 다시 시도해주세요.')
       } finally {
         setIsDeleting(null)
-        alert('삭제를 완료하였습니다.')
       }
     },
     [initialBuiltAllUsersValue, onDeleteUser],
@@ -421,13 +458,6 @@ export default function UsersProvider({
       if (isPost) {
         if (isCreatingUserRef.current) return
 
-        // hasEmptyRequiredField로 교체함
-        // const { email, first_name, last_name } = newUserValueRef.current
-        // if (!email || !first_name || !last_name) {
-        //   alert('이메일, 이름, 성을 모두 입력해주세요.')
-        //   return
-        // }
-
         const hasEmpty = hasEmptyRequiredField(newUserValueRef.current)
 
         if (hasEmpty) {
@@ -435,9 +465,13 @@ export default function UsersProvider({
           return
         }
 
+        const confirmMsg = `${newUserValueRef.current[`first_name`]} ${newUserValueRef.current[`last_name`]}님의 데이터를 추가하시겠습니까?`
+        if (!confirm(confirmMsg)) return
+
         try {
           setIsCreatingUser(true)
           await onCreate(newUserValueRef.current)
+          alert('추가를 완료하였습니다.')
         } catch (error) {
           console.error(error)
           alert('유저 생성에 실패했습니다. 다시 시도해주세요.')
