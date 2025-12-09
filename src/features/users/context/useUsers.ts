@@ -40,6 +40,9 @@ export type UsersStateContextType = {
   isPatching: IsPatching
   newUserValue: PayloadNewUser
   isDeleting: IsDeleting
+  isCheckedDeleting: boolean
+  checkedDeleteItems: User['id'][]
+  isAllCheckedDeleteItems: boolean
 }
 
 export type UsersActionsContextType = {
@@ -53,6 +56,8 @@ export type UsersActionsContextType = {
   onChangeUserData: OnChangeUserData
   onChangeUserAvatar: OnChangeUserAvatar
   onClickDeleteItem: (id: User['id']) => Promise<void>
+  onAllCheck: () => void
+  resetCheckedDeleteItems: () => void
 }
 
 export const UsersStateContext = createContext<UsersStateContextType | null>(null)

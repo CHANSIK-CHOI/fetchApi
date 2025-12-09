@@ -7,10 +7,23 @@ type UsersProps = {
   count: string
 }
 export default function Users({ children, newUserForm, count }: UsersProps) {
-  const { isShowAllEditor, isShowDeleteCheckbox, isShowNewUserForm, isCreatingUser, isPatching } =
-    useUsersState()
-  const { onAllEditor, onToggleDeleteCheckbox, onClickDeleteSelectedItems, onNewUserForm } =
-    useUsersActions()
+  const {
+    isShowAllEditor,
+    isShowDeleteCheckbox,
+    isShowNewUserForm,
+    isCreatingUser,
+    isPatching,
+    isCheckedDeleting,
+    isAllCheckedDeleteItems,
+  } = useUsersState()
+  const {
+    onAllEditor,
+    onToggleDeleteCheckbox,
+    onClickDeleteSelectedItems,
+    onNewUserForm,
+    onAllCheck,
+    resetCheckedDeleteItems,
+  } = useUsersActions()
 
   const isShowNewUserFormEl = !isShowAllEditor && !isShowDeleteCheckbox
   const isShowDeleteCheckboxEl = !isShowNewUserForm && !isShowAllEditor
@@ -57,7 +70,7 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
             <>
               {!isShowDeleteCheckbox ? (
                 <button type="button" className="line" onClick={() => onToggleDeleteCheckbox(true)}>
-                  선택하기
+                  삭제할 유저 선택하기
                 </button>
               ) : (
                 <>
@@ -68,8 +81,22 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
                   >
                     선택취소
                   </button>
-                  <button type="button" onClick={onClickDeleteSelectedItems}>
-                    삭제하기
+                  {isAllCheckedDeleteItems ? (
+                    <button type="button" className="line" onClick={resetCheckedDeleteItems}>
+                      전체취소
+                    </button>
+                  ) : (
+                    <button type="button" onClick={onAllCheck}>
+                      전체선택
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={onClickDeleteSelectedItems}
+                    disabled={isCheckedDeleting}
+                  >
+                    {isCheckedDeleting ? '삭제중...' : '삭제하기'}
                   </button>
                 </>
               )}

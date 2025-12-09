@@ -25,6 +25,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     builtAllUsersValue,
     isPatching,
     isDeleting,
+    checkedDeleteItems,
   } = useUsersState()
   const { onItemEditor, onChangeCheckDeleteItems, onChangeUserData, onClickDeleteItem } =
     useUsersActions()
@@ -52,6 +53,8 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     </>
   )
 
+  console.log(checkedDeleteItems, id, checkedDeleteItems.includes(id))
+
   return (
     <li className="userItem">
       <div className="userItem__box">
@@ -61,6 +64,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
               type="checkbox"
               name="usersItem"
               id={`checkbox_${id}`}
+              checked={checkedDeleteItems.includes(id)}
               onChange={(e) => onChangeCheckDeleteItems({ e, id })}
             />
           </div>

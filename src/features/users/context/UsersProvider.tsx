@@ -53,6 +53,7 @@ export default function UsersProvider({
   const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show/hide 여부
   const [checkedDeleteItems, setCheckedDeleteItems] = useState<User['id'][]>([]) // 체크박스가 선택 된 유저의 id 배열
   const checkedDeleteItemsRef = useRef<User['id'][]>([]) // checkedDeleteItems ref
+  const [isAllCheckedDeleteItems, setIsAllCheckedDeleteItems] = useState<boolean>(false)
 
   const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // UsersNewForm 마운트 여부
   const [newUserValue, setNewUserValue] = useState<PayloadNewUser>(INIT_NEW_USER_VALUE) // UsersNewForm 컴포넌트 내부 input들의 value
@@ -127,6 +128,10 @@ export default function UsersProvider({
     },
     [initialBuiltAllUsersValue],
   )
+
+  const resetCheckedDeleteItems = useCallback(() => {
+    setCheckedDeleteItems([])
+  }, [])
 
   // [수정하기] 수정된 데이터만 필터링 후 반환
   const filterModifiedData = useCallback(() => {
@@ -372,7 +377,7 @@ export default function UsersProvider({
       // 선택 된 데이터가 없을 때
       alert('선택한 데이터가 없습니다.')
     } else {
-      if (!isCheckedDeletingRef.current) return
+      if (isCheckedDeletingRef.current) return
 
       const names = checkedDeleteItemsRef.current
         .map((id) => initialBuiltAllUsersValue[id])
@@ -385,7 +390,7 @@ export default function UsersProvider({
       try {
         setisCheckedDeleting(true)
         await onDeleteSelectedUsers(checkedDeleteItemsRef.current)
-        setCheckedDeleteItems([])
+        resetCheckedDeleteItems()
         alert('삭제를 완료하였습니다.')
       } catch (err) {
         console.error(err)
@@ -394,7 +399,7 @@ export default function UsersProvider({
         setisCheckedDeleting(false)
       }
     }
-  }, [initialBuiltAllUsersValue, onDeleteSelectedUsers])
+  }, [initialBuiltAllUsersValue, onDeleteSelectedUsers, resetCheckedDeleteItems])
 
   useEffect(() => {
     isCheckedDeletingRef.current = isCheckedDeleting
@@ -402,7 +407,8 @@ export default function UsersProvider({
 
   useEffect(() => {
     checkedDeleteItemsRef.current = checkedDeleteItems
-  }, [checkedDeleteItems])
+    setIsAllCheckedDeleteItems(users.length === checkedDeleteItems.length)
+  }, [checkedDeleteItems, users])
 
   const onClickDeleteItem = useCallback(
     async (id: User['id']) => {
@@ -441,6 +447,11 @@ export default function UsersProvider({
     },
     [resetAllUsersData],
   )
+
+  const onAllCheck = useCallback(() => {
+    const ids = Object.keys(initialBuiltAllUsersValue).map((k) => Number(k))
+    setCheckedDeleteItems(ids)
+  }, [initialBuiltAllUsersValue])
 
   useEffect(() => {
     isDeletingRef.current = isDeleting
@@ -514,6 +525,9 @@ export default function UsersProvider({
       isPatching,
       newUserValue,
       isDeleting,
+      isCheckedDeleting,
+      checkedDeleteItems,
+      isAllCheckedDeleteItems,
     }),
     [
       isShowAllEditor,
@@ -525,6 +539,9 @@ export default function UsersProvider({
       isPatching,
       newUserValue,
       isDeleting,
+      isCheckedDeleting,
+      checkedDeleteItems,
+      isAllCheckedDeleteItems,
     ],
   )
 
@@ -540,6 +557,8 @@ export default function UsersProvider({
       onChangeUserData,
       onChangeUserAvatar,
       onClickDeleteItem,
+      onAllCheck,
+      resetCheckedDeleteItems,
     }),
     [
       onAllEditor,
@@ -552,6 +571,8 @@ export default function UsersProvider({
       onChangeUserData,
       onChangeUserAvatar,
       onClickDeleteItem,
+      onAllCheck,
+      resetCheckedDeleteItems,
     ],
   )
 
