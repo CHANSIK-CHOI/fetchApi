@@ -1,5 +1,8 @@
 # fetch 실습 (CRUD)
 
+## 프로젝트 링크
+[https://chansik-choi.github.io/fetchApi/](https://chansik-choi.github.io/fetchApi/) 에서 산출물 확인 가능하다.
+
 ## Intro
 
 이 프로젝트는 지금까지 배운 자바스크립트 fetch와 타입스크립트를 실제로 사용해 보기 위해 만든 작은 CRUD 예제다.
