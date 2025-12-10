@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react'
 import { UsersProvider, Users } from '@/features/users'
 import { useUsersQuery } from '@/hooks/useUsersQuery'
 import loadingGif from '@/assets/loading.gif'
@@ -7,7 +6,6 @@ import errorImg from '@/assets/error.jpeg'
 export default function UsersContainer() {
   const {
     users,
-    getAllUsers,
     isLoading,
     error,
     createUser,
@@ -16,10 +14,6 @@ export default function UsersContainer() {
     deleteUser,
     deleteSelectedUsers,
   } = useUsersQuery()
-
-  useEffect(() => {
-    void getAllUsers()
-  }, [getAllUsers])
 
   return (
     <UsersProvider
