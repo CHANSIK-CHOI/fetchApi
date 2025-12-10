@@ -4,7 +4,7 @@ import { UsersItem, UsersNewForm, useUsersActions, useUsersState } from '@/featu
 type UsersProps = {
   children: React.ReactNode
   newUserForm: React.ReactNode
-  count: string
+  count: number
 }
 export default function Users({ children, newUserForm, count }: UsersProps) {
   const {
@@ -14,25 +14,28 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
     isCreatingUser,
     isPatching,
     isCheckedDeleting,
-    isAllCheckedDeleteItems,
+    isAllChecked,
   } = useUsersState()
   const {
     onAllEditor,
-    onToggleDeleteCheckbox,
+    handleToggleDeleteCheckbox,
     onClickDeleteSelectedItems,
     onNewUserForm,
-    onAllCheck,
-    resetCheckedDeleteItems,
+    handleAllCheck,
+    resetChecked,
   } = useUsersActions()
 
+  const isNoUserData = count === 0
   const isShowNewUserFormEl = !isShowAllEditor && !isShowDeleteCheckbox
-  const isShowDeleteCheckboxEl = !isShowNewUserForm && !isShowAllEditor
-  const isShowAllEditorEl = !isShowNewUserForm && !isShowDeleteCheckbox
+  const isShowDeleteCheckboxEl = !isNoUserData && !isShowNewUserForm && !isShowAllEditor
+  const isShowAllEditorEl = !isNoUserData && !isShowNewUserForm && !isShowDeleteCheckbox
+
+  const resultCount = count.toString().padStart(2, '0')
 
   return (
     <div className="users">
       <div className="users__head">
-        <span className="users__result">검색 결과 : {count}건</span>
+        <span className="users__result">검색 결과 : {resultCount}건</span>
 
         <div className="users__actions">
           {isShowNewUserFormEl && (
@@ -69,7 +72,11 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
           {isShowDeleteCheckboxEl && (
             <>
               {!isShowDeleteCheckbox ? (
-                <button type="button" className="line" onClick={() => onToggleDeleteCheckbox(true)}>
+                <button
+                  type="button"
+                  className="line"
+                  onClick={() => handleToggleDeleteCheckbox(true)}
+                >
                   삭제할 유저 선택하기
                 </button>
               ) : (
@@ -77,16 +84,16 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
                   <button
                     type="button"
                     className="line"
-                    onClick={() => onToggleDeleteCheckbox(false)}
+                    onClick={() => handleToggleDeleteCheckbox(false)}
                   >
                     선택취소
                   </button>
-                  {isAllCheckedDeleteItems ? (
-                    <button type="button" className="line" onClick={resetCheckedDeleteItems}>
+                  {isAllChecked ? (
+                    <button type="button" className="line" onClick={resetChecked}>
                       전체취소
                     </button>
                   ) : (
-                    <button type="button" onClick={onAllCheck}>
+                    <button type="button" onClick={handleAllCheck}>
                       전체선택
                     </button>
                   )}

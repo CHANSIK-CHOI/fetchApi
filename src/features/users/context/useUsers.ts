@@ -42,13 +42,13 @@ export type UsersStateContextType = {
   isDeleting: IsDeleting
   isCheckedDeleting: boolean
   checkedDeleteItems: User['id'][]
-  isAllCheckedDeleteItems: boolean
+  isAllChecked: boolean
 }
 
 export type UsersActionsContextType = {
   onAllEditor: ({ isShowEditor, isPatch }: OnAllEditor) => void
   onItemEditor: ({ id, isShowEditor, isPatch }: OnItemEditor) => void
-  onToggleDeleteCheckbox: (isChecked: boolean) => void
+  handleToggleDeleteCheckbox: (isChecked: boolean) => void
   onChangeCheckDeleteItems: ({ e, id }: OnChangeCheckDeleteItems) => void
   onClickDeleteSelectedItems: () => void
   onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => Promise<void>
@@ -56,8 +56,8 @@ export type UsersActionsContextType = {
   onChangeUserData: OnChangeUserData
   onChangeUserAvatar: OnChangeUserAvatar
   onClickDeleteItem: (id: User['id']) => Promise<void>
-  onAllCheck: () => void
-  resetCheckedDeleteItems: () => void
+  handleAllCheck: () => void
+  resetChecked: () => void
 }
 
 export const UsersStateContext = createContext<UsersStateContextType | null>(null)

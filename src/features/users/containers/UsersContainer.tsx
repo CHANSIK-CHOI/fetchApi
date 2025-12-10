@@ -21,8 +21,6 @@ export default function UsersContainer() {
     void getAllUsers()
   }, [getAllUsers])
 
-  const resultCount = users.length.toString().padStart(2, '0')
-
   return (
     <UsersProvider
       users={users}
@@ -32,26 +30,32 @@ export default function UsersContainer() {
       onDeleteUser={deleteUser}
       onDeleteSelectedUsers={deleteSelectedUsers}
     >
-      <Users newUserForm={<Users.NewForm />} count={resultCount}>
+      <Users newUserForm={<Users.NewForm />} count={users.length}>
         {isLoading && <img src={loadingGif} className="loading" alt="loading" />}
-        {error.length > 0 && (
-          <>
-            <div className="error">
-              <img src={errorImg} alt="error" className="error__img" />
-              <span className="error__text">{error}</span>
-            </div>
-          </>
+
+        {!isLoading && error.length > 0 && (
+          <div className="error">
+            <img src={errorImg} alt="error" className="error__img" />
+            <span className="error__text">{error}</span>
+          </div>
         )}
-        {users.map((user) => (
-          <Users.Item
-            key={user.id}
-            profileSrc={user.avatar}
-            firstName={user.first_name}
-            lastName={user.last_name}
-            email={user.email}
-            id={user.id}
-          />
-        ))}
+
+        {users.length > 0 ? (
+          users.map((user) => (
+            <Users.Item
+              key={user.id}
+              profileSrc={user.avatar}
+              firstName={user.first_name}
+              lastName={user.last_name}
+              email={user.email}
+              id={user.id}
+            />
+          ))
+        ) : (
+          <div className="nodata">
+            <span className="nodata__text">검색된 유저가 없습니다.</span>
+          </div>
+        )}
       </Users>
     </UsersProvider>
   )

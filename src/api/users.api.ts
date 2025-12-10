@@ -20,7 +20,7 @@ export const getAllUsersApi = async () => {
   return result
 }
 
-export const createUserApi = async (payload: PayloadNewUser) => {
+export const postUserApi = async (payload: PayloadNewUser) => {
   const response = await fetch('https://reqres.in/api/users', {
     method: 'POST',
     headers: {

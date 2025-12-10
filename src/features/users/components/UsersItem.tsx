@@ -53,8 +53,6 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     </>
   )
 
-  console.log(checkedDeleteItems, id, checkedDeleteItems.includes(id))
-
   return (
     <li className="userItem">
       <div className="userItem__box">

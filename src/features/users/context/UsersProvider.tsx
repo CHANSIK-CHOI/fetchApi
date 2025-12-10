@@ -53,7 +53,7 @@ export default function UsersProvider({
   const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show/hide 여부
   const [checkedDeleteItems, setCheckedDeleteItems] = useState<User['id'][]>([]) // 체크박스가 선택 된 유저의 id 배열
   const checkedDeleteItemsRef = useRef<User['id'][]>([]) // checkedDeleteItems ref
-  const [isAllCheckedDeleteItems, setIsAllCheckedDeleteItems] = useState<boolean>(false)
+  const [isAllChecked, setIsAllChecked] = useState<boolean>(false) // 전체 체크 여부
 
   const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // UsersNewForm 마운트 여부
   const [newUserValue, setNewUserValue] = useState<PayloadNewUser>(INIT_NEW_USER_VALUE) // UsersNewForm 컴포넌트 내부 input들의 value
@@ -129,9 +129,16 @@ export default function UsersProvider({
     [initialBuiltAllUsersValue],
   )
 
-  const resetCheckedDeleteItems = useCallback(() => {
+  // [reset] 전체 체크박스 선택 reset
+  const resetChecked = useCallback(() => {
     setCheckedDeleteItems([])
   }, [])
+
+  // 전체 체크박스 선택
+  const handleAllCheck = useCallback(() => {
+    const ids = Object.keys(initialBuiltAllUsersValue).map((k) => Number(k))
+    setCheckedDeleteItems(ids)
+  }, [initialBuiltAllUsersValue])
 
   // [수정하기] 수정된 데이터만 필터링 후 반환
   const filterModifiedData = useCallback(() => {
@@ -390,26 +397,30 @@ export default function UsersProvider({
       try {
         setisCheckedDeleting(true)
         await onDeleteSelectedUsers(checkedDeleteItemsRef.current)
-        resetCheckedDeleteItems()
+        resetChecked()
         alert('삭제를 완료하였습니다.')
       } catch (err) {
         console.error(err)
         alert('삭제에 실패했습니다. 다시 시도해주세요.')
       } finally {
         setisCheckedDeleting(false)
+        setIsShowDeleteCheckbox(false)
       }
     }
-  }, [initialBuiltAllUsersValue, onDeleteSelectedUsers, resetCheckedDeleteItems])
+  }, [initialBuiltAllUsersValue, onDeleteSelectedUsers, resetChecked])
 
+  // isCheckedDeletingRef 업데이트
   useEffect(() => {
     isCheckedDeletingRef.current = isCheckedDeleting
   }, [isCheckedDeleting])
 
+  // checkedDeleteItemsRef, isAllChecked 업데이트
   useEffect(() => {
     checkedDeleteItemsRef.current = checkedDeleteItems
-    setIsAllCheckedDeleteItems(users.length === checkedDeleteItems.length)
+    setIsAllChecked(users.length === checkedDeleteItems.length)
   }, [checkedDeleteItems, users])
 
+  // [삭제하기] 개별 유저 데이터 삭제
   const onClickDeleteItem = useCallback(
     async (id: User['id']) => {
       if (isDeletingRef.current !== null) return
@@ -433,8 +444,13 @@ export default function UsersProvider({
     [initialBuiltAllUsersValue, onDeleteUser],
   )
 
+  // isDeletingRef 업데이트
+  useEffect(() => {
+    isDeletingRef.current = isDeleting
+  }, [isDeleting])
+
   // [삭제하기] 삭제하기 버튼 클릭 시 item 옆 checkbox show/hide toggle
-  const onToggleDeleteCheckbox = useCallback(
+  const handleToggleDeleteCheckbox = useCallback(
     (isChecked: boolean) => {
       setIsShowDeleteCheckbox(isChecked)
 
@@ -442,20 +458,11 @@ export default function UsersProvider({
         setDisplayItemEditor([])
         resetAllUsersData()
       } else {
-        setCheckedDeleteItems([])
+        resetChecked()
       }
     },
-    [resetAllUsersData],
+    [resetAllUsersData, resetChecked],
   )
-
-  const onAllCheck = useCallback(() => {
-    const ids = Object.keys(initialBuiltAllUsersValue).map((k) => Number(k))
-    setCheckedDeleteItems(ids)
-  }, [initialBuiltAllUsersValue])
-
-  useEffect(() => {
-    isDeletingRef.current = isDeleting
-  }, [isDeleting])
 
   // displayItemEditorRef 업데이트
   useEffect(() => {
@@ -504,12 +511,12 @@ export default function UsersProvider({
     [onCreate, resetAllUsersData],
   )
 
-  // [추가하기] newUserValue 업데이트 시 newUserValueRef도 업데이트
+  // newUserValueRef 업데이트
   useEffect(() => {
     newUserValueRef.current = newUserValue
   }, [newUserValue])
 
-  // [추가하기] isCreatingUser 업데이트 시 isCreatingUserRef도 업데이트
+  // isCreatingUserRef 업데이트
   useEffect(() => {
     isCreatingUserRef.current = isCreatingUser
   }, [isCreatingUser])
@@ -527,7 +534,7 @@ export default function UsersProvider({
       isDeleting,
       isCheckedDeleting,
       checkedDeleteItems,
-      isAllCheckedDeleteItems,
+      isAllChecked,
     }),
     [
       isShowAllEditor,
@@ -541,7 +548,7 @@ export default function UsersProvider({
       isDeleting,
       isCheckedDeleting,
       checkedDeleteItems,
-      isAllCheckedDeleteItems,
+      isAllChecked,
     ],
   )
 
@@ -549,7 +556,7 @@ export default function UsersProvider({
     () => ({
       onAllEditor,
       onItemEditor,
-      onToggleDeleteCheckbox,
+      handleToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteSelectedItems,
       onNewUserForm,
@@ -557,13 +564,13 @@ export default function UsersProvider({
       onChangeUserData,
       onChangeUserAvatar,
       onClickDeleteItem,
-      onAllCheck,
-      resetCheckedDeleteItems,
+      handleAllCheck,
+      resetChecked,
     }),
     [
       onAllEditor,
       onItemEditor,
-      onToggleDeleteCheckbox,
+      handleToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteSelectedItems,
       onNewUserForm,
@@ -571,8 +578,8 @@ export default function UsersProvider({
       onChangeUserData,
       onChangeUserAvatar,
       onClickDeleteItem,
-      onAllCheck,
-      resetCheckedDeleteItems,
+      handleAllCheck,
+      resetChecked,
     ],
   )
 
