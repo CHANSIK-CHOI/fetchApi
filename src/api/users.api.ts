@@ -107,3 +107,5 @@ export const deleteSelectedUsersApi = async (ids: User['id'][]) => {
   ).includes(false)
   return isAllSuccess
 }
+
+// fetch
