@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { UsersProvider, Users } from '@/features/users'
 import { useUsersQuery } from '@/hooks/useUsersQuery'
 import loadingGif from '@/assets/loading.gif'
