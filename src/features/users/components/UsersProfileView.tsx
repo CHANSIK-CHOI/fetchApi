@@ -1,11 +1,11 @@
 import type { User } from '@/types/users'
-import { PLACEHOLDER_SRC } from '@/utils'
+import { PLACEHOLDER_SRC } from '@/constants/users'
 
-type UsersItemProfileViewProps = {
+type UsersProfileViewProps = {
   profileSrc?: User['avatar']
 }
 
-export default function UsersItemProfileView({ profileSrc }: UsersItemProfileViewProps) {
+export default function UsersProfileView({ profileSrc }: UsersProfileViewProps) {
   return (
     <div className="userItem__profile">
       <img src={profileSrc || PLACEHOLDER_SRC} alt="" />

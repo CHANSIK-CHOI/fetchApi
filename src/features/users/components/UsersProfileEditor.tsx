@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { useUsersActions } from '@/features/users'
-import { PLACEHOLDER_SRC } from '@/utils'
+import { PLACEHOLDER_SRC } from '@/constants/users'
 import type { User } from '@/types/users'
 
-type UsersItemProfileEditorProps = {
+type UsersProfileEditorProps = {
   id: User['id']
   profileSrc?: User['avatar']
 }
 
-export default function UsersItemProfileEditor({ id, profileSrc }: UsersItemProfileEditorProps) {
+export default function UsersProfileEditor({ id, profileSrc }: UsersProfileEditorProps) {
   const { onChangeUserAvatar } = useUsersActions()
   const [file, setFile] = useState<File | null>(null)
   const [isProfileCleared, setIsProfileCleared] = useState(false)

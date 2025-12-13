@@ -8,6 +8,7 @@
   width: 10rem;
   height: 10rem;
   margin: 10rem auto;
+  display: block;
 }
 
 .error {
@@ -28,6 +29,7 @@
 
 .nodata {
   margin: 10rem auto;
+  text-align: center;
   &__text {
     font-size: 2rem;
   }

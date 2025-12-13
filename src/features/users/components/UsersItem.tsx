@@ -1,8 +1,8 @@
 import {
   useUsersActions,
   useUsersState,
-  UsersItemProfileView,
-  UsersItemProfileEditor,
+  UsersProfileView,
+  UsersProfileEditor,
 } from '@/features/users'
 import type { ChangeEvent } from 'react'
 
@@ -21,11 +21,11 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     isShowAllEditor,
     displayItemEditor,
     isShowDeleteCheckbox,
-    isShowNewUserForm,
     builtAllUsersValue,
     isPatching,
     isDeleting,
     checkedDeleteItems,
+    newUserState,
   } = useUsersState()
   const { onItemEditor, onChangeCheckDeleteItems, onChangeUserData, onClickDeleteItem } =
     useUsersActions()
@@ -39,7 +39,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
   const emailValue = userInputValues ? userInputValues[`email_${id}`] : ''
   const avatarSrc = userInputValues ? userInputValues[`avatar_${id}`] : ''
 
-  const isShowEditorBtns = !isShowAllEditor && !isShowDeleteCheckbox && !isShowNewUserForm
+  const isShowEditorBtns = !isShowAllEditor && !isShowDeleteCheckbox && !newUserState.isShowEditor
   const handleChangeUserData = (
     e: ChangeEvent<HTMLInputElement & { name: PersonalEditableUserKey }>,
   ) => onChangeUserData(e, id)
@@ -70,9 +70,9 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
         <div className="userItem__info">
           <div className="userItem__profileWrap">
             {isEditing ? (
-              <UsersItem.ProfileEditor key={`editing-${id}`} id={id} profileSrc={avatarSrc} />
+              <UsersProfileEditor key={`editing-${id}`} id={id} profileSrc={avatarSrc} />
             ) : (
-              <UsersItem.ProfileView profileSrc={profileSrc} />
+              <UsersProfileView profileSrc={profileSrc} />
             )}
           </div>
 
@@ -158,6 +158,3 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     </li>
   )
 }
-
-UsersItem.ProfileView = UsersItemProfileView
-UsersItem.ProfileEditor = UsersItemProfileEditor

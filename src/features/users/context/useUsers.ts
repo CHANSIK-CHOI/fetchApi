@@ -1,5 +1,6 @@
+import type { NewUserAction, NewUserState } from '@/reducers/usersReducer'
 import type {
-  PayloadNewUser,
+  // PayloadNewUser,
   BuiltAllUsersValue,
   User,
   PersonalEditableUserKey,
@@ -7,9 +8,10 @@ import type {
 import {
   createContext,
   useContext,
+  type ActionDispatch,
   type ChangeEvent,
-  type Dispatch,
-  type SetStateAction,
+  // type Dispatch,
+  // type SetStateAction,
 } from 'react'
 
 export type OnAllEditor = {
@@ -19,7 +21,7 @@ export type OnAllEditor = {
 export type OnItemEditor = { id: User['id'] } & OnAllEditor
 export type OnChangeCheckDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: User['id'] }
 
-export type OnNewUserForm = { isShowEditor: boolean; isPost?: boolean }
+// export type OnNewUserForm = { isShowEditor: boolean; isPost?: boolean }
 
 export type IsPatching = User['id'] | 'all' | null
 export type IsDeleting = User['id'] | null
@@ -34,15 +36,13 @@ export type UsersStateContextType = {
   isShowAllEditor: boolean
   displayItemEditor: User['id'][]
   isShowDeleteCheckbox: boolean
-  isShowNewUserForm: boolean
-  isCreatingUser: boolean
   builtAllUsersValue: BuiltAllUsersValue
   isPatching: IsPatching
-  newUserValue: PayloadNewUser
   isDeleting: IsDeleting
   isCheckedDeleting: boolean
   checkedDeleteItems: User['id'][]
   isAllChecked: boolean
+  newUserState: NewUserState
 }
 
 export type UsersActionsContextType = {
@@ -51,13 +51,12 @@ export type UsersActionsContextType = {
   handleToggleDeleteCheckbox: (isChecked: boolean) => void
   onChangeCheckDeleteItems: ({ e, id }: OnChangeCheckDeleteItems) => void
   onClickDeleteSelectedItems: () => void
-  onNewUserForm: ({ isShowEditor, isPost }: OnNewUserForm) => Promise<void>
-  setNewUserValue: Dispatch<SetStateAction<PayloadNewUser>>
   onChangeUserData: OnChangeUserData
   onChangeUserAvatar: OnChangeUserAvatar
   onClickDeleteItem: (id: User['id']) => Promise<void>
   handleAllCheck: () => void
   resetChecked: () => void
+  newUserDispatch: ActionDispatch<[action: NewUserAction]>
 }
 
 export const UsersStateContext = createContext<UsersStateContextType | null>(null)

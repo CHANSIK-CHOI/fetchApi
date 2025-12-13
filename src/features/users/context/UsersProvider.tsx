@@ -1,4 +1,12 @@
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react'
 
 import {
   UsersActionsContext,
@@ -6,7 +14,6 @@ import {
   type OnItemEditor,
   type OnChangeCheckDeleteItems,
   type OnAllEditor,
-  type OnNewUserForm,
   type IsPatching,
   type OnChangeUserAvatar,
   type OnChangeUserData,
@@ -16,7 +23,6 @@ import {
 import type {
   FilteredModifiedAllData,
   PayloadModifiedUser,
-  PayloadNewUser,
   User,
   PersonalUserValue,
   BuiltAllUsersValue,
@@ -26,14 +32,14 @@ import type {
   PersonalEditableUserKey,
   PersonalEditableUserValue,
 } from '@/types/users'
-import { EDITABLE_USER_KEYS, INIT_NEW_USER_VALUE, REQUIRED_USER_KEYS } from '@/utils'
+import { EDITABLE_USER_KEYS, REQUIRED_USER_KEYS } from '@/constants/users'
+import { INIT_NEW_USER_STATE, newUserReducer } from '@/reducers/usersReducer'
 
 const toPersonalKey = <K extends EditableUserKey>(key: K, id: User['id']) =>
   `${key}_${id}` as `${K}_${number}`
 
 type UsersProviderProps = {
   children: ReactNode
-  onCreate: (payload: PayloadNewUser) => Promise<void>
   users: User[]
   onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
   onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
@@ -43,35 +49,27 @@ type UsersProviderProps = {
 
 export default function UsersProvider({
   children,
-  onCreate,
   users,
   onModify,
   onAllModify,
   onDeleteUser,
   onDeleteSelectedUsers,
 }: UsersProviderProps) {
-  const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // 선택 체크박스 show/hide 여부
-  const [checkedDeleteItems, setCheckedDeleteItems] = useState<User['id'][]>([]) // 체크박스가 선택 된 유저의 id 배열
+  const [isShowDeleteCheckbox, setIsShowDeleteCheckbox] = useState<boolean>(false) // UI - 선택 체크박스 show/hide 여부
+  const [checkedDeleteItems, setCheckedDeleteItems] = useState<User['id'][]>([]) // UI - 체크박스가 선택 된 유저의 id 배열
   const checkedDeleteItemsRef = useRef<User['id'][]>([]) // checkedDeleteItems ref
-  const [isAllChecked, setIsAllChecked] = useState<boolean>(false) // 전체 체크 여부
-
-  const [isShowNewUserForm, setIsShowNewUserForm] = useState<boolean>(false) // UsersNewForm 마운트 여부
-  const [newUserValue, setNewUserValue] = useState<PayloadNewUser>(INIT_NEW_USER_VALUE) // UsersNewForm 컴포넌트 내부 input들의 value
-  const newUserValueRef = useRef<PayloadNewUser>(newUserValue) // newUserValue ref
-  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false) // 새로운 유저 데이터 생성 중 여부
-  const isCreatingUserRef = useRef<boolean>(isCreatingUser) // isCreatingUser ref
-
-  const [isShowAllEditor, setIsShowAllEditor] = useState<boolean>(false) // 전체 유저의 수정 에디터 show/hide 여부
-  const [displayItemEditor, setDisplayItemEditor] = useState<User['id'][]>([]) // 개별 수정 시 에디터가 보여지고 있는 유저의 id 배열
+  const [isAllChecked, setIsAllChecked] = useState<boolean>(false) // UI - 전체 체크 여부
+  const [isShowAllEditor, setIsShowAllEditor] = useState<boolean>(false) // UI - 전체 유저의 수정 에디터 show/hide 여부
+  const [displayItemEditor, setDisplayItemEditor] = useState<User['id'][]>([]) // UI - 개별 수정 시 에디터가 보여지고 있는 유저의 id 배열
   const displayItemEditorRef = useRef<User['id'][]>([]) // displayItemEditor ref
-  const [isPatching, setIsPatching] = useState<IsPatching>(null) // 유저 데이터의 수정 여부
+  const [isPatching, setIsPatching] = useState<IsPatching>(null) // UI - 유저 데이터의 수정 여부
   const isPatchingRef = useRef<IsPatching>(null) // isPatching ref
-
-  const [isDeleting, setIsDeleting] = useState<IsDeleting>(null) // 유저 데이터의 삭제 여부
+  const [isDeleting, setIsDeleting] = useState<IsDeleting>(null) // UI - 유저 데이터의 삭제 여부
   const isDeletingRef = useRef<IsDeleting>(null) // isDeleting ref
-
-  const [isCheckedDeleting, setisCheckedDeleting] = useState<boolean>(false) // 선택된 유저 데이터의 삭제 여부
+  const [isCheckedDeleting, setisCheckedDeleting] = useState<boolean>(false) // UI - 선택된 유저 데이터의 삭제 여부
   const isCheckedDeletingRef = useRef<boolean>(false)
+
+  const [newUserState, newUserDispatch] = useReducer(newUserReducer, INIT_NEW_USER_STATE) // 유저 추가하기 reducer
 
   // 각 유저의 데이터를 id값과 조합하여 가공한 데이터 : UsersItem 컴포넌트 내부 input 태그의 value값으로 연결
   const buildUsersData = useCallback((data: User[]) => {
@@ -469,86 +467,38 @@ export default function UsersProvider({
     displayItemEditorRef.current = displayItemEditor
   }, [displayItemEditor])
 
-  // [추가하기] 신규 유저 추가 에디터 show/hide & post
-  const onNewUserForm = useCallback(
-    async ({ isShowEditor, isPost = false }: OnNewUserForm) => {
-      // 추가완료(POST) : isPost
-      if (isPost) {
-        if (isCreatingUserRef.current) return
-
-        const hasEmpty = hasEmptyRequiredField(newUserValueRef.current)
-
-        if (hasEmpty) {
-          alert('이메일, 이름, 성을 모두 입력해주세요.')
-          return
-        }
-
-        const confirmMsg = `${newUserValueRef.current[`first_name`]} ${newUserValueRef.current[`last_name`]}님의 데이터를 추가하시겠습니까?`
-        if (!confirm(confirmMsg)) return
-
-        try {
-          setIsCreatingUser(true)
-          await onCreate(newUserValueRef.current)
-          alert('추가를 완료하였습니다.')
-        } catch (error) {
-          console.error(error)
-          alert('유저 생성에 실패했습니다. 다시 시도해주세요.')
-        } finally {
-          setIsCreatingUser(false)
-        }
-      }
-
-      if (isShowEditor) {
-        setDisplayItemEditor([])
-        resetAllUsersData()
-      } else {
-        setNewUserValue(INIT_NEW_USER_VALUE)
-      }
-
-      // toggle
-      setIsShowNewUserForm(isShowEditor)
-    },
-    [onCreate, resetAllUsersData],
-  )
-
-  // newUserValueRef 업데이트
+  // 임시 : 다른 로직도 useReducer로 변경 후 삭제 예정
   useEffect(() => {
-    newUserValueRef.current = newUserValue
-  }, [newUserValue])
-
-  // isCreatingUserRef 업데이트
-  useEffect(() => {
-    isCreatingUserRef.current = isCreatingUser
-  }, [isCreatingUser])
+    if (newUserState.isShowEditor) {
+      setDisplayItemEditor([])
+      resetAllUsersData()
+    }
+  }, [newUserState.isShowEditor, resetAllUsersData])
 
   const stateValue = useMemo(
     () => ({
       isShowAllEditor,
       displayItemEditor,
       isShowDeleteCheckbox,
-      isShowNewUserForm,
-      isCreatingUser,
       builtAllUsersValue,
       isPatching,
-      newUserValue,
       isDeleting,
       isCheckedDeleting,
       checkedDeleteItems,
       isAllChecked,
+      newUserState,
     }),
     [
       isShowAllEditor,
       displayItemEditor,
       isShowDeleteCheckbox,
-      isShowNewUserForm,
-      isCreatingUser,
       builtAllUsersValue,
       isPatching,
-      newUserValue,
       isDeleting,
       isCheckedDeleting,
       checkedDeleteItems,
       isAllChecked,
+      newUserState,
     ],
   )
 
@@ -559,13 +509,12 @@ export default function UsersProvider({
       handleToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteSelectedItems,
-      onNewUserForm,
-      setNewUserValue,
       onChangeUserData,
       onChangeUserAvatar,
       onClickDeleteItem,
       handleAllCheck,
       resetChecked,
+      newUserDispatch,
     }),
     [
       onAllEditor,
@@ -573,13 +522,12 @@ export default function UsersProvider({
       handleToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteSelectedItems,
-      onNewUserForm,
-      setNewUserValue,
       onChangeUserData,
       onChangeUserAvatar,
       onClickDeleteItem,
       handleAllCheck,
       resetChecked,
+      newUserDispatch,
     ],
   )
 
