@@ -61,10 +61,12 @@ export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
     const confirmMsg = `${newUserValue.first_name} ${newUserValue.last_name}님의 데이터를 추가하시겠습니까?`
     if (!confirm(confirmMsg)) return
 
+    newUserDispatch({ type: 'RESET' })
+
     try {
       newUserDispatch({ type: 'SUBMIT_START' })
       await onCreate(newUserValue)
-      newUserDispatch({ type: 'SUBMIT_SUCCESS' })
+      newUserDispatch({ type: 'SUBMIT_SUCCESS', payload: newUserValue })
       alert('추가를 완료하였습니다.')
 
       setNewUserValue(INIT_NEW_USER_VALUE)
@@ -72,7 +74,10 @@ export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
       setFileName(null)
     } catch (err) {
       console.error(err)
-      newUserDispatch({ type: 'SUBMIT_ERROR' })
+      newUserDispatch({
+        type: 'SUBMIT_ERROR',
+        payload: '유저 생성에 실패했습니다. 다시 시도해주세요.',
+      })
       alert('유저 생성에 실패했습니다. 다시 시도해주세요.')
     }
   }
