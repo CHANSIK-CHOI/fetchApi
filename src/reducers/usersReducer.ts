@@ -1,5 +1,5 @@
 import { INIT_NEW_USER_VALUE } from '@/constants/users'
-import type { EditableUserFormObject, PayloadNewUser, User } from '@/types/users'
+import type { PayloadNewUser, User } from '@/types/users'
 
 export type NewUserState = {
   isShowEditor: boolean
@@ -49,18 +49,22 @@ export function newUserReducer(state: NewUserState, action: NewUserAction) {
 }
 
 export type UserEditState = {
-  mode: 'default' | 'individualEdit' | 'allEdit'
+  isShowAllEditor: boolean
   displayedEditor: User['id'][]
   editing: User['id'] | 'all' | null
   error: string | null
-  changes: Record<number, Partial<EditableUserFormObject>>
+  data:
+    | Partial<Omit<User, 'id'>>
+    | {
+        id: number
+        payload: Partial<Omit<User, 'id'>>
+      }[]
 }
 
 export type UserEditAction =
   | { type: 'SHOW_EDITOR'; payload: User['id'] }
   | { type: 'HIDE_EDITOR'; payload: User['id'] }
   | { type: 'TOGGLE_ALL_EDITOR'; payload: boolean }
-  | { type: 'UPDATE_CHANGE'; payload: { id: number; name: string; value: string } }
   | { type: 'SUBMIT_START'; payload: User['id'] }
   | { type: 'SUBMIT_MODIFIED_USERS_START' }
   | { type: 'SUBMIT_SUCCESS'; payload: { data: Partial<Omit<User, 'id'>>; id: User['id'] } }
@@ -75,60 +79,37 @@ export type UserEditAction =
   | { type: 'RESET' }
 
 export const INIT_USER_EDIT_STATE: UserEditState = {
-  mode: 'default',
+  isShowAllEditor: false,
   displayedEditor: [],
   editing: null,
   error: null,
-  changes: {},
+  data: INIT_NEW_USER_VALUE,
 }
 
 export function userEditReducer(state: UserEditState, action: UserEditAction) {
-  const { displayedEditor, changes } = state
+  const { displayedEditor } = state
 
   switch (action.type) {
-    case 'SHOW_EDITOR': {
-      const { payload } = action
+    case 'SHOW_EDITOR':
       return {
         ...state,
-        displayedEditor: displayedEditor.includes(payload)
+        displayedEditor: displayedEditor.includes(action.payload)
           ? displayedEditor
-          : [...displayedEditor, payload],
+          : [...displayedEditor, action.payload],
       }
-    }
-    case 'HIDE_EDITOR': {
-      const { payload } = action
+    case 'HIDE_EDITOR':
       return {
         ...state,
-        displayedEditor: displayedEditor.filter((displayedId) => displayedId !== payload),
+        displayedEditor: displayedEditor.filter((displayedId) => displayedId !== action.payload),
       }
-    }
-    case 'TOGGLE_ALL_EDITOR': {
-      const { payload } = action
+    case 'TOGGLE_ALL_EDITOR':
       return {
         ...state,
         displayedEditor: [],
-        mode: payload ? 'allEdit' : 'default',
+        isShowAllEditor: action.payload,
       }
-    }
-    case 'SUBMIT_START': {
-      const { payload } = action
-      return { ...state, editing: payload }
-    }
-    case 'UPDATE_CHANGE': {
-      const { id, name, value } = action.payload
-      console.log(changes)
-      return {
-        ...state,
-        changes: {
-          ...state.changes,
-          [id]: {
-            ...state.changes[id],
-            [name]: value,
-          },
-        },
-      }
-    }
-
+    case 'SUBMIT_START':
+      return { ...state, editing: action.payload }
     case 'SUBMIT_MODIFIED_USERS_START':
       return { ...state, editing: 'all' as const }
     case 'SUBMIT_SUCCESS':

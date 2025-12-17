@@ -19,9 +19,9 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
   } = useUsersActions()
 
   const isNoUserData = count === 0
-  const isShowNewUserFormEl = !(userEditState.mode === 'allEdit') && !isShowDeleteCheckbox
+  const isShowNewUserFormEl = !userEditState.isShowAllEditor && !isShowDeleteCheckbox
   const isShowDeleteCheckboxEl =
-    !isNoUserData && !newUserState.isShowEditor && !(userEditState.mode === 'allEdit')
+    !isNoUserData && !newUserState.isShowEditor && !userEditState.isShowAllEditor
   const isShowAllEditorEl = !isNoUserData && !newUserState.isShowEditor && !isShowDeleteCheckbox
 
   const resultCount = count.toString().padStart(2, '0')
@@ -102,7 +102,7 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
 
           {isShowAllEditorEl && (
             <>
-              {!(userEditState.mode == 'allEdit') ? (
+              {!userEditState.isShowAllEditor ? (
                 <button
                   type="button"
                   className="line"
