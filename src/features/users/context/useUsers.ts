@@ -52,8 +52,6 @@ export type UsersActionsContextType = {
   handleToggleDeleteCheckbox: (isChecked: boolean) => void
   onChangeCheckDeleteItems: ({ e, id }: OnChangeCheckDeleteItems) => void
   onClickDeleteSelectedItems: () => void
-  onChangeUserData: OnChangeUserData
-  onChangeUserAvatar: OnChangeUserAvatar
   onClickDeleteItem: (id: User['id']) => Promise<void>
   handleAllCheck: () => void
   resetChecked: () => void

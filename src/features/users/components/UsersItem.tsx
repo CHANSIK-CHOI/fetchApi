@@ -43,7 +43,7 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
     setFormData((prev) => {
       return {
         ...prev,
-        [name]: value,
+        [name]: value.trim(),
       }
     })
   }

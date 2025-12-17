@@ -24,7 +24,6 @@ export default function UsersContainer() {
   return (
     <UsersProvider
       users={users}
-      // onModify={modifyUser}
       onAllModify={modifyAllUsers}
       onDeleteUser={deleteUser}
       onDeleteSelectedUsers={deleteSelectedUsers}

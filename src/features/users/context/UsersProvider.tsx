@@ -12,19 +12,14 @@ import {
   UsersActionsContext,
   UsersStateContext,
   type OnChangeCheckDeleteItems,
-  type OnChangeUserAvatar,
-  type OnChangeUserData,
   type IsDeleting,
 } from '@/features/users'
 
 import type {
   User,
-  PersonalUserValue,
   BuiltAllUsersValue,
   PayloadAllModifiedUsers,
   EditableUserKey,
-  PersonalEditableUserKey,
-  PersonalEditableUserValue,
 } from '@/types/users'
 
 import {
@@ -89,7 +84,6 @@ export default function UsersProvider({
   const initialBuiltAllUsersValue = useMemo(() => buildUsersData(users), [buildUsersData, users]) // users 업데이트 시 전체 유저의 데이터를 BuiltAllUsersValue 타입으로 캐싱
   const [builtAllUsersValue, setBuiltAllUsersValue] =
     useState<BuiltAllUsersValue>(initialBuiltAllUsersValue) // 각 유저의 데이터를 id값과 조합하여 가공한 데이터 : UsersItem 컴포넌트 내부 input 태그의 value값으로 연결
-  const builtAllUsersValueRef = useRef<BuiltAllUsersValue>(initialBuiltAllUsersValue) // builtAllUsersValue ref
 
   // [reset] 전체 유저의 input value를 reset
   const resetAllUsersData = useCallback(() => {
@@ -170,129 +164,50 @@ export default function UsersProvider({
   //   [filterModifiedData, resetAllUsersData, onAllModify, initialBuiltAllUsersValue],
   // )
 
-  // [수정하기 - 개별] item 수정 에디터 show/hide & patch
-  // const onItemEditor = useCallback(
-  //   async ({ id, isShowEditor, isPatch = false }: OnItemEditor) => {
-  //     // 수정완료(PATCH) : isPatch
-  //     if (isPatch) {
-  //       if (isPatchingRef.current !== null) return
-
-  //       const filteredModifiedData = filterModifiedData()
-  //       const payload = filteredModifiedData[id]
-
-  //       if (!payload) {
-  //         alert('수정된 내역이 없습니다.')
-  //         return
-  //       }
-
-  //       const hasEmpty = hasEmptyRequiredField(payload)
-  //       if (hasEmpty) {
-  //         alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
-  //         return
-  //       }
-
-  //       const confirmMsg = `${initialBuiltAllUsersValue[id][`first_name_${id}`]} ${initialBuiltAllUsersValue[id][`last_name_${id}`]}님의 데이터를 수정하시겠습니까?`
-  //       if (!confirm(confirmMsg)) return
-
-  //       try {
-  //         setIsPatching(id)
-  //         await onModify(id, payload)
-  //         alert('수정을 완료하였습니다.')
-  //       } catch (err) {
-  //         console.error(err)
-  //         alert('수정에 실패했습니다. 다시 시도해주세요.')
-  //       } finally {
-  //         setIsPatching(null)
-  //       }
-  //     }
-
-  //     // 수정취소
-  //     if (!isShowEditor && !isPatch) resetTargetUserData(id)
-
-  //     // id Item 에디터 창 show
-  //     if (isShowEditor) {
-  //       setDisplayItemEditor((prev) => {
-  //         const isShowItemIds = prev.includes(id) ? prev : [...prev, id]
-  //         return isShowItemIds
-  //       })
-  //     }
-  //     // id Item 에디터 창 hide
-  //     else {
-  //       setDisplayItemEditor((prev) => {
-  //         const isFilteredId = prev.filter((value) => value !== id)
-  //         return isFilteredId
-  //       })
-  //     }
-  //   },
-  //   [filterModifiedData, resetTargetUserData, onModify, initialBuiltAllUsersValue],
-  // )
-
   // [수정하기] builtAllUsersValue update
-  const updateBuiltUserData = useCallback(
-    (
-      id: User['id'],
-      name: PersonalEditableUserKey,
-      value: PersonalEditableUserValue[PersonalEditableUserKey],
-    ) => {
-      setBuiltAllUsersValue((prev) => {
-        const target = prev[id]
-        if (!target) return prev
+  // const updateBuiltUserData = useCallback(
+  //   (
+  //     id: User['id'],
+  //     name: PersonalEditableUserKey,
+  //     value: PersonalEditableUserValue[PersonalEditableUserKey],
+  //   ) => {
+  //     setBuiltAllUsersValue((prev) => {
+  //       const target = prev[id]
+  //       if (!target) return prev
 
-        const nextEntry: PersonalUserValue = {
-          ...target,
-          [name]: value,
-        }
+  //       const nextEntry: PersonalUserValue = {
+  //         ...target,
+  //         [name]: value,
+  //       }
 
-        const originalUser = users.find((user) => user.id === id)
-        if (originalUser) {
-          const isModify =
-            nextEntry[`first_name_${id}`] !== originalUser.first_name ||
-            nextEntry[`last_name_${id}`] !== originalUser.last_name ||
-            nextEntry[`email_${id}`] !== originalUser.email ||
-            nextEntry[`avatar_${id}`] !== originalUser.avatar
+  //       const originalUser = users.find((user) => user.id === id)
+  //       if (originalUser) {
+  //         const isModify =
+  //           nextEntry[`first_name_${id}`] !== originalUser.first_name ||
+  //           nextEntry[`last_name_${id}`] !== originalUser.last_name ||
+  //           nextEntry[`email_${id}`] !== originalUser.email ||
+  //           nextEntry[`avatar_${id}`] !== originalUser.avatar
 
-          return {
-            ...prev,
-            [id]: {
-              ...nextEntry,
-              isModify,
-            },
-          }
-        }
+  //         return {
+  //           ...prev,
+  //           [id]: {
+  //             ...nextEntry,
+  //             isModify,
+  //           },
+  //         }
+  //       }
 
-        return {
-          ...prev,
-          [id]: {
-            ...nextEntry,
-            isModify: true,
-          },
-        }
-      })
-    },
-    [users],
-  )
-
-  // [수정하기] 이름, 이메일 변경 이벤트 : builtAllUsersValue update
-  const onChangeUserData = useCallback<OnChangeUserData>(
-    (e, id) => {
-      const { name, value } = e.target
-      updateBuiltUserData(id, name, value.trim())
-    },
-    [updateBuiltUserData],
-  )
-
-  // [수정하기] 프로필 이미지 변경 이벤트 : builtAllUsersValue update
-  const onChangeUserAvatar = useCallback<OnChangeUserAvatar>(
-    (id, avatarSrc) => {
-      updateBuiltUserData(id, `avatar_${id}`, avatarSrc ?? '')
-    },
-    [updateBuiltUserData],
-  )
-
-  // [수정하기] builtAllUsersValue 업데이트 시 builtAllUsersValueRef도 업데이트
-  useEffect(() => {
-    builtAllUsersValueRef.current = builtAllUsersValue
-  }, [builtAllUsersValue])
+  //       return {
+  //         ...prev,
+  //         [id]: {
+  //           ...nextEntry,
+  //           isModify: true,
+  //         },
+  //       }
+  //     })
+  //   },
+  //   [users],
+  // )
 
   // [삭제하기] Checkbox Change Event
   const onChangeCheckDeleteItems = useCallback(({ e, id }: OnChangeCheckDeleteItems) => {
@@ -430,8 +345,6 @@ export default function UsersProvider({
       handleToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteSelectedItems,
-      onChangeUserData,
-      onChangeUserAvatar,
       onClickDeleteItem,
       handleAllCheck,
       resetChecked,
@@ -442,8 +355,6 @@ export default function UsersProvider({
       handleToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteSelectedItems,
-      onChangeUserData,
-      onChangeUserAvatar,
       onClickDeleteItem,
       handleAllCheck,
       resetChecked,

@@ -119,7 +119,11 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
                   >
                     수정취소
                   </button>
-                  <button type="submit" disabled={userEditState.editing === 'all'}>
+                  <button
+                    type="button"
+                    disabled={userEditState.editing === 'all'}
+                    onClick={() => userEditDispatch({ type: 'SUBMIT_MODIFIED_USERS_START' })}
+                  >
                     {userEditState.editing === 'all' ? '수정중...' : '수정완료'}
                   </button>
                 </>
