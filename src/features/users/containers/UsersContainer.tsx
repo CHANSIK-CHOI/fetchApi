@@ -24,7 +24,7 @@ export default function UsersContainer() {
   return (
     <UsersProvider
       users={users}
-      onModify={modifyUser}
+      // onModify={modifyUser}
       onAllModify={modifyAllUsers}
       onDeleteUser={deleteUser}
       onDeleteSelectedUsers={deleteSelectedUsers}
@@ -39,7 +39,7 @@ export default function UsersContainer() {
           </div>
         )}
 
-        <UsersList data={users} />
+        <UsersList data={users} onModify={modifyUser} />
       </Users>
     </UsersProvider>
   )

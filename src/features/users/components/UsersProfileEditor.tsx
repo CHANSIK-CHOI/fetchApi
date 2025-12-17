@@ -1,47 +1,39 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from 'react'
-import { useUsersActions } from '@/features/users'
+import { memo, useEffect, useState, type ChangeEvent } from 'react'
 import { PLACEHOLDER_SRC } from '@/constants/users'
 import type { User } from '@/types/users'
 
 type UsersProfileEditorProps = {
   id: User['id']
-  profileSrc?: User['avatar']
+  avatar?: User['avatar']
+  onChange: (url: string) => void
 }
 
-export default function UsersProfileEditor({ id, profileSrc }: UsersProfileEditorProps) {
-  const { onChangeUserAvatar } = useUsersActions()
-  const [file, setFile] = useState<File | null>(null)
-  const [isProfileCleared, setIsProfileCleared] = useState(false)
+function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
+  const [preview, setPreview] = useState<string | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview)
+    }
+  }, [preview])
 
   const handleChangeImage = (e: ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0] || null
-    setFile(selected)
+    const selected = e.target.files?.[0]
+
     if (selected) {
-      setIsProfileCleared(false)
+      const objectUrl = URL.createObjectURL(selected)
+      setPreview(objectUrl)
+      onChange(objectUrl)
     }
   }
 
   const handleRemoveImage = () => {
-    setFile(null)
-    if (!isProfileCleared) setIsProfileCleared(true)
-    onChangeUserAvatar(id, '')
+    setPreview(null)
+    onChange('')
   }
 
-  const previewUrl = useMemo(() => {
-    if (!file) return null
-    return URL.createObjectURL(file)
-  }, [file])
-
-  useEffect(() => {
-    if (!previewUrl) return
-    onChangeUserAvatar(id, previewUrl)
-    return () => URL.revokeObjectURL(previewUrl)
-  }, [id, onChangeUserAvatar, previewUrl])
-
-  const hasPreview = Boolean(previewUrl)
-  const hasProfileSrc = Boolean(profileSrc) && !isProfileCleared
-  const displaySrc = previewUrl || (hasProfileSrc ? profileSrc : null) || PLACEHOLDER_SRC
-  const labelText = hasPreview || hasProfileSrc ? '프로필 변경' : '프로필 추가'
+  const displaySrc = preview || avatar || PLACEHOLDER_SRC
+  const hasContent = Boolean(preview || avatar)
 
   return (
     <>
@@ -49,12 +41,11 @@ export default function UsersProfileEditor({ id, profileSrc }: UsersProfileEdito
         <img src={displaySrc} alt="" />
       </div>
       <div className="userItem__profileBtns">
-        {hasPreview && file?.name && <span className="userItem__profileName">{file.name}</span>}
-
         <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
-          {labelText}
+          {hasContent ? '프로필 변경' : '프로필 추가'}
         </label>
-        {(hasPreview || hasProfileSrc) && (
+
+        {hasContent && (
           <button type="button" className="line userItem__profileBtn" onClick={handleRemoveImage}>
             삭제
           </button>
@@ -70,3 +61,5 @@ export default function UsersProfileEditor({ id, profileSrc }: UsersProfileEdito
     </>
   )
 }
+
+export default memo(UsersProfileEditor)

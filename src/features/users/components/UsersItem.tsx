@@ -4,45 +4,58 @@ import {
   UsersProfileView,
   UsersProfileEditor,
 } from '@/features/users'
-import type { ChangeEvent } from 'react'
+import { useCallback, useState, type ChangeEvent, type FormEvent } from 'react'
 
-import type { PersonalEditableUserKey, User } from '@/types/users'
+import type { PayloadModifiedUser, PayloadNewUser, User } from '@/types/users'
+import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
 
 type UsersItem = {
-  profileSrc?: User['avatar']
+  avatar?: User['avatar']
   firstName: User['first_name']
   lastName: User['last_name']
   email: User['email']
   id: User['id']
+  onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
 }
 
-export default function UsersItem({ profileSrc, firstName, lastName, email, id }: UsersItem) {
-  const {
-    isShowAllEditor,
-    displayItemEditor,
-    isShowDeleteCheckbox,
-    builtAllUsersValue,
-    isPatching,
-    isDeleting,
-    checkedDeleteItems,
-    newUserState,
-  } = useUsersState()
-  const { onItemEditor, onChangeCheckDeleteItems, onChangeUserData, onClickDeleteItem } =
-    useUsersActions()
+export default function UsersItem({ avatar, firstName, lastName, email, id, onModify }: UsersItem) {
+  const originalData = {
+    avatar,
+    email,
+    first_name: firstName,
+    last_name: lastName,
+  }
+  const [formData, setFormData] = useState<PayloadNewUser>(originalData)
 
-  const isItemEditing = displayItemEditor.includes(id)
-  const isEditing = isShowAllEditor || isItemEditing
+  const { isShowDeleteCheckbox, isDeleting, checkedDeleteItems, newUserState, userEditState } =
+    useUsersState()
+  const { onChangeCheckDeleteItems, onClickDeleteItem, userEditDispatch } = useUsersActions()
 
-  const userInputValues = builtAllUsersValue[id]
-  const firstNameValue = userInputValues ? userInputValues[`first_name_${id}`] : ''
-  const lastNameValue = userInputValues ? userInputValues[`last_name_${id}`] : ''
-  const emailValue = userInputValues ? userInputValues[`email_${id}`] : ''
-  const avatarSrc = userInputValues ? userInputValues[`avatar_${id}`] : ''
+  const isItemEditing = userEditState.displayedEditor.includes(id)
+  const isEditing = userEditState.isShowAllEditor || isItemEditing
 
-  const isShowEditorBtns = !isShowAllEditor && !isShowDeleteCheckbox && !newUserState.isShowEditor
-  const handleChangeUserData = (
-    e: ChangeEvent<HTMLInputElement & { name: PersonalEditableUserKey }>,
-  ) => onChangeUserData(e, id)
+  const isShowEditorBtns =
+    !userEditState.isShowAllEditor && !isShowDeleteCheckbox && !newUserState.isShowEditor
+
+  const handleChangeUserData = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+
+    setFormData((prev) => {
+      return {
+        ...prev,
+        [name]: value,
+      }
+    })
+  }
+
+  const handleChangeImage = useCallback((url: string) => {
+    setFormData((prev) => {
+      return {
+        ...prev,
+        avatar: url,
+      }
+    })
+  }, [])
 
   const userNameEl = (
     <>
@@ -53,9 +66,43 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
     </>
   )
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+
+    if (userEditState.editing !== null) return
+
+    const filteredIdAndData = filterModifiedData({ data: [formData], originalData, id })
+    const filteredData = filteredIdAndData[id]
+
+    if (!filteredData) {
+      alert('수정된 내역이 없습니다.')
+      return
+    }
+
+    const hasEmpty = hasEmptyRequiredField(filteredData)
+    if (hasEmpty) {
+      alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
+      return
+    }
+
+    const confirmMsg = `${originalData.first_name} ${originalData.last_name}님의 데이터를 수정하시겠습니까?`
+    if (!confirm(confirmMsg)) return
+
+    try {
+      userEditDispatch({ type: 'SUBMIT_START', payload: id })
+      await onModify(id, filteredData)
+      userEditDispatch({ type: 'SUBMIT_SUCCESS', payload: { data: filteredData, id } })
+      alert('수정을 완료하였습니다.')
+    } catch (err) {
+      console.error(err)
+      userEditDispatch({ type: 'SUBMIT_ERROR', payload: '수정에 실패했습니다. 다시 시도해주세요.' })
+      alert('수정에 실패했습니다. 다시 시도해주세요.')
+    }
+  }
+
   return (
     <li className="userItem">
-      <div className="userItem__box">
+      <form id={`userItem_${id}`} className="userItem__box" onSubmit={handleSubmit}>
         {isShowDeleteCheckbox && (
           <div className="userItem__checkbox">
             <input
@@ -70,9 +117,13 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
         <div className="userItem__info">
           <div className="userItem__profileWrap">
             {isEditing ? (
-              <UsersProfileEditor key={`editing-${id}`} id={id} profileSrc={avatarSrc} />
+              <UsersProfileEditor
+                id={id}
+                avatar={formData ? formData.avatar : ''}
+                onChange={handleChangeImage}
+              />
             ) : (
-              <UsersProfileView profileSrc={profileSrc} />
+              <UsersProfileView avatar={avatar} />
             )}
           </div>
 
@@ -89,23 +140,23 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
               <div className="userItem__editer">
                 <input
                   type="text"
-                  name={`first_name_${id}`}
+                  name="first_name"
                   placeholder="first name"
-                  value={firstNameValue}
+                  value={formData ? formData.first_name : ''}
                   onChange={handleChangeUserData}
                 />
                 <input
                   type="text"
-                  name={`last_name_${id}`}
+                  name="last_name"
                   placeholder="last name"
-                  value={lastNameValue}
+                  value={formData ? formData.last_name : ''}
                   onChange={handleChangeUserData}
                 />
                 <input
                   type="text"
-                  name={`email_${id}`}
+                  name="email"
                   placeholder="email"
-                  value={emailValue}
+                  value={formData ? formData.email : ''}
                   onChange={handleChangeUserData}
                 />
               </div>
@@ -119,7 +170,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
               <button
                 type="button"
                 className="line"
-                onClick={() => onItemEditor({ id, isShowEditor: true })}
+                onClick={() => userEditDispatch({ type: 'SHOW_EDITOR', payload: id })}
               >
                 수정하기
               </button>
@@ -128,16 +179,16 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
                 <button
                   type="button"
                   className="line"
-                  onClick={() => onItemEditor({ id, isShowEditor: false })}
+                  onClick={() => userEditDispatch({ type: 'HIDE_EDITOR', payload: id })}
                 >
                   수정취소
                 </button>
                 <button
-                  type="button"
-                  onClick={() => onItemEditor({ id, isShowEditor: false, isPatch: true })}
-                  disabled={isPatching == 'all' || isPatching == id}
+                  type="submit"
+                  form={`userItem_${id}`}
+                  disabled={userEditState.editing == id}
                 >
-                  {isPatching == 'all' || isPatching == id ? '수정중...' : '수정완료'}
+                  {userEditState.editing == id ? '수정중...' : '수정완료'}
                 </button>
               </>
             )}
@@ -154,7 +205,7 @@ export default function UsersItem({ profileSrc, firstName, lastName, email, id }
             )}
           </div>
         )}
-      </div>
+      </form>
     </li>
   )
 }

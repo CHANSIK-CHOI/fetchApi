@@ -7,26 +7,21 @@ type UsersProps = {
   count: number
 }
 export default function Users({ children, newUserForm, count }: UsersProps) {
+  const { isShowDeleteCheckbox, isCheckedDeleting, isAllChecked, newUserState, userEditState } =
+    useUsersState()
   const {
-    isShowAllEditor,
-    isShowDeleteCheckbox,
-    isPatching,
-    isCheckedDeleting,
-    isAllChecked,
-    newUserState,
-  } = useUsersState()
-  const {
-    onAllEditor,
     handleToggleDeleteCheckbox,
     onClickDeleteSelectedItems,
     handleAllCheck,
     resetChecked,
     newUserDispatch,
+    userEditDispatch,
   } = useUsersActions()
 
   const isNoUserData = count === 0
-  const isShowNewUserFormEl = !isShowAllEditor && !isShowDeleteCheckbox
-  const isShowDeleteCheckboxEl = !isNoUserData && !newUserState.isShowEditor && !isShowAllEditor
+  const isShowNewUserFormEl = !userEditState.isShowAllEditor && !isShowDeleteCheckbox
+  const isShowDeleteCheckboxEl =
+    !isNoUserData && !newUserState.isShowEditor && !userEditState.isShowAllEditor
   const isShowAllEditorEl = !isNoUserData && !newUserState.isShowEditor && !isShowDeleteCheckbox
 
   const resultCount = count.toString().padStart(2, '0')
@@ -107,11 +102,11 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
 
           {isShowAllEditorEl && (
             <>
-              {!isShowAllEditor ? (
+              {!userEditState.isShowAllEditor ? (
                 <button
                   type="button"
                   className="line"
-                  onClick={() => onAllEditor({ isShowEditor: true })}
+                  onClick={() => userEditDispatch({ type: 'TOGGLE_ALL_EDITOR', payload: true })}
                 >
                   전체수정
                 </button>
@@ -120,16 +115,12 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
                   <button
                     type="button"
                     className="line"
-                    onClick={() => onAllEditor({ isShowEditor: false })}
+                    onClick={() => userEditDispatch({ type: 'TOGGLE_ALL_EDITOR', payload: false })}
                   >
                     수정취소
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => onAllEditor({ isShowEditor: false, isPatch: true })}
-                    disabled={isPatching === 'all'}
-                  >
-                    {isPatching === 'all' ? '수정중...' : '수정완료'}
+                  <button type="submit" disabled={userEditState.editing === 'all'}>
+                    {userEditState.editing === 'all' ? '수정중...' : '수정완료'}
                   </button>
                 </>
               )}

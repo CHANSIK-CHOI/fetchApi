@@ -11,29 +11,28 @@ import {
 import {
   UsersActionsContext,
   UsersStateContext,
-  type OnItemEditor,
   type OnChangeCheckDeleteItems,
-  type OnAllEditor,
-  type IsPatching,
   type OnChangeUserAvatar,
   type OnChangeUserData,
   type IsDeleting,
 } from '@/features/users'
 
 import type {
-  FilteredModifiedAllData,
-  PayloadModifiedUser,
   User,
   PersonalUserValue,
   BuiltAllUsersValue,
   PayloadAllModifiedUsers,
   EditableUserKey,
-  EditableUserFormObject,
   PersonalEditableUserKey,
   PersonalEditableUserValue,
 } from '@/types/users'
-import { EDITABLE_USER_KEYS, REQUIRED_USER_KEYS } from '@/constants/users'
-import { INIT_NEW_USER_STATE, newUserReducer } from '@/reducers/usersReducer'
+
+import {
+  INIT_NEW_USER_STATE,
+  INIT_USER_EDIT_STATE,
+  newUserReducer,
+  userEditReducer,
+} from '@/reducers/usersReducer'
 
 const toPersonalKey = <K extends EditableUserKey>(key: K, id: User['id']) =>
   `${key}_${id}` as `${K}_${number}`
@@ -41,7 +40,6 @@ const toPersonalKey = <K extends EditableUserKey>(key: K, id: User['id']) =>
 type UsersProviderProps = {
   children: ReactNode
   users: User[]
-  onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
   onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
   onDeleteUser: (id: User['id']) => Promise<void>
   onDeleteSelectedUsers: (ids: User['id'][]) => Promise<void>
@@ -50,8 +48,6 @@ type UsersProviderProps = {
 export default function UsersProvider({
   children,
   users,
-  onModify,
-  onAllModify,
   onDeleteUser,
   onDeleteSelectedUsers,
 }: UsersProviderProps) {
@@ -59,17 +55,14 @@ export default function UsersProvider({
   const [checkedDeleteItems, setCheckedDeleteItems] = useState<User['id'][]>([]) // UI - 체크박스가 선택 된 유저의 id 배열
   const checkedDeleteItemsRef = useRef<User['id'][]>([]) // checkedDeleteItems ref
   const [isAllChecked, setIsAllChecked] = useState<boolean>(false) // UI - 전체 체크 여부
-  const [isShowAllEditor, setIsShowAllEditor] = useState<boolean>(false) // UI - 전체 유저의 수정 에디터 show/hide 여부
-  const [displayItemEditor, setDisplayItemEditor] = useState<User['id'][]>([]) // UI - 개별 수정 시 에디터가 보여지고 있는 유저의 id 배열
-  const displayItemEditorRef = useRef<User['id'][]>([]) // displayItemEditor ref
-  const [isPatching, setIsPatching] = useState<IsPatching>(null) // UI - 유저 데이터의 수정 여부
-  const isPatchingRef = useRef<IsPatching>(null) // isPatching ref
+
   const [isDeleting, setIsDeleting] = useState<IsDeleting>(null) // UI - 유저 데이터의 삭제 여부
   const isDeletingRef = useRef<IsDeleting>(null) // isDeleting ref
   const [isCheckedDeleting, setisCheckedDeleting] = useState<boolean>(false) // UI - 선택된 유저 데이터의 삭제 여부
   const isCheckedDeletingRef = useRef<boolean>(false)
 
   const [newUserState, newUserDispatch] = useReducer(newUserReducer, INIT_NEW_USER_STATE) // 유저 추가하기 reducer
+  const [userEditState, userEditDispatch] = useReducer(userEditReducer, INIT_USER_EDIT_STATE) // 유저 수정하기(개별) reducer
 
   // 각 유저의 데이터를 id값과 조합하여 가공한 데이터 : UsersItem 컴포넌트 내부 input 태그의 value값으로 연결
   const buildUsersData = useCallback((data: User[]) => {
@@ -108,25 +101,6 @@ export default function UsersProvider({
     })
   }, [initialBuiltAllUsersValue])
 
-  // [reset] 특정 유저의 input value를 reset
-  const resetTargetUserData = useCallback(
-    (id: User['id']) => {
-      setBuiltAllUsersValue((prev) => {
-        const target = prev[id]
-        if (!target || !target.isModify) return prev
-
-        return {
-          ...prev,
-          [id]: {
-            ...initialBuiltAllUsersValue[id],
-            isModify: false,
-          } as PersonalUserValue,
-        }
-      })
-    },
-    [initialBuiltAllUsersValue],
-  )
-
   // [reset] 전체 체크박스 선택 reset
   const resetChecked = useCallback(() => {
     setCheckedDeleteItems([])
@@ -138,153 +112,120 @@ export default function UsersProvider({
     setCheckedDeleteItems(ids)
   }, [initialBuiltAllUsersValue])
 
-  // [수정하기] 수정된 데이터만 필터링 후 반환
-  const filterModifiedData = useCallback(() => {
-    const usersArray = Object.values(builtAllUsersValueRef.current)
-    const modifiedData = usersArray.filter(({ isModify }) => isModify)
-    const filteredModifiedData = modifiedData.reduce((acc, user) => {
-      const original = initialBuiltAllUsersValue[user.id]
-      const changed = EDITABLE_USER_KEYS.reduce<EditableUserFormObject>((fieldAcc, key) => {
-        const personalKey: PersonalEditableUserKey = `${key}_${user.id}`
-        if (!original || user[personalKey] !== original[personalKey]) {
-          fieldAcc[key] = user[personalKey]
-        }
-        return fieldAcc
-      }, {})
-      if (Object.keys(changed).length) acc[user.id] = changed
-      return acc
-    }, {} as FilteredModifiedAllData)
-
-    return filteredModifiedData
-  }, [initialBuiltAllUsersValue])
-
-  // [추가하기, 수정하기] 필수 입력란이 빈값인지 여부 확인
-  const hasEmptyRequiredField = (data: EditableUserFormObject) => {
-    const hasEmpty = REQUIRED_USER_KEYS.some((key) => {
-      return data[key] !== undefined && data[key].trim() === ''
-    })
-    return hasEmpty
-  }
-
   // [수정하기 - 전체] 전체 수정 에디터 show/hide & patch
-  const onAllEditor = useCallback(
-    async ({ isShowEditor, isPatch = false }: OnAllEditor) => {
-      // 수정완료(PATCH) : isPatch
-      if (isPatch) {
-        if (isPatchingRef.current !== null) return
+  // const onAllEditor = useCallback(
+  //   async ({ isShowEditor, isPatch = false }: OnAllEditor) => {
+  //     // 수정완료(PATCH) : isPatch
+  //     if (isPatch) {
+  //       if (isPatchingRef.current !== null) return
 
-        const filteredModifiedData = filterModifiedData()
-        const data = Object.entries(filteredModifiedData).map(([id, payload]) => {
-          const numId = Number(id)
-          return { id: numId, payload }
-        })
+  //       const filteredModifiedData = filterModifiedData()
+  //       const data = Object.entries(filteredModifiedData).map(([id, payload]) => {
+  //         const numId = Number(id)
+  //         return { id: numId, payload }
+  //       })
 
-        if (data.length === 0) {
-          alert('수정된 내역이 없습니다.')
-          return
-        }
+  //       if (data.length === 0) {
+  //         alert('수정된 내역이 없습니다.')
+  //         return
+  //       }
 
-        const hasEmpty = Object.values(filteredModifiedData).some(hasEmptyRequiredField)
+  //       const hasEmpty = Object.values(filteredModifiedData).some(hasEmptyRequiredField)
 
-        if (hasEmpty) {
-          alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
-          return
-        }
+  //       if (hasEmpty) {
+  //         alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
+  //         return
+  //       }
 
-        const names = data
-          .map((u) => u.id)
-          .map((id) => initialBuiltAllUsersValue[id])
-          .filter(Boolean)
-          .map((u) => `${u[`first_name_${u.id}`]} ${u[`last_name_${u.id}`]}`)
-          .join(', ')
-        const confirmMsg = `${names} 유저들을 수정하시겠습니까?`
-        if (!confirm(confirmMsg)) return
+  //       const names = data
+  //         .map((u) => u.id)
+  //         .map((id) => initialBuiltAllUsersValue[id])
+  //         .filter(Boolean)
+  //         .map((u) => `${u[`first_name_${u.id}`]} ${u[`last_name_${u.id}`]}`)
+  //         .join(', ')
+  //       const confirmMsg = `${names} 유저들을 수정하시겠습니까?`
+  //       if (!confirm(confirmMsg)) return
 
-        try {
-          setIsPatching('all')
-          await onAllModify(data)
-          alert('수정을 완료하였습니다.')
-        } catch (err) {
-          console.error(err)
-          alert('수정에 실패했습니다. 다시 시도해주세요.')
-        } finally {
-          setIsPatching(null)
-        }
-      }
+  //       try {
+  //         setIsPatching('all')
+  //         await onAllModify(data)
+  //         alert('수정을 완료하였습니다.')
+  //       } catch (err) {
+  //         console.error(err)
+  //         alert('수정에 실패했습니다. 다시 시도해주세요.')
+  //       } finally {
+  //         setIsPatching(null)
+  //       }
+  //     }
 
-      // 수정취소
-      if (!isShowEditor && !isPatch) resetAllUsersData()
+  //     // 수정취소
+  //     if (!isShowEditor && !isPatch) resetAllUsersData()
 
-      // 전체 Editor가 열릴 때 Item Editor reset
-      if (isShowEditor) setDisplayItemEditor([])
+  //     // 전체 Editor가 열릴 때 Item Editor reset
+  //     if (isShowEditor) setDisplayItemEditor([])
 
-      // Editor toggle(show/hide)
-      setIsShowAllEditor(isShowEditor)
-    },
-    [filterModifiedData, resetAllUsersData, onAllModify, initialBuiltAllUsersValue],
-  )
+  //     // Editor toggle(show/hide)
+  //     setIsShowAllEditor(isShowEditor)
+  //   },
+  //   [filterModifiedData, resetAllUsersData, onAllModify, initialBuiltAllUsersValue],
+  // )
 
   // [수정하기 - 개별] item 수정 에디터 show/hide & patch
-  const onItemEditor = useCallback(
-    async ({ id, isShowEditor, isPatch = false }: OnItemEditor) => {
-      // 수정완료(PATCH) : isPatch
-      if (isPatch) {
-        if (isPatchingRef.current !== null) return
+  // const onItemEditor = useCallback(
+  //   async ({ id, isShowEditor, isPatch = false }: OnItemEditor) => {
+  //     // 수정완료(PATCH) : isPatch
+  //     if (isPatch) {
+  //       if (isPatchingRef.current !== null) return
 
-        const filteredModifiedData = filterModifiedData()
-        const payload = filteredModifiedData[id]
+  //       const filteredModifiedData = filterModifiedData()
+  //       const payload = filteredModifiedData[id]
 
-        if (!payload) {
-          alert('수정된 내역이 없습니다.')
-          return
-        }
+  //       if (!payload) {
+  //         alert('수정된 내역이 없습니다.')
+  //         return
+  //       }
 
-        const hasEmpty = hasEmptyRequiredField(payload)
-        if (hasEmpty) {
-          alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
-          return
-        }
+  //       const hasEmpty = hasEmptyRequiredField(payload)
+  //       if (hasEmpty) {
+  //         alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
+  //         return
+  //       }
 
-        const confirmMsg = `${initialBuiltAllUsersValue[id][`first_name_${id}`]} ${initialBuiltAllUsersValue[id][`last_name_${id}`]}님의 데이터를 수정하시겠습니까?`
-        if (!confirm(confirmMsg)) return
+  //       const confirmMsg = `${initialBuiltAllUsersValue[id][`first_name_${id}`]} ${initialBuiltAllUsersValue[id][`last_name_${id}`]}님의 데이터를 수정하시겠습니까?`
+  //       if (!confirm(confirmMsg)) return
 
-        try {
-          setIsPatching(id)
-          await onModify(id, payload)
-          alert('수정을 완료하였습니다.')
-        } catch (err) {
-          console.error(err)
-          alert('수정에 실패했습니다. 다시 시도해주세요.')
-        } finally {
-          setIsPatching(null)
-        }
-      }
+  //       try {
+  //         setIsPatching(id)
+  //         await onModify(id, payload)
+  //         alert('수정을 완료하였습니다.')
+  //       } catch (err) {
+  //         console.error(err)
+  //         alert('수정에 실패했습니다. 다시 시도해주세요.')
+  //       } finally {
+  //         setIsPatching(null)
+  //       }
+  //     }
 
-      // 수정취소
-      if (!isShowEditor && !isPatch) resetTargetUserData(id)
+  //     // 수정취소
+  //     if (!isShowEditor && !isPatch) resetTargetUserData(id)
 
-      // id Item 에디터 창 show
-      if (isShowEditor) {
-        setDisplayItemEditor((prev) => {
-          const isShowItemIds = prev.includes(id) ? prev : [...prev, id]
-          return isShowItemIds
-        })
-      }
-      // id Item 에디터 창 hide
-      else {
-        setDisplayItemEditor((prev) => {
-          const isFilteredId = prev.filter((value) => value !== id)
-          return isFilteredId
-        })
-      }
-    },
-    [filterModifiedData, resetTargetUserData, onModify, initialBuiltAllUsersValue],
-  )
-
-  // isPatchingRef update
-  useEffect(() => {
-    isPatchingRef.current = isPatching
-  }, [isPatching])
+  //     // id Item 에디터 창 show
+  //     if (isShowEditor) {
+  //       setDisplayItemEditor((prev) => {
+  //         const isShowItemIds = prev.includes(id) ? prev : [...prev, id]
+  //         return isShowItemIds
+  //       })
+  //     }
+  //     // id Item 에디터 창 hide
+  //     else {
+  //       setDisplayItemEditor((prev) => {
+  //         const isFilteredId = prev.filter((value) => value !== id)
+  //         return isFilteredId
+  //       })
+  //     }
+  //   },
+  //   [filterModifiedData, resetTargetUserData, onModify, initialBuiltAllUsersValue],
+  // )
 
   // [수정하기] builtAllUsersValue update
   const updateBuiltUserData = useCallback(
@@ -347,13 +288,6 @@ export default function UsersProvider({
     },
     [updateBuiltUserData],
   )
-
-  // [수정하기] users 업데이트 시 builtAllUsersValue도 업데이트
-  useEffect(() => {
-    // item 에디터가 열려있을 땐 return
-    if (displayItemEditorRef.current.length > 0) return
-    setBuiltAllUsersValue(initialBuiltAllUsersValue)
-  }, [initialBuiltAllUsersValue])
 
   // [수정하기] builtAllUsersValue 업데이트 시 builtAllUsersValueRef도 업데이트
   useEffect(() => {
@@ -453,7 +387,6 @@ export default function UsersProvider({
       setIsShowDeleteCheckbox(isChecked)
 
       if (isChecked) {
-        setDisplayItemEditor([])
         resetAllUsersData()
       } else {
         resetChecked()
@@ -462,50 +395,38 @@ export default function UsersProvider({
     [resetAllUsersData, resetChecked],
   )
 
-  // displayItemEditorRef 업데이트
-  useEffect(() => {
-    displayItemEditorRef.current = displayItemEditor
-  }, [displayItemEditor])
-
   // 임시 : 다른 로직도 useReducer로 변경 후 삭제 예정
   useEffect(() => {
     if (newUserState.isShowEditor) {
-      setDisplayItemEditor([])
       resetAllUsersData()
     }
   }, [newUserState.isShowEditor, resetAllUsersData])
 
   const stateValue = useMemo(
     () => ({
-      isShowAllEditor,
-      displayItemEditor,
       isShowDeleteCheckbox,
       builtAllUsersValue,
-      isPatching,
       isDeleting,
       isCheckedDeleting,
       checkedDeleteItems,
       isAllChecked,
       newUserState,
+      userEditState,
     }),
     [
-      isShowAllEditor,
-      displayItemEditor,
       isShowDeleteCheckbox,
       builtAllUsersValue,
-      isPatching,
       isDeleting,
       isCheckedDeleting,
       checkedDeleteItems,
       isAllChecked,
       newUserState,
+      userEditState,
     ],
   )
 
   const actionsValue = useMemo(
     () => ({
-      onAllEditor,
-      onItemEditor,
       handleToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteSelectedItems,
@@ -515,10 +436,9 @@ export default function UsersProvider({
       handleAllCheck,
       resetChecked,
       newUserDispatch,
+      userEditDispatch,
     }),
     [
-      onAllEditor,
-      onItemEditor,
       handleToggleDeleteCheckbox,
       onChangeCheckDeleteItems,
       onClickDeleteSelectedItems,
@@ -528,6 +448,7 @@ export default function UsersProvider({
       handleAllCheck,
       resetChecked,
       newUserDispatch,
+      userEditDispatch,
     ],
   )
 

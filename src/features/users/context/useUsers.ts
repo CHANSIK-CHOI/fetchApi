@@ -1,4 +1,9 @@
-import type { NewUserAction, NewUserState } from '@/reducers/usersReducer'
+import type {
+  NewUserAction,
+  NewUserState,
+  UserEditAction,
+  UserEditState,
+} from '@/reducers/usersReducer'
 import type {
   // PayloadNewUser,
   BuiltAllUsersValue,
@@ -33,21 +38,17 @@ export type OnChangeUserData = (
 export type OnChangeUserAvatar = (id: User['id'], avatarSrc: User['avatar'] | null) => void
 
 export type UsersStateContextType = {
-  isShowAllEditor: boolean
-  displayItemEditor: User['id'][]
   isShowDeleteCheckbox: boolean
   builtAllUsersValue: BuiltAllUsersValue
-  isPatching: IsPatching
   isDeleting: IsDeleting
   isCheckedDeleting: boolean
   checkedDeleteItems: User['id'][]
   isAllChecked: boolean
   newUserState: NewUserState
+  userEditState: UserEditState
 }
 
 export type UsersActionsContextType = {
-  onAllEditor: ({ isShowEditor, isPatch }: OnAllEditor) => void
-  onItemEditor: ({ id, isShowEditor, isPatch }: OnItemEditor) => void
   handleToggleDeleteCheckbox: (isChecked: boolean) => void
   onChangeCheckDeleteItems: ({ e, id }: OnChangeCheckDeleteItems) => void
   onClickDeleteSelectedItems: () => void
@@ -57,6 +58,7 @@ export type UsersActionsContextType = {
   handleAllCheck: () => void
   resetChecked: () => void
   newUserDispatch: ActionDispatch<[action: NewUserAction]>
+  userEditDispatch: ActionDispatch<[action: UserEditAction]>
 }
 
 export const UsersStateContext = createContext<UsersStateContextType | null>(null)

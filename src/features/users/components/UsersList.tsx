@@ -1,10 +1,11 @@
 import { UsersItem } from '@/features/users'
-import type { User } from '@/types/users'
+import type { PayloadModifiedUser, User } from '@/types/users'
 
 type UsersListProps = {
   data: User[]
+  onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
 }
-export default function UsersList({ data }: UsersListProps) {
+export default function UsersList({ data, onModify }: UsersListProps) {
   return (
     <>
       {data.length > 0 ? (
@@ -12,11 +13,12 @@ export default function UsersList({ data }: UsersListProps) {
           {data.map((user) => (
             <UsersItem
               key={user.id}
-              profileSrc={user.avatar}
+              avatar={user.avatar}
               firstName={user.first_name}
               lastName={user.last_name}
               email={user.email}
               id={user.id}
+              onModify={onModify}
             />
           ))}
         </ul>
