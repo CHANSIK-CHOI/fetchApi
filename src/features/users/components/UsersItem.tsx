@@ -4,9 +4,9 @@ import {
   UsersProfileView,
   UsersProfileEditor,
 } from '@/features/users'
-import { useCallback, useState, type ChangeEvent, type FormEvent } from 'react'
+import { type ChangeEvent, type FormEvent } from 'react'
 
-import type { PayloadModifiedUser, PayloadNewUser, User } from '@/types/users'
+import type { PayloadModifiedUser, User } from '@/types/users'
 import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
 
 type UsersItem = {
@@ -25,37 +25,40 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
     first_name: firstName,
     last_name: lastName,
   }
-  const [formData, setFormData] = useState<PayloadNewUser>(originalData)
 
   const { isShowDeleteCheckbox, isDeleting, checkedDeleteItems, newUserState, userEditState } =
     useUsersState()
   const { onChangeCheckDeleteItems, onClickDeleteItem, userEditDispatch } = useUsersActions()
 
-  const isItemEditing = userEditState.displayedEditor.includes(id)
-  const isEditing = userEditState.isShowAllEditor || isItemEditing
-
-  const isShowEditorBtns =
-    !userEditState.isShowAllEditor && !isShowDeleteCheckbox && !newUserState.isShowEditor
+  const formData = { ...originalData, ...(userEditState.changes[id] || {}) }
 
   const handleChangeUserData = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-
-    setFormData((prev) => {
-      return {
-        ...prev,
-        [name]: value.trim(),
-      }
+    userEditDispatch({
+      type: 'UPDATE_CHANGE',
+      payload: {
+        id,
+        name,
+        value: value.trim(),
+      },
     })
   }
 
-  const handleChangeImage = useCallback((url: string) => {
-    setFormData((prev) => {
-      return {
-        ...prev,
-        avatar: url,
-      }
+  const handleChangeImage = (url: string) => {
+    userEditDispatch({
+      type: 'UPDATE_CHANGE',
+      payload: {
+        id,
+        name: 'avatar',
+        value: url,
+      },
     })
-  }, [])
+  }
+
+  const isItemEditing = userEditState.displayedEditor.includes(id)
+  const isEditing = userEditState.mode === 'allEdit' || isItemEditing
+  const isShowEditorBtns =
+    !(userEditState.mode === 'allEdit') && !isShowDeleteCheckbox && !newUserState.isShowEditor
 
   const userNameEl = (
     <>
