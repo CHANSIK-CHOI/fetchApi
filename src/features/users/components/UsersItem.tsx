@@ -4,7 +4,15 @@ import {
   UsersProfileView,
   UsersProfileEditor,
 } from '@/features/users'
-import { useCallback, useState, type ChangeEvent, type FormEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FocusEventHandler,
+  type FormEvent,
+} from 'react'
 
 import type { PayloadModifiedUser, PayloadNewUser, User } from '@/types/users'
 import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
@@ -66,9 +74,7 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
     </>
   )
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-
+  const handleSubmitUserItem = async () => {
     if (userEditState.editing !== null) return
 
     const filteredIdAndData = filterModifiedData({ data: [formData], originalData, id })
@@ -102,7 +108,11 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
 
   return (
     <li className="userItem">
-      <form id={`userItem_${id}`} className="userItem__box" onSubmit={handleSubmit}>
+      <div
+        // id={`userItem_${id}`}
+        className="userItem__box"
+        // onSubmit={handleSubmit}
+      >
         {isShowDeleteCheckbox && (
           <div className="userItem__checkbox">
             <input
@@ -140,24 +150,27 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
               <div className="userItem__editer">
                 <input
                   type="text"
-                  name="first_name"
+                  name={`first_name_${id}`}
                   placeholder="first name"
                   value={formData ? formData.first_name : ''}
                   onChange={handleChangeUserData}
+                  // onBlur={handleBlurUserInput}
                 />
                 <input
                   type="text"
-                  name="last_name"
+                  name={`last_name_${id}`}
                   placeholder="last name"
                   value={formData ? formData.last_name : ''}
                   onChange={handleChangeUserData}
+                  // onBlur={handleBlurUserInput}
                 />
                 <input
                   type="text"
-                  name="email"
+                  name={`email_${id}`}
                   placeholder="email"
                   value={formData ? formData.email : ''}
                   onChange={handleChangeUserData}
+                  // onBlur={handleBlurUserInput}
                 />
               </div>
             )}
@@ -184,8 +197,9 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
                   수정취소
                 </button>
                 <button
-                  type="submit"
-                  form={`userItem_${id}`}
+                  type="button"
+                  // form={`userItem_${id}`}
+                  onClick={handleSubmitUserItem}
                   disabled={userEditState.editing == id}
                 >
                   {userEditState.editing == id ? '수정중...' : '수정완료'}
@@ -205,7 +219,7 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
             )}
           </div>
         )}
-      </form>
+      </div>
     </li>
   )
 }

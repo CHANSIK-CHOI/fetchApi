@@ -41,7 +41,7 @@ function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
         <img src={displaySrc} alt="" />
       </div>
       <div className="userItem__profileBtns">
-        <label htmlFor={`userItem_${id}`} className="button line userItem__profileBtn">
+        <label htmlFor={`avatar_${id}`} className="button line userItem__profileBtn">
           {hasContent ? '프로필 변경' : '프로필 추가'}
         </label>
 
@@ -52,7 +52,8 @@ function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
         )}
       </div>
       <input
-        id={`userItem_${id}`}
+        id={`avatar_${id}`}
+        name={`avatar_${id}`}
         type="file"
         accept="image/*"
         hidden

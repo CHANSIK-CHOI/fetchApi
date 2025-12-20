@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { type FormEvent } from 'react'
 import { useUsersActions, useUsersState } from '@/features/users'
+import type { PayloadAllModifiedUsers, User } from '@/types/users'
 
 type UsersProps = {
   children: React.ReactNode
   newUserForm: React.ReactNode
   count: number
+  onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
 }
-export default function Users({ children, newUserForm, count }: UsersProps) {
+export default function Users({ children, newUserForm, count, onAllModify }: UsersProps) {
   const { isShowDeleteCheckbox, isCheckedDeleting, isAllChecked, newUserState, userEditState } =
     useUsersState()
   const {
@@ -25,6 +27,40 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
   const isShowAllEditorEl = !isNoUserData && !newUserState.isShowEditor && !isShowDeleteCheckbox
 
   const resultCount = count.toString().padStart(2, '0')
+
+  const handleSubmitAllUsers = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const formData = new FormData(e.currentTarget)
+    const payloadMap = new Map<User['id'], any>()
+
+    for (const [key, value] of formData.entries()) {
+      const match = key.match(/^(.+)_(\d+)$/)
+      if (!match) continue
+
+      const [_, field, idStr] = match
+      void _
+      const id = Number(idStr)
+
+      if (value instanceof File && value.size === 0) continue
+
+      // 3. Map에 데이터 적재
+      if (!payloadMap.has(id)) {
+        payloadMap.set(id, {})
+      }
+      // value는 File | string 입니다.
+      // API가 JSON을 보낸다면 File 객체는 {}로 변환되어 날아가니 주의하세요.
+      // 텍스트 위주라면 value.toString() 처리가 안전할 수 있습니다.
+      payloadMap.get(id)[field] = value
+    }
+
+    const finalData = Array.from(payloadMap.entries()).map(([id, payload]) => ({
+      id,
+      payload,
+    }))
+
+    console.log(finalData)
+  }
 
   return (
     <div className="users">
@@ -120,9 +156,10 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
                     수정취소
                   </button>
                   <button
-                    type="button"
+                    type="submit"
+                    form="users"
                     disabled={userEditState.editing === 'all'}
-                    onClick={() => userEditDispatch({ type: 'SUBMIT_MODIFIED_USERS_START' })}
+                    // onClick={() => userEditDispatch({ type: 'SUBMIT_MODIFIED_USERS_START' })}
                   >
                     {userEditState.editing === 'all' ? '수정중...' : '수정완료'}
                   </button>
@@ -133,7 +170,9 @@ export default function Users({ children, newUserForm, count }: UsersProps) {
         </div>
       </div>
       {newUserState.isShowEditor && <div className="users__form">{newUserForm}</div>}
-      <div className="users__body">{children}</div>
+      <form id="users" onSubmit={handleSubmitAllUsers} className="users__body">
+        {children}
+      </form>
     </div>
   )
 }

@@ -24,11 +24,14 @@ export default function UsersContainer() {
   return (
     <UsersProvider
       users={users}
-      onAllModify={modifyAllUsers}
       onDeleteUser={deleteUser}
       onDeleteSelectedUsers={deleteSelectedUsers}
     >
-      <Users newUserForm={<UsersNewForm onCreate={createUser} />} count={users.length}>
+      <Users
+        newUserForm={<UsersNewForm onCreate={createUser} />}
+        count={users.length}
+        onAllModify={modifyAllUsers}
+      >
         {isLoading && <img src={loadingGif} className="loading" alt="loading" />}
 
         {!isLoading && error.length > 0 && (

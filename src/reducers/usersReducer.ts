@@ -1,5 +1,10 @@
 import { INIT_NEW_USER_VALUE } from '@/constants/users'
-import type { PayloadNewUser, User } from '@/types/users'
+import type {
+  EditableUserFormObject,
+  FilteredModifiedAllData,
+  PayloadNewUser,
+  User,
+} from '@/types/users'
 
 export type NewUserState = {
   isShowEditor: boolean
@@ -53,6 +58,7 @@ export type UserEditState = {
   displayedEditor: User['id'][]
   editing: User['id'] | 'all' | null
   error: string | null
+  // changes: FilteredModifiedAllData
   data:
     | Partial<Omit<User, 'id'>>
     | {
@@ -65,6 +71,8 @@ export type UserEditAction =
   | { type: 'SHOW_EDITOR'; payload: User['id'] }
   | { type: 'HIDE_EDITOR'; payload: User['id'] }
   | { type: 'TOGGLE_ALL_EDITOR'; payload: boolean }
+  // | { type: 'UPDATE_CHANGE'; payload: { id: number; data: Partial<Omit<User, 'id'>> } }
+  // | { type: 'REMOVE_CHANGE'; payload: { id: number } }
   | { type: 'SUBMIT_START'; payload: User['id'] }
   | { type: 'SUBMIT_MODIFIED_USERS_START' }
   | { type: 'SUBMIT_SUCCESS'; payload: { data: Partial<Omit<User, 'id'>>; id: User['id'] } }
@@ -83,7 +91,8 @@ export const INIT_USER_EDIT_STATE: UserEditState = {
   displayedEditor: [],
   editing: null,
   error: null,
-  data: INIT_NEW_USER_VALUE,
+  // changes: {},
+  data: {},
 }
 
 export function userEditReducer(state: UserEditState, action: UserEditAction) {
@@ -102,6 +111,25 @@ export function userEditReducer(state: UserEditState, action: UserEditAction) {
         ...state,
         displayedEditor: displayedEditor.filter((displayedId) => displayedId !== action.payload),
       }
+    // case 'UPDATE_CHANGE': {
+    //   const { id, data } = action.payload
+    //   return {
+    //     ...state,
+    //     changes: {
+    //       ...state.changes,
+    //       [id]: data,
+    //     },
+    //   }
+    // }
+    // case 'REMOVE_CHANGE': {
+    //   const { id } = action.payload
+    //   const nextChanges = { ...state.changes }
+    //   delete nextChanges[id]
+    //   return {
+    //     ...state,
+    //     changes: nextChanges,
+    //   }
+    // }
     case 'TOGGLE_ALL_EDITOR':
       return {
         ...state,

@@ -35,7 +35,7 @@ const toPersonalKey = <K extends EditableUserKey>(key: K, id: User['id']) =>
 type UsersProviderProps = {
   children: ReactNode
   users: User[]
-  onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
+  // onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
   onDeleteUser: (id: User['id']) => Promise<void>
   onDeleteSelectedUsers: (ids: User['id'][]) => Promise<void>
 }
