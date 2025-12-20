@@ -1,6 +1,7 @@
 import { memo, useEffect, useState, type ChangeEvent } from 'react'
 import { PLACEHOLDER_SRC } from '@/constants/users'
 import type { User } from '@/types/users'
+import { readFileAsDataURL } from '@/util/users'
 
 type UsersProfileEditorProps = {
   id: User['id']
@@ -10,6 +11,7 @@ type UsersProfileEditorProps = {
 
 function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
   const [preview, setPreview] = useState<string | null>(null)
+  const [submitValue, setSubmitValue] = useState<string>(avatar || '')
 
   useEffect(() => {
     return () => {
@@ -17,23 +19,27 @@ function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
     }
   }, [preview])
 
-  const handleChangeImage = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeImage = async (e: ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0]
 
-    if (selected) {
-      const objectUrl = URL.createObjectURL(selected)
-      setPreview(objectUrl)
-      onChange(objectUrl)
-    }
+    if (!selected) return
+
+    const objectUrl = URL.createObjectURL(selected)
+    setPreview(objectUrl)
+
+    const base64 = await readFileAsDataURL(selected)
+    onChange(base64)
+    setSubmitValue(base64)
   }
 
   const handleRemoveImage = () => {
     setPreview(null)
     onChange('')
+    setSubmitValue('')
   }
 
-  const displaySrc = preview || avatar || PLACEHOLDER_SRC
-  const hasContent = Boolean(preview || avatar)
+  const displaySrc = preview || (submitValue !== '' ? submitValue : PLACEHOLDER_SRC)
+  const hasContent = Boolean(submitValue)
 
   return (
     <>
@@ -51,14 +57,8 @@ function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
           </button>
         )}
       </div>
-      <input
-        id={`avatar_${id}`}
-        name={`avatar_${id}`}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={handleChangeImage}
-      />
+      <input id={`avatar_${id}`} type="file" accept="image/*" hidden onChange={handleChangeImage} />
+      <input type="text" name={`avatar_${id}`} hidden readOnly value={submitValue} />
     </>
   )
 }

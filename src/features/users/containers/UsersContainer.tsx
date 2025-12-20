@@ -29,7 +29,7 @@ export default function UsersContainer() {
     >
       <Users
         newUserForm={<UsersNewForm onCreate={createUser} />}
-        count={users.length}
+        users={users}
         onAllModify={modifyAllUsers}
       >
         {isLoading && <img src={loadingGif} className="loading" alt="loading" />}

@@ -1,14 +1,20 @@
 import React, { type FormEvent } from 'react'
 import { useUsersActions, useUsersState } from '@/features/users'
-import type { PayloadAllModifiedUsers, User } from '@/types/users'
+import type {
+  BuiltAllUsersValue,
+  PayloadAllModifiedUsers,
+  PayloadNewUser,
+  User,
+} from '@/types/users'
+import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
 
 type UsersProps = {
   children: React.ReactNode
   newUserForm: React.ReactNode
-  count: number
+  users: User[]
   onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
 }
-export default function Users({ children, newUserForm, count, onAllModify }: UsersProps) {
+export default function Users({ children, newUserForm, users, onAllModify }: UsersProps) {
   const { isShowDeleteCheckbox, isCheckedDeleting, isAllChecked, newUserState, userEditState } =
     useUsersState()
   const {
@@ -20,21 +26,19 @@ export default function Users({ children, newUserForm, count, onAllModify }: Use
     userEditDispatch,
   } = useUsersActions()
 
-  const isNoUserData = count === 0
+  const isNoUserData = users.length === 0
   const isShowNewUserFormEl = !userEditState.isShowAllEditor && !isShowDeleteCheckbox
   const isShowDeleteCheckboxEl =
     !isNoUserData && !newUserState.isShowEditor && !userEditState.isShowAllEditor
   const isShowAllEditorEl = !isNoUserData && !newUserState.isShowEditor && !isShowDeleteCheckbox
 
-  const resultCount = count.toString().padStart(2, '0')
+  const resultCount = users.length.toString().padStart(2, '0')
 
-  const handleSubmitAllUsers = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    const formData = new FormData(e.currentTarget)
-    const payloadMap = new Map<User['id'], any>()
+  const parseFormDataToUsers = (formData: FormData) => {
+    const currentDataMap: Record<User['id'], PayloadNewUser> = {}
 
     for (const [key, value] of formData.entries()) {
+      // 정규식: "field_id" 패턴 분리
       const match = key.match(/^(.+)_(\d+)$/)
       if (!match) continue
 
@@ -42,24 +46,95 @@ export default function Users({ children, newUserForm, count, onAllModify }: Use
       void _
       const id = Number(idStr)
 
-      if (value instanceof File && value.size === 0) continue
-
-      // 3. Map에 데이터 적재
-      if (!payloadMap.has(id)) {
-        payloadMap.set(id, {})
+      if (!currentDataMap[id]) {
+        // PayloadNewUser 타입에 맞게 초기화 (일단 빈 문자열로)
+        currentDataMap[id] = {
+          first_name: '',
+          last_name: '',
+          email: '',
+          avatar: '',
+        }
       }
-      // value는 File | string 입니다.
-      // API가 JSON을 보낸다면 File 객체는 {}로 변환되어 날아가니 주의하세요.
-      // 텍스트 위주라면 value.toString() 처리가 안전할 수 있습니다.
-      payloadMap.get(id)[field] = value
+
+      currentDataMap[id][field as keyof PayloadNewUser] = value.toString()
+    }
+    return currentDataMap
+  }
+
+  const handleSubmitAllUsers = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const formData = new FormData(e.currentTarget)
+
+    // A. FormData를 객체 형태로 변환 (Adapter Pattern)
+    const currentUsersObj = parseFormDataToUsers(formData)
+
+    // B. 원본과 비교하여 변경된 데이터 추출 (님께서 만든 filterModifiedData 활용)
+    const finalPayloads = users.reduce(
+      (acc, originalUser) => {
+        const id = originalUser.id
+        const currentUserData = currentUsersObj[id]
+
+        // 화면에 없는 유저(혹은 데이터 파싱 실패)면 스킵
+        if (!currentUserData) return acc
+
+        // 🔥 [핵심] 기존 유틸 함수 재사용!
+        // filterModifiedData는 { [id]: changedObject } 형태를 반환함
+        const filteredResult = filterModifiedData({
+          data: currentUserData,
+          originalData: originalUser,
+          id: id,
+        })
+
+        // 변경된 내역이 있다면 ({ 1: { ... } } 형태라면)
+        if (Object.keys(filteredResult).length > 0) {
+          // API 스펙({ id, payload })에 맞춰서 변환
+          acc.push({
+            id: id,
+            payload: filteredResult[id], // 변경된 필드만 들어있음
+          })
+        }
+
+        return acc
+      },
+      [] as { id: number; payload: BuiltAllUsersValue }[],
+    ) // 결과 타입 정의
+
+    // C. 변경 사항이 없으면 종료
+    if (finalPayloads.length === 0) {
+      alert('수정된 내용이 없습니다.')
+      return
+    }
+    const hasEmpty = Object.values(finalPayloads).some(({ id, payload }) => {
+      void id
+      return hasEmptyRequiredField(payload)
+    })
+
+    if (hasEmpty) {
+      alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
+      return
     }
 
-    const finalData = Array.from(payloadMap.entries()).map(([id, payload]) => ({
-      id,
-      payload,
-    }))
+    const targetIds = finalPayloads.map((u) => u.id)
+    const targetedUsers = users.filter((user) => targetIds.includes(user.id))
+    const names = targetedUsers.map((u) => `${u.first_name} ${u.last_name}`)
 
-    console.log(finalData)
+    const confirmMsg = `${names} 유저들을 수정하시겠습니까?`
+    if (!confirm(confirmMsg)) return
+
+    try {
+      userEditDispatch({ type: 'SUBMIT_MODIFIED_USERS_START' })
+      await onAllModify(finalPayloads)
+      userEditDispatch({ type: 'SUBMIT_MODIFIED_USERS_SUCCESS', payload: { data: finalPayloads } })
+      alert('수정을 완료하였습니다.')
+    } catch (err) {
+      console.error(err)
+      userEditDispatch({
+        type: 'SUBMIT_ERROR',
+        payload: { msg: '수정에 실패했습니다. 다시 시도해주세요.' },
+      })
+      alert('수정에 실패했습니다. 다시 시도해주세요.')
+    }
   }
 
   return (
@@ -142,7 +217,7 @@ export default function Users({ children, newUserForm, count, onAllModify }: Use
                 <button
                   type="button"
                   className="line"
-                  onClick={() => userEditDispatch({ type: 'TOGGLE_ALL_EDITOR', payload: true })}
+                  onClick={() => userEditDispatch({ type: 'OPEN_ALL_EDITOR' })}
                 >
                   전체수정
                 </button>
@@ -151,16 +226,11 @@ export default function Users({ children, newUserForm, count, onAllModify }: Use
                   <button
                     type="button"
                     className="line"
-                    onClick={() => userEditDispatch({ type: 'TOGGLE_ALL_EDITOR', payload: false })}
+                    onClick={() => userEditDispatch({ type: 'CLOSE_ALL_EDITOR' })}
                   >
                     수정취소
                   </button>
-                  <button
-                    type="submit"
-                    form="users"
-                    disabled={userEditState.editing === 'all'}
-                    // onClick={() => userEditDispatch({ type: 'SUBMIT_MODIFIED_USERS_START' })}
-                  >
+                  <button type="submit" form="users" disabled={userEditState.editing === 'all'}>
                     {userEditState.editing === 'all' ? '수정중...' : '수정완료'}
                   </button>
                 </>

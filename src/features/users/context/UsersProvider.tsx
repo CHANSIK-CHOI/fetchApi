@@ -15,12 +15,7 @@ import {
   type IsDeleting,
 } from '@/features/users'
 
-import type {
-  User,
-  BuiltAllUsersValue,
-  PayloadAllModifiedUsers,
-  EditableUserKey,
-} from '@/types/users'
+import type { User, BuiltAllUsersValue, EditableUserKey } from '@/types/users'
 
 import {
   INIT_NEW_USER_STATE,
@@ -35,7 +30,6 @@ const toPersonalKey = <K extends EditableUserKey>(key: K, id: User['id']) =>
 type UsersProviderProps = {
   children: ReactNode
   users: User[]
-  // onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
   onDeleteUser: (id: User['id']) => Promise<void>
   onDeleteSelectedUsers: (ids: User['id'][]) => Promise<void>
 }
@@ -105,109 +99,6 @@ export default function UsersProvider({
     const ids = Object.keys(initialBuiltAllUsersValue).map((k) => Number(k))
     setCheckedDeleteItems(ids)
   }, [initialBuiltAllUsersValue])
-
-  // [수정하기 - 전체] 전체 수정 에디터 show/hide & patch
-  // const onAllEditor = useCallback(
-  //   async ({ isShowEditor, isPatch = false }: OnAllEditor) => {
-  //     // 수정완료(PATCH) : isPatch
-  //     if (isPatch) {
-  //       if (isPatchingRef.current !== null) return
-
-  //       const filteredModifiedData = filterModifiedData()
-  //       const data = Object.entries(filteredModifiedData).map(([id, payload]) => {
-  //         const numId = Number(id)
-  //         return { id: numId, payload }
-  //       })
-
-  //       if (data.length === 0) {
-  //         alert('수정된 내역이 없습니다.')
-  //         return
-  //       }
-
-  //       const hasEmpty = Object.values(filteredModifiedData).some(hasEmptyRequiredField)
-
-  //       if (hasEmpty) {
-  //         alert('이메일, 이름, 성은 빈값으로 수정할 수 없습니다.')
-  //         return
-  //       }
-
-  //       const names = data
-  //         .map((u) => u.id)
-  //         .map((id) => initialBuiltAllUsersValue[id])
-  //         .filter(Boolean)
-  //         .map((u) => `${u[`first_name_${u.id}`]} ${u[`last_name_${u.id}`]}`)
-  //         .join(', ')
-  //       const confirmMsg = `${names} 유저들을 수정하시겠습니까?`
-  //       if (!confirm(confirmMsg)) return
-
-  //       try {
-  //         setIsPatching('all')
-  //         await onAllModify(data)
-  //         alert('수정을 완료하였습니다.')
-  //       } catch (err) {
-  //         console.error(err)
-  //         alert('수정에 실패했습니다. 다시 시도해주세요.')
-  //       } finally {
-  //         setIsPatching(null)
-  //       }
-  //     }
-
-  //     // 수정취소
-  //     if (!isShowEditor && !isPatch) resetAllUsersData()
-
-  //     // 전체 Editor가 열릴 때 Item Editor reset
-  //     if (isShowEditor) setDisplayItemEditor([])
-
-  //     // Editor toggle(show/hide)
-  //     setIsShowAllEditor(isShowEditor)
-  //   },
-  //   [filterModifiedData, resetAllUsersData, onAllModify, initialBuiltAllUsersValue],
-  // )
-
-  // [수정하기] builtAllUsersValue update
-  // const updateBuiltUserData = useCallback(
-  //   (
-  //     id: User['id'],
-  //     name: PersonalEditableUserKey,
-  //     value: PersonalEditableUserValue[PersonalEditableUserKey],
-  //   ) => {
-  //     setBuiltAllUsersValue((prev) => {
-  //       const target = prev[id]
-  //       if (!target) return prev
-
-  //       const nextEntry: PersonalUserValue = {
-  //         ...target,
-  //         [name]: value,
-  //       }
-
-  //       const originalUser = users.find((user) => user.id === id)
-  //       if (originalUser) {
-  //         const isModify =
-  //           nextEntry[`first_name_${id}`] !== originalUser.first_name ||
-  //           nextEntry[`last_name_${id}`] !== originalUser.last_name ||
-  //           nextEntry[`email_${id}`] !== originalUser.email ||
-  //           nextEntry[`avatar_${id}`] !== originalUser.avatar
-
-  //         return {
-  //           ...prev,
-  //           [id]: {
-  //             ...nextEntry,
-  //             isModify,
-  //           },
-  //         }
-  //       }
-
-  //       return {
-  //         ...prev,
-  //         [id]: {
-  //           ...nextEntry,
-  //           isModify: true,
-  //         },
-  //       }
-  //     })
-  //   },
-  //   [users],
-  // )
 
   // [삭제하기] Checkbox Change Event
   const onChangeCheckDeleteItems = useCallback(({ e, id }: OnChangeCheckDeleteItems) => {

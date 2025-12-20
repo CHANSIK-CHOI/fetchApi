@@ -18,11 +18,11 @@ export const filterModifiedData = ({
   originalData,
   id,
 }: {
-  data: PayloadNewUser[]
+  data: PayloadNewUser
   originalData: Omit<User, 'id' | 'avatar'> & { avatar?: User['avatar'] }
   id: User['id']
 }) => {
-  const filteredIdAndData = data.reduce((acc, value) => {
+  const filteredIdAndData = [data].reduce((acc, value) => {
     const changed = EDITABLE_USER_KEYS.reduce<EditableUserFormObject>((fieldAcc, key) => {
       if (value[key] !== originalData[key]) {
         fieldAcc[key] = value[key]
@@ -34,4 +34,12 @@ export const filterModifiedData = ({
   }, {} as FilteredModifiedAllData)
 
   return filteredIdAndData
+}
+
+export const readFileAsDataURL = (file: File): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.readAsDataURL(file)
+  })
 }

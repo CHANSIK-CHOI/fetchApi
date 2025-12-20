@@ -4,15 +4,7 @@ import {
   UsersProfileView,
   UsersProfileEditor,
 } from '@/features/users'
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ChangeEvent,
-  type FocusEventHandler,
-  type FormEvent,
-} from 'react'
+import { useCallback, useState, type ChangeEvent } from 'react'
 
 import type { PayloadModifiedUser, PayloadNewUser, User } from '@/types/users'
 import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
@@ -47,11 +39,12 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
 
   const handleChangeUserData = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
+    const fieldName = name.replace(/_\d+$/, '')
 
     setFormData((prev) => {
       return {
         ...prev,
-        [name]: value.trim(),
+        [fieldName]: value.trim(),
       }
     })
   }
@@ -77,7 +70,7 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
   const handleSubmitUserItem = async () => {
     if (userEditState.editing !== null) return
 
-    const filteredIdAndData = filterModifiedData({ data: [formData], originalData, id })
+    const filteredIdAndData = filterModifiedData({ data: formData, originalData, id })
     const filteredData = filteredIdAndData[id]
 
     if (!filteredData) {
@@ -95,24 +88,28 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
     if (!confirm(confirmMsg)) return
 
     try {
-      userEditDispatch({ type: 'SUBMIT_START', payload: id })
+      userEditDispatch({ type: 'SUBMIT_START', payload: { id } })
       await onModify(id, filteredData)
       userEditDispatch({ type: 'SUBMIT_SUCCESS', payload: { data: filteredData, id } })
       alert('수정을 완료하였습니다.')
     } catch (err) {
       console.error(err)
-      userEditDispatch({ type: 'SUBMIT_ERROR', payload: '수정에 실패했습니다. 다시 시도해주세요.' })
+      userEditDispatch({
+        type: 'SUBMIT_ERROR',
+        payload: { msg: '수정에 실패했습니다. 다시 시도해주세요.' },
+      })
       alert('수정에 실패했습니다. 다시 시도해주세요.')
     }
   }
 
+  const handleClickCancel = () => {
+    setFormData(originalData)
+    userEditDispatch({ type: 'HIDE_EDITOR', payload: { id } })
+  }
+
   return (
     <li className="userItem">
-      <div
-        // id={`userItem_${id}`}
-        className="userItem__box"
-        // onSubmit={handleSubmit}
-      >
+      <div className="userItem__box">
         {isShowDeleteCheckbox && (
           <div className="userItem__checkbox">
             <input
@@ -183,22 +180,17 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
               <button
                 type="button"
                 className="line"
-                onClick={() => userEditDispatch({ type: 'SHOW_EDITOR', payload: id })}
+                onClick={() => userEditDispatch({ type: 'SHOW_EDITOR', payload: { id } })}
               >
                 수정하기
               </button>
             ) : (
               <>
-                <button
-                  type="button"
-                  className="line"
-                  onClick={() => userEditDispatch({ type: 'HIDE_EDITOR', payload: id })}
-                >
+                <button type="button" className="line" onClick={handleClickCancel}>
                   수정취소
                 </button>
                 <button
                   type="button"
-                  // form={`userItem_${id}`}
                   onClick={handleSubmitUserItem}
                   disabled={userEditState.editing == id}
                 >
