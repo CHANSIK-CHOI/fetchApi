@@ -4,20 +4,8 @@ import type {
   UserEditAction,
   UserEditState,
 } from '@/reducers/usersReducer'
-import type {
-  // PayloadNewUser,
-  BuiltAllUsersValue,
-  User,
-  PersonalEditableUserKey,
-} from '@/types/users'
-import {
-  createContext,
-  useContext,
-  type ActionDispatch,
-  type ChangeEvent,
-  // type Dispatch,
-  // type SetStateAction,
-} from 'react'
+import type { BuiltAllUsersValue, User, PersonalEditableUserKey } from '@/types/users'
+import { createContext, useContext, type ActionDispatch, type ChangeEvent } from 'react'
 
 export type OnAllEditor = {
   isShowEditor: boolean
@@ -25,8 +13,6 @@ export type OnAllEditor = {
 }
 export type OnItemEditor = { id: User['id'] } & OnAllEditor
 export type OnChangeCheckDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: User['id'] }
-
-// export type OnNewUserForm = { isShowEditor: boolean; isPost?: boolean }
 
 export type IsPatching = User['id'] | 'all' | null
 export type IsDeleting = User['id'] | null

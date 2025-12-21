@@ -11,7 +11,7 @@ type UsersProfileEditorProps = {
 
 function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
   const [preview, setPreview] = useState<string | null>(null)
-  const [submitValue, setSubmitValue] = useState<string>(avatar || '')
+  const [submitValue, setSubmitValue] = useState<User['avatar']>(avatar || '')
 
   useEffect(() => {
     return () => {
@@ -39,7 +39,7 @@ function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
   }
 
   const displaySrc = preview || (submitValue !== '' ? submitValue : PLACEHOLDER_SRC)
-  const hasContent = Boolean(submitValue)
+  const isHasContent = Boolean(submitValue)
 
   return (
     <>
@@ -48,10 +48,10 @@ function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
       </div>
       <div className="userItem__profileBtns">
         <label htmlFor={`avatar_${id}`} className="button line userItem__profileBtn">
-          {hasContent ? '프로필 변경' : '프로필 추가'}
+          {isHasContent ? '프로필 변경' : '프로필 추가'}
         </label>
 
-        {hasContent && (
+        {isHasContent && (
           <button type="button" className="line userItem__profileBtn" onClick={handleRemoveImage}>
             삭제
           </button>

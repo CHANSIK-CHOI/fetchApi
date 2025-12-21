@@ -50,6 +50,7 @@ export function newUserReducer(state: NewUserState, action: NewUserAction) {
 
 export type UserEditState = {
   isShowAllEditor: boolean
+  isResetAllValue: boolean
   displayedEditor: User['id'][]
   editing: User['id'] | 'all' | null
   error: string | null
@@ -65,7 +66,8 @@ export type UserEditAction =
   | { type: 'SHOW_EDITOR'; payload: { id: User['id'] } }
   | { type: 'HIDE_EDITOR'; payload: { id: User['id'] } }
   | { type: 'OPEN_ALL_EDITOR' }
-  | { type: 'CLOSE_ALL_EDITOR' }
+  | { type: 'RESET_START_ALL_VALUE' }
+  | { type: 'RESET_COMPLETE_ALL_VALUE' }
   | { type: 'SUBMIT_START'; payload: { id: User['id'] } }
   | { type: 'SUBMIT_SUCCESS'; payload: { data: Partial<Omit<User, 'id'>>; id: User['id'] } }
   | { type: 'SUBMIT_MODIFIED_USERS_START' }
@@ -83,6 +85,7 @@ export type UserEditAction =
 
 export const INIT_USER_EDIT_STATE: UserEditState = {
   isShowAllEditor: false,
+  isResetAllValue: false,
   displayedEditor: [],
   editing: null,
   error: null,
@@ -114,10 +117,17 @@ export function userEditReducer(state: UserEditState, action: UserEditAction) {
         isShowAllEditor: true,
       }
     }
-    case 'CLOSE_ALL_EDITOR': {
+    case 'RESET_START_ALL_VALUE': {
       return {
         ...state,
+        isResetAllValue: true,
         isShowAllEditor: false,
+      }
+    }
+    case 'RESET_COMPLETE_ALL_VALUE': {
+      return {
+        ...state,
+        isResetAllValue: false,
       }
     }
     case 'SUBMIT_START': {

@@ -1,4 +1,4 @@
-import { UsersItem } from '@/features/users'
+import { UsersItem, useUsersState } from '@/features/users'
 import type { PayloadModifiedUser, User } from '@/types/users'
 
 type UsersListProps = {
@@ -6,19 +6,20 @@ type UsersListProps = {
   onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
 }
 export default function UsersList({ data, onModify }: UsersListProps) {
+  const { userEditState } = useUsersState()
   return (
     <>
       {data.length > 0 ? (
         <ul className="users__list">
           {data.map((user) => (
             <UsersItem
-              key={user.id}
               avatar={user.avatar}
               firstName={user.first_name}
               lastName={user.last_name}
               email={user.email}
               id={user.id}
               onModify={onModify}
+              key={`${user.id}_${userEditState.isResetAllValue ? 'reset' : 'active'}`}
             />
           ))}
         </ul>

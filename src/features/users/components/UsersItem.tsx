@@ -4,12 +4,11 @@ import {
   UsersProfileView,
   UsersProfileEditor,
 } from '@/features/users'
-import { useCallback, useState, type ChangeEvent } from 'react'
-
-import type { PayloadModifiedUser, PayloadNewUser, User } from '@/types/users'
+import { useCallback, useMemo, useState, type ChangeEvent } from 'react'
+import type { EditableUserFormObject, PayloadModifiedUser, User } from '@/types/users'
 import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
 
-type UsersItem = {
+type UsersItemProps = {
   avatar?: User['avatar']
   firstName: User['first_name']
   lastName: User['last_name']
@@ -18,14 +17,25 @@ type UsersItem = {
   onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
 }
 
-export default function UsersItem({ avatar, firstName, lastName, email, id, onModify }: UsersItem) {
-  const originalData = {
-    avatar,
-    email,
-    first_name: firstName,
-    last_name: lastName,
-  }
-  const [formData, setFormData] = useState<PayloadNewUser>(originalData)
+export default function UsersItem({
+  avatar,
+  firstName,
+  lastName,
+  email,
+  id,
+  onModify,
+}: UsersItemProps) {
+  const originalData = useMemo(
+    () => ({
+      avatar,
+      email,
+      first_name: firstName,
+      last_name: lastName,
+    }),
+    [avatar, email, firstName, lastName],
+  )
+
+  const [formData, setFormData] = useState<EditableUserFormObject>(originalData)
 
   const { isShowDeleteCheckbox, isDeleting, checkedDeleteItems, newUserState, userEditState } =
     useUsersState()
@@ -44,7 +54,7 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
     setFormData((prev) => {
       return {
         ...prev,
-        [fieldName]: value.trim(),
+        [fieldName]: value,
       }
     })
   }
@@ -151,7 +161,6 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
                   placeholder="first name"
                   value={formData ? formData.first_name : ''}
                   onChange={handleChangeUserData}
-                  // onBlur={handleBlurUserInput}
                 />
                 <input
                   type="text"
@@ -159,7 +168,6 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
                   placeholder="last name"
                   value={formData ? formData.last_name : ''}
                   onChange={handleChangeUserData}
-                  // onBlur={handleBlurUserInput}
                 />
                 <input
                   type="text"
@@ -167,7 +175,6 @@ export default function UsersItem({ avatar, firstName, lastName, email, id, onMo
                   placeholder="email"
                   value={formData ? formData.email : ''}
                   onChange={handleChangeUserData}
-                  // onBlur={handleBlurUserInput}
                 />
               </div>
             )}

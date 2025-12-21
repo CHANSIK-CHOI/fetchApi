@@ -1,9 +1,4 @@
-import type {
-  EditableUserFormObject,
-  FilteredModifiedAllData,
-  PayloadNewUser,
-  User,
-} from '@/types/users'
+import type { EditableUserFormObject, FilteredModifiedAllData, User } from '@/types/users'
 import { EDITABLE_USER_KEYS, REQUIRED_USER_KEYS } from '@/constants/users'
 
 export const hasEmptyRequiredField = (data: EditableUserFormObject) => {
@@ -18,7 +13,7 @@ export const filterModifiedData = ({
   originalData,
   id,
 }: {
-  data: PayloadNewUser
+  data: EditableUserFormObject
   originalData: Omit<User, 'id' | 'avatar'> & { avatar?: User['avatar'] }
   id: User['id']
 }) => {
