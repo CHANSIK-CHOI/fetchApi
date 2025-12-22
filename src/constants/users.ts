@@ -1,8 +1,8 @@
-import type { EditableUserKey, PayloadNewUser, RequiredEditableUserKey } from '@/types/users'
+import type { EditableUserKey, InitUserFormObject, RequiredEditableUserKey } from '@/types/users'
 
 export const PLACEHOLDER_SRC = 'https://placehold.co/100x100?text=Hello+World'
 
-export const INIT_NEW_USER_VALUE: PayloadNewUser = {
+export const INIT_NEW_USER_VALUE: InitUserFormObject = {
   email: '',
   first_name: '',
   last_name: '',

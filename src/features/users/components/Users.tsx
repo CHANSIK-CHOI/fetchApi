@@ -1,6 +1,11 @@
 import React, { useEffect, type FormEvent } from 'react'
 import { useUsersActions, useUsersState } from '@/features/users'
-import type { EditableUserFormObject, PayloadAllModifiedUsers, User } from '@/types/users'
+import type {
+  EditableUserKey,
+  PayloadAllModifiedUsers,
+  User,
+  UserIdAndEditableUserFormObject,
+} from '@/types/users'
 import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
 
 type UsersProps = {
@@ -30,7 +35,7 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
   const resultCount = users.length.toString().padStart(2, '0')
 
   const parseFormDataToUsers = (formData: FormData) => {
-    const currentDataMap: Record<User['id'], EditableUserFormObject> = {}
+    const currentDataMap: UserIdAndEditableUserFormObject = {}
 
     for (const [key, value] of formData.entries()) {
       const match = key.match(/^(.+)_(\d+)$/)
@@ -49,7 +54,7 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
         }
       }
 
-      currentDataMap[id][field as keyof EditableUserFormObject] = value.toString()
+      currentDataMap[id][field as EditableUserKey] = value.toString()
     }
     return currentDataMap
   }
@@ -60,30 +65,27 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
     const formData = new FormData(e.currentTarget)
     const currentUsersObj = parseFormDataToUsers(formData)
 
-    const data = users.reduce(
-      (acc, originalUser) => {
-        const id = originalUser.id
-        const currentUserData = currentUsersObj[id]
+    const data = users.reduce((acc, originalUser) => {
+      const id = originalUser.id
+      const currentUserData = currentUsersObj[id]
 
-        if (!currentUserData) return acc
+      if (!currentUserData) return acc
 
-        const filteredIdAndData = filterModifiedData({
-          data: currentUserData,
-          originalData: originalUser,
+      const filteredIdAndData = filterModifiedData({
+        data: currentUserData,
+        originalData: originalUser,
+        id: id,
+      })
+
+      if (Object.keys(filteredIdAndData).length > 0) {
+        acc.push({
           id: id,
+          payload: filteredIdAndData[id],
         })
+      }
 
-        if (Object.keys(filteredIdAndData).length > 0) {
-          acc.push({
-            id: id,
-            payload: filteredIdAndData[id],
-          })
-        }
-
-        return acc
-      },
-      [] as { id: User['id']; payload: EditableUserFormObject }[],
-    )
+      return acc
+    }, [] as PayloadAllModifiedUsers)
 
     if (data.length === 0) {
       alert('수정된 내용이 없습니다.')

@@ -4,7 +4,7 @@ import type {
   UserEditAction,
   UserEditState,
 } from '@/reducers/usersReducer'
-import type { BuiltAllUsersValue, User, PersonalEditableUserKey } from '@/types/users'
+import type { BuiltAllUsersValue, User } from '@/types/users'
 import { createContext, useContext, type ActionDispatch, type ChangeEvent } from 'react'
 
 export type OnAllEditor = {
@@ -17,10 +17,7 @@ export type OnChangeCheckDeleteItems = { e: ChangeEvent<HTMLInputElement>; id: U
 export type IsPatching = User['id'] | 'all' | null
 export type IsDeleting = User['id'] | null
 
-export type OnChangeUserData = (
-  e: ChangeEvent<HTMLInputElement & { name: PersonalEditableUserKey }>,
-  id: User['id'],
-) => void
+export type OnChangeUserData = (e: ChangeEvent<HTMLInputElement>, id: User['id']) => void
 export type OnChangeUserAvatar = (id: User['id'], avatarSrc: User['avatar'] | null) => void
 
 export type UsersStateContextType = {
