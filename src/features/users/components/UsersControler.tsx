@@ -1,12 +1,10 @@
 import { useUsersActions, useUsersState } from '@/features/users'
 import { memo } from 'react'
 
-type UsersControlerProps = {
-  onDeleteSelected: (ids: number[]) => Promise<void>
-}
-function UsersControler({ onDeleteSelected }: UsersControlerProps) {
+function UsersControler() {
   const { users, targetIds, newUserState, userEditState, userDeleteState } = useUsersState()
-  const { newUserDispatch, userEditDispatch, userDeleteDispatch } = useUsersActions()
+  const { onDeleteSelected, newUserDispatch, userEditDispatch, userDeleteDispatch } =
+    useUsersActions()
 
   const isNoUserData = users.length === 0
   const isShowNewUserFormEl =

@@ -9,16 +9,32 @@ import {
   userDeleteReducer,
   userEditReducer,
 } from '@/reducers/usersReducer'
-import type { PayloadModifiedUser, User } from '@/types/users'
+import type {
+  PayloadAllModifiedUsers,
+  PayloadModifiedUser,
+  PayloadNewUser,
+  User,
+} from '@/types/users'
 
 type UsersProviderProps = {
   children: ReactNode
   users: User[]
+  onCreate: (payload: PayloadNewUser) => Promise<void>
   onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
+  onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
   onDelete: (id: User['id']) => Promise<void>
+  onDeleteSelected: (ids: number[]) => Promise<void>
 }
 
-export default function UsersProvider({ children, users, onModify, onDelete }: UsersProviderProps) {
+export default function UsersProvider({
+  children,
+  users,
+  onCreate,
+  onModify,
+  onAllModify,
+  onDelete,
+  onDeleteSelected,
+}: UsersProviderProps) {
   const [newUserState, newUserDispatch] = useReducer(newUserReducer, INIT_NEW_USER_STATE) // 유저 추가하기 reducer
   const [userEditState, userEditDispatch] = useReducer(userEditReducer, INIT_USER_EDIT_STATE) // 유저 수정하기 reducer
   const [userDeleteState, userDeleteDispatch] = useReducer(
@@ -44,10 +60,13 @@ export default function UsersProvider({ children, users, onModify, onDelete }: U
       newUserDispatch,
       userEditDispatch,
       userDeleteDispatch,
+      onCreate,
       onModify,
+      onAllModify,
       onDelete,
+      onDeleteSelected,
     }),
-    [onModify, onDelete],
+    [onCreate, onModify, onAllModify, onDelete, onDeleteSelected],
   )
 
   return (

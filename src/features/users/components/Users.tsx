@@ -9,11 +9,10 @@ import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
 
 type UsersProps = {
   children: React.ReactNode
-  onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
 }
-function Users({ children, onAllModify }: UsersProps) {
+function Users({ children }: UsersProps) {
   const { users, userEditState } = useUsersState()
-  const { userEditDispatch } = useUsersActions()
+  const { onAllModify, userEditDispatch } = useUsersActions()
 
   // [수정하기] : 모든 유저 form value 정렬
   const parseFormDataToUsers = (formData: FormData) => {

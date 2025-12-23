@@ -22,11 +22,17 @@ export default function UsersContainer() {
   }, [getAllUsers])
 
   return (
-    <UsersProvider users={users}>
-      <UsersControler onDeleteSelected={deleteSelectedUsers} />
-      <UsersNewForm onCreate={createUser} />
-
-      <Users onAllModify={modifyAllUsers}>
+    <UsersProvider
+      users={users}
+      onCreate={createUser}
+      onModify={modifyUser}
+      onAllModify={modifyAllUsers}
+      onDelete={deleteUser}
+      onDeleteSelected={deleteSelectedUsers}
+    >
+      <UsersControler />
+      <UsersNewForm />
+      <Users>
         {isLoading && <img src={loadingGif} className="loading" alt="loading" />}
 
         {!isLoading && error.length > 0 && (
@@ -36,7 +42,7 @@ export default function UsersContainer() {
           </div>
         )}
 
-        <UsersList onModify={modifyUser} onDelete={deleteUser} />
+        <UsersList />
       </Users>
     </UsersProvider>
   )

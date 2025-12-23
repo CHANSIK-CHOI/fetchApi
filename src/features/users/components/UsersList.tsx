@@ -1,11 +1,6 @@
 import { UsersItem, useUsersState } from '@/features/users'
-import type { PayloadModifiedUser, User } from '@/types/users'
 
-type UsersListProps = {
-  onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
-  onDelete: (id: User['id']) => Promise<void>
-}
-export default function UsersList({ onModify, onDelete }: UsersListProps) {
+export default function UsersList() {
   const { users, userEditState } = useUsersState()
   return (
     <>
@@ -19,8 +14,6 @@ export default function UsersList({ onModify, onDelete }: UsersListProps) {
               lastName={u.last_name}
               email={u.email}
               id={u.id}
-              onModify={onModify}
-              onDelete={onDelete}
             />
           ))}
         </ul>

@@ -4,15 +4,12 @@ import { INIT_NEW_USER_VALUE, PLACEHOLDER_SRC } from '@/constants/users'
 import { useUsersActions, useUsersState } from '@/features/users'
 import { hasEmptyRequiredField, readFileAsDataURL } from '@/util/users'
 
-type UsersNewFormProps = {
-  onCreate: (payload: PayloadNewUser) => Promise<void>
-}
-export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
+export default function UsersNewForm() {
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [submitValue, setSubmitValue] = useState<User['avatar']>('')
   const [newUserValue, setNewUserValue] = useState<PayloadNewUser>(INIT_NEW_USER_VALUE)
   const { newUserState } = useUsersState()
-  const { newUserDispatch } = useUsersActions()
+  const { onCreate, newUserDispatch } = useUsersActions()
 
   useEffect(() => {
     return () => {
