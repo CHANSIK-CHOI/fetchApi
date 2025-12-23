@@ -1,25 +1,25 @@
 import { UsersItem, useUsersState } from '@/features/users'
 import type { PayloadModifiedUser, User } from '@/types/users'
+import { memo } from 'react'
 
 type UsersListProps = {
-  data: User[]
   onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
   onDelete: (id: User['id']) => Promise<void>
 }
-export default function UsersList({ data, onModify, onDelete }: UsersListProps) {
-  const { userEditState } = useUsersState()
+function UsersList({ onModify, onDelete }: UsersListProps) {
+  const { users, userEditState } = useUsersState()
   return (
     <>
-      {data.length > 0 ? (
+      {users.length > 0 ? (
         <ul className="users__list">
-          {data.map((user) => (
+          {users.map((u) => (
             <UsersItem
-              key={`${user.id}_${userEditState.isResetAllValue ? 'reset' : 'active'}`}
-              avatar={user.avatar}
-              firstName={user.first_name}
-              lastName={user.last_name}
-              email={user.email}
-              id={user.id}
+              key={`${u.id}_${userEditState.isResetAllValue ? 'reset' : 'active'}`}
+              avatar={u.avatar}
+              firstName={u.first_name}
+              lastName={u.last_name}
+              email={u.email}
+              id={u.id}
               onModify={onModify}
               onDelete={onDelete}
             />
@@ -33,3 +33,5 @@ export default function UsersList({ data, onModify, onDelete }: UsersListProps) 
     </>
   )
 }
+
+export default memo(UsersList)

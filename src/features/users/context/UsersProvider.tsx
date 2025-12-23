@@ -9,12 +9,14 @@ import {
   userDeleteReducer,
   userEditReducer,
 } from '@/reducers/usersReducer'
+import type { User } from '@/types/users'
 
 type UsersProviderProps = {
   children: ReactNode
+  users: User[]
 }
 
-export default function UsersProvider({ children }: UsersProviderProps) {
+export default function UsersProvider({ children, users }: UsersProviderProps) {
   const [newUserState, newUserDispatch] = useReducer(newUserReducer, INIT_NEW_USER_STATE) // 유저 추가하기 reducer
   const [userEditState, userEditDispatch] = useReducer(userEditReducer, INIT_USER_EDIT_STATE) // 유저 수정하기 reducer
   const [userDeleteState, userDeleteDispatch] = useReducer(
@@ -22,43 +24,12 @@ export default function UsersProvider({ children }: UsersProviderProps) {
     INIT_USER_DELETE_STATE,
   ) // 유저 삭제하기reducer
 
-  // [삭제하기] 선택된 item 데이터 삭제
-  // const onClickDeleteSelectedItems = useCallback(async () => {
-  //   if (checkedDeleteItemsRef.current.length === 0) {
-  //     // 선택 된 데이터가 없을 때
-  //     alert('선택한 데이터가 없습니다.')
-  //   } else {
-  //     if (isCheckedDeletingRef.current) return
-
-  //     const names = checkedDeleteItemsRef.current
-  //       .map((id) => initialBuiltAllUsersValue[id])
-  //       .filter(Boolean)
-  //       .map((u) => `${u[`first_name_${u.id}`]} ${u[`last_name_${u.id}`]}`)
-  //       .join(', ')
-  //     const confirmMsg = `${names} 유저들을 삭제하시겠습니까?`
-  //     if (!confirm(confirmMsg)) return
-
-  //     try {
-  //       setisCheckedDeleting(true)
-  //       await onDeleteSelectedUsers(checkedDeleteItemsRef.current)
-  //       resetChecked()
-  //       alert('삭제를 완료하였습니다.')
-  //     } catch (err) {
-  //       console.error(err)
-  //       alert('삭제에 실패했습니다. 다시 시도해주세요.')
-  //     } finally {
-  //       setisCheckedDeleting(false)
-  //       setIsShowDeleteCheckbox(false)
-  //     }
-  //   }
-  // }, [initialBuiltAllUsersValue, onDeleteSelectedUsers, resetChecked])
-
   return (
-    <UsersStateContext.Provider value={{ newUserState, userEditState, userDeleteState }}>
+    <UsersStateContext.Provider value={{ users, newUserState, userEditState, userDeleteState }}>
       <UsersActionsContext.Provider
         value={{ newUserDispatch, userEditDispatch, userDeleteDispatch }}
       >
-        {children}
+        <div className="users">{children}</div>
       </UsersActionsContext.Provider>
     </UsersStateContext.Provider>
   )

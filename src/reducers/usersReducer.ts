@@ -211,6 +211,7 @@ export function userDeleteReducer(state: UserDeleteState, action: UserDeleteActi
       return {
         ...state,
         isShowDeleteCheckbox: false,
+        checkedIds: [],
       }
     }
     case 'ALL_CHECKED': {

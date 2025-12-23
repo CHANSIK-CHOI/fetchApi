@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { UsersProvider, Users, UsersList, UsersNewForm } from '@/features/users'
+import { UsersProvider, Users, UsersList, UsersNewForm, UsersControler } from '@/features/users'
 import { useUsersQuery } from '@/hooks/useUsersQuery'
 import loadingGif from '@/assets/loading.gif'
 import errorImg from '@/assets/error.jpeg'
@@ -22,13 +22,11 @@ export default function UsersContainer() {
   }, [getAllUsers])
 
   return (
-    <UsersProvider>
-      <Users
-        newUserForm={<UsersNewForm onCreate={createUser} />}
-        users={users}
-        onAllModify={modifyAllUsers}
-        onDeleteSelected={deleteSelectedUsers}
-      >
+    <UsersProvider users={users}>
+      <UsersControler onDeleteSelected={deleteSelectedUsers} />
+      <UsersNewForm onCreate={createUser} />
+
+      <Users onAllModify={modifyAllUsers}>
         {isLoading && <img src={loadingGif} className="loading" alt="loading" />}
 
         {!isLoading && error.length > 0 && (
@@ -38,7 +36,7 @@ export default function UsersContainer() {
           </div>
         )}
 
-        <UsersList data={users} onModify={modifyUser} onDelete={deleteUser} />
+        <UsersList onModify={modifyUser} onDelete={deleteUser} />
       </Users>
     </UsersProvider>
   )

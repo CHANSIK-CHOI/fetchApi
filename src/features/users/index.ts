@@ -1,5 +1,6 @@
 export { default as UsersContainer } from './containers/UsersContainer'
 export { default as Users } from './components/Users'
+export { default as UsersControler } from './components/UsersControler'
 export { default as UsersList } from './components/UsersList'
 export { default as UsersItem } from './components/UsersItem'
 export { default as UsersProfileEditor } from './components/UsersProfileEditor'

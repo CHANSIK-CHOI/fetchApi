@@ -36,8 +36,7 @@ export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
   const handleChangeInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name: newDataName, value } = e.target
     const key = newDataName.replace(/_userForm$/, '') as RequiredEditableUserKey
-    const trimmed = value.trim()
-    setNewUserValue((prev) => ({ ...prev, [key]: trimmed }))
+    setNewUserValue((prev) => ({ ...prev, [key]: value }))
   }, [])
 
   useEffect(() => {
@@ -82,67 +81,71 @@ export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
     }
   }
 
+  if (!newUserState.isShowEditor) return null
+
   return (
-    <form id="usersNewForm" className="userForm" onSubmit={handleSubmit}>
-      <div className="userForm__box">
-        <div className="userForm__profileWrap">
-          <div className="userForm__profile">
-            <img src={previewUrl || 'https://placehold.co/100x100?text=Hello+World'} alt="" />
-          </div>
-          {!previewUrl ? (
-            <label htmlFor="userFormImg" className="button line userForm__profileBtn">
-              프로필 추가
-            </label>
-          ) : (
-            <div className="userForm__profileBtns">
-              <span className="userForm__profileName">{fileName}</span>
-
-              <label htmlFor="userFormImg" className="button line userForm__profileBtn">
-                프로필 변경
-              </label>
-              <button
-                type="button"
-                className="line userForm__profileBtn"
-                onClick={handleRemoveImage}
-              >
-                삭제
-              </button>
+    <div className="users__newForm">
+      <form id="usersNewForm" className="userForm" onSubmit={handleSubmit}>
+        <div className="userForm__box">
+          <div className="userForm__profileWrap">
+            <div className="userForm__profile">
+              <img src={previewUrl || 'https://placehold.co/100x100?text=Hello+World'} alt="" />
             </div>
-          )}
+            {!previewUrl ? (
+              <label htmlFor="userFormImg" className="button line userForm__profileBtn">
+                프로필 추가
+              </label>
+            ) : (
+              <div className="userForm__profileBtns">
+                <span className="userForm__profileName">{fileName}</span>
 
-          <input
-            id="userFormImg"
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={handleChangeImage}
-          />
-        </div>
+                <label htmlFor="userFormImg" className="button line userForm__profileBtn">
+                  프로필 변경
+                </label>
+                <button
+                  type="button"
+                  className="line userForm__profileBtn"
+                  onClick={handleRemoveImage}
+                >
+                  삭제
+                </button>
+              </div>
+            )}
 
-        <div className="userForm__editer">
-          <input
-            type="text"
-            name={`first_name_userForm`}
-            placeholder="first name"
-            value={newUserValue.first_name ?? ''}
-            onChange={handleChangeInput}
-          />
-          <input
-            type="text"
-            name={`last_name_userForm`}
-            placeholder="last name"
-            value={newUserValue.last_name ?? ''}
-            onChange={handleChangeInput}
-          />
-          <input
-            type="text"
-            name={`email_userForm`}
-            placeholder="email"
-            value={newUserValue.email ?? ''}
-            onChange={handleChangeInput}
-          />
+            <input
+              id="userFormImg"
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleChangeImage}
+            />
+          </div>
+
+          <div className="userForm__editer">
+            <input
+              type="text"
+              name={`first_name_userForm`}
+              placeholder="first name"
+              value={newUserValue.first_name ?? ''}
+              onChange={handleChangeInput}
+            />
+            <input
+              type="text"
+              name={`last_name_userForm`}
+              placeholder="last name"
+              value={newUserValue.last_name ?? ''}
+              onChange={handleChangeInput}
+            />
+            <input
+              type="text"
+              name={`email_userForm`}
+              placeholder="email"
+              value={newUserValue.email ?? ''}
+              onChange={handleChangeInput}
+            />
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   )
 }

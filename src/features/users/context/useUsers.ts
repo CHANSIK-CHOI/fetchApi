@@ -6,9 +6,11 @@ import type {
   UserEditAction,
   UserEditState,
 } from '@/reducers/usersReducer'
+import type { User } from '@/types/users'
 import { createContext, useContext, type ActionDispatch } from 'react'
 
 export type UsersStateContextType = {
+  users: User[]
   newUserState: NewUserState
   userEditState: UserEditState
   userDeleteState: UserDeleteState
