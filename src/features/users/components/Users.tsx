@@ -13,8 +13,15 @@ type UsersProps = {
   newUserForm: React.ReactNode
   users: User[]
   onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
+  onDeleteSelected: (ids: number[]) => Promise<void>
 }
-export default function Users({ children, newUserForm, users, onAllModify }: UsersProps) {
+export default function Users({
+  children,
+  newUserForm,
+  users,
+  onAllModify,
+  onDeleteSelected,
+}: UsersProps) {
   const { newUserState, userEditState, userDeleteState } = useUsersState()
   const { newUserDispatch, userEditDispatch, userDeleteDispatch } = useUsersActions()
 
@@ -25,8 +32,8 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
     !isNoUserData && !newUserState.isShowEditor && !userEditState.isShowAllEditor
   const isShowAllEditorEl =
     !isNoUserData && !newUserState.isShowEditor && !userDeleteState.isShowDeleteCheckbox
-
   const resultCount = users.length.toString().padStart(2, '0')
+  const isAllChecked = users.length > 0 && userDeleteState.checkedIds.length === users.length
 
   const parseFormDataToUsers = (formData: FormData) => {
     const currentDataMap: UserIdAndEditableUserFormObject = {}
@@ -53,7 +60,7 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
     return currentDataMap
   }
 
-  // PATCH : 다수 유저 수정
+  // [수정하기] : 다수 유저 수정
   const handleSubmitAllUsers = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
@@ -119,17 +126,52 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
     }
   }
 
-  // DELETE : 다수 유저 삭제
-  const handleClickCheckedItemDeleting = () => {
-    userDeleteDispatch({ type: 'SUBMIT_CHECKED_ITEMS_START' })
-  }
-
-  // RESET
+  // [수정하기] : 전체 유저 form value 수정하기
   useEffect(() => {
     if (userEditState.isResetAllValue) {
       userEditDispatch({ type: 'RESET_COMPLETE_ALL_VALUE' })
     }
   }, [userEditState.isResetAllValue, userEditDispatch])
+
+  // [삭제하기] : 다수 유저 삭제
+  const handleClickCheckedItemDeleting = async () => {
+    userDeleteDispatch({ type: 'SUBMIT_CHECKED_ITEMS_START' })
+
+    if (userDeleteState.checkedIds.length === 0) {
+      alert('선택한 데이터가 없습니다.')
+      return
+    }
+
+    if (userDeleteState.deleteing) return
+
+    const targetUsers = users.filter(({ id }) => userDeleteState.checkedIds.includes(id))
+    const targetUsersnames = targetUsers.map((u) => `${u.first_name} ${u.last_name}`).join(', ')
+
+    const confirmMsg = `${targetUsersnames} 유저들을 삭제하시겠습니까?`
+    if (!confirm(confirmMsg)) return
+
+    try {
+      userDeleteDispatch({ type: 'SUBMIT_CHECKED_ITEMS_START' })
+      await onDeleteSelected(userDeleteState.checkedIds)
+      userDeleteDispatch({ type: 'SUBMIT_SUCCESS' })
+      alert('삭제를 완료하였습니다.')
+    } catch (err) {
+      console.error(err)
+      userDeleteDispatch({
+        type: 'SUBMIT_ERROR',
+        payload: { msg: '삭제에 실패했습니다. 다시 시도해주세요.' },
+      })
+      alert('삭제에 실패했습니다. 다시 시도해주세요.')
+    }
+  }
+
+  // [삭제하기] : users 업데이트 시 targetIds 업데이트
+  useEffect(() => {
+    if (users.length > 0) {
+      const ids = users.map((u) => u.id)
+      userDeleteDispatch({ type: 'SYNC_TARGET_USERS', payload: { ids } })
+    }
+  }, [users, userDeleteDispatch])
 
   return (
     <div className="users">
@@ -183,7 +225,7 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
                   >
                     선택취소
                   </button>
-                  {userDeleteState.isAllChecked ? (
+                  {isAllChecked ? (
                     <button
                       type="button"
                       className="line"

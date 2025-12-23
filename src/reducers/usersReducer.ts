@@ -165,15 +165,18 @@ export function userEditReducer(state: UserEditState, action: UserEditAction) {
 // DELETE
 export type UserDeleteState = {
   isShowDeleteCheckbox: boolean
-  isAllChecked: boolean
+  targetIds: User['id'][]
+  checkedIds: User['id'][]
   deleteing: User['id'] | 'all' | null
   error: string | null
 }
 export type UserDeleteAction =
+  | { type: 'SYNC_TARGET_USERS'; payload: { ids: User['id'][] } }
   | { type: 'SHOW_CHECKBOX' }
   | { type: 'HIDE_CHECKBOX' }
   | { type: 'ALL_CHECKED' }
   | { type: 'RESET_CHECKED' }
+  | { type: 'TOGGLE_ITEM'; payload: { id: User['id'] } }
   | { type: 'SUBMIT_START'; payload: { id: User['id'] } }
   | { type: 'SUBMIT_CHECKED_ITEMS_START' }
   | { type: 'SUBMIT_SUCCESS' }
@@ -181,14 +184,23 @@ export type UserDeleteAction =
   | { type: 'RESET' }
 
 export const INIT_USER_DELETE_STATE: UserDeleteState = {
+  targetIds: [],
   isShowDeleteCheckbox: false,
-  isAllChecked: false,
+  checkedIds: [],
   deleteing: null,
   error: null,
 }
 
 export function userDeleteReducer(state: UserDeleteState, action: UserDeleteAction) {
+  const { targetIds, checkedIds } = state
   switch (action.type) {
+    case 'SYNC_TARGET_USERS': {
+      const { ids } = action.payload
+      return {
+        ...state,
+        targetIds: ids,
+      }
+    }
     case 'SHOW_CHECKBOX': {
       return {
         ...state,
@@ -204,13 +216,25 @@ export function userDeleteReducer(state: UserDeleteState, action: UserDeleteActi
     case 'ALL_CHECKED': {
       return {
         ...state,
-        isAllChecked: true,
+        checkedIds: targetIds,
+      }
+    }
+    case 'TOGGLE_ITEM': {
+      const { id } = action.payload
+      const isChecked = checkedIds.includes(id)
+      const newCheckedIds = isChecked
+        ? checkedIds.filter((itemId) => itemId !== id)
+        : [...checkedIds, id]
+
+      return {
+        ...state,
+        checkedIds: newCheckedIds,
       }
     }
     case 'RESET_CHECKED': {
       return {
         ...state,
-        isAllChecked: false,
+        checkedIds: [],
       }
     }
     case 'SUBMIT_START': {
@@ -221,7 +245,7 @@ export function userDeleteReducer(state: UserDeleteState, action: UserDeleteActi
       return { ...state, deleteing: 'all' as const }
     }
     case 'SUBMIT_SUCCESS': {
-      return { ...state, deleteing: null }
+      return { ...state, deleteing: null, checkedIds: [], isShowDeleteCheckbox: false }
     }
     case 'SUBMIT_ERROR': {
       const { msg } = action.payload

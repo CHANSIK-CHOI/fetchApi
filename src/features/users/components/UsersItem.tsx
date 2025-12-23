@@ -4,7 +4,7 @@ import {
   UsersProfileView,
   UsersProfileEditor,
 } from '@/features/users'
-import { useCallback, useMemo, useState, type ChangeEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import type { EditableUserFormObject, PayloadModifiedUser, User } from '@/types/users'
 import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
 
@@ -36,10 +36,7 @@ export default function UsersItem({
     }),
     [avatar, email, firstName, lastName],
   )
-
   const [formData, setFormData] = useState<EditableUserFormObject>(originalData)
-  const [checkedItems, setCheckedItems] = useState(false)
-
   const { newUserState, userEditState, userDeleteState } = useUsersState()
   const { userEditDispatch, userDeleteDispatch } = useUsersActions()
 
@@ -50,6 +47,15 @@ export default function UsersItem({
     !userEditState.isShowAllEditor &&
     !userDeleteState.isShowDeleteCheckbox &&
     !newUserState.isShowEditor
+
+  const userNameEl = (
+    <>
+      <span className="userItem__name">
+        {firstName} {lastName}
+      </span>
+      <span className="userItem__email">{email}</span>
+    </>
+  )
 
   const handleChangeUserData = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -72,15 +78,7 @@ export default function UsersItem({
     })
   }, [])
 
-  const userNameEl = (
-    <>
-      <span className="userItem__name">
-        {firstName} {lastName}
-      </span>
-      <span className="userItem__email">{email}</span>
-    </>
-  )
-
+  // [수정하기] : 개별 유저 수정하기
   const handleSubmitUserItem = async () => {
     if (userEditState.editing !== null) return
 
@@ -116,11 +114,13 @@ export default function UsersItem({
     }
   }
 
+  // [수정하기] : 수정취소
   const handleClickCancel = () => {
     setFormData(originalData)
     userEditDispatch({ type: 'HIDE_EDITOR', payload: { id } })
   }
 
+  // [삭제하기] : 개별 유저 삭제
   const handleDeleteItem = async () => {
     if (userDeleteState.deleteing !== null) return
 
@@ -142,6 +142,12 @@ export default function UsersItem({
     }
   }
 
+  // [삭제하기] : checkbox
+  const isChecked = userDeleteState.checkedIds.includes(id)
+  const handleChangeCheckItem = () => {
+    userDeleteDispatch({ type: 'TOGGLE_ITEM', payload: { id } })
+  }
+
   return (
     <li className="userItem">
       <div className="userItem__box">
@@ -151,8 +157,8 @@ export default function UsersItem({
               type="checkbox"
               name={`checkbox_${id}`}
               id={`checkbox_${id}`}
-              checked={checkedItems}
-              onChange={() => setCheckedItems((prev) => !prev)}
+              checked={isChecked}
+              onChange={handleChangeCheckItem}
             />
           </div>
         )}
