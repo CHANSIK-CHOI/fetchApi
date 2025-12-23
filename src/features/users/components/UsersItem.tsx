@@ -4,7 +4,7 @@ import {
   UsersProfileView,
   UsersProfileEditor,
 } from '@/features/users'
-import { useCallback, useMemo, useState, type ChangeEvent } from 'react'
+import { memo, useCallback, useMemo, useState, type ChangeEvent } from 'react'
 import type { EditableUserFormObject, PayloadModifiedUser, User } from '@/types/users'
 import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
 
@@ -18,15 +18,7 @@ type UsersItemProps = {
   onDelete: (id: User['id']) => Promise<void>
 }
 
-export default function UsersItem({
-  avatar,
-  firstName,
-  lastName,
-  email,
-  id,
-  onModify,
-  onDelete,
-}: UsersItemProps) {
+function UsersItem({ avatar, firstName, lastName, email, id, onModify, onDelete }: UsersItemProps) {
   const originalData = useMemo(
     () => ({
       avatar,
@@ -253,3 +245,5 @@ export default function UsersItem({
     </li>
   )
 }
+
+export default memo(UsersItem)

@@ -58,7 +58,10 @@ export default function UsersControler({ onDeleteSelected }: UsersControlerProps
               <button
                 type="button"
                 className="line"
-                onClick={() => newUserDispatch({ type: 'SHOW_EDITOR' })}
+                onClick={() => {
+                  newUserDispatch({ type: 'SHOW_EDITOR' })
+                  userEditDispatch({ type: 'RESET_START_ALL_VALUE' })
+                }}
               >
                 추가하기
               </button>
@@ -85,7 +88,10 @@ export default function UsersControler({ onDeleteSelected }: UsersControlerProps
               <button
                 type="button"
                 className="line"
-                onClick={() => userDeleteDispatch({ type: 'SHOW_CHECKBOX' })}
+                onClick={() => {
+                  userDeleteDispatch({ type: 'SHOW_CHECKBOX' })
+                  userEditDispatch({ type: 'RESET_START_ALL_VALUE' })
+                }}
               >
                 삭제할 유저 선택하기
               </button>

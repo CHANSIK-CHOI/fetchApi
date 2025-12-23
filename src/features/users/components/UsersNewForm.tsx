@@ -1,43 +1,18 @@
 import React, { useCallback, useEffect, useState, type FormEvent } from 'react'
-import type { PayloadNewUser, RequiredEditableUserKey } from '@/types/users'
-import { INIT_NEW_USER_VALUE } from '@/constants/users'
+import type { PayloadNewUser, RequiredEditableUserKey, User } from '@/types/users'
+import { INIT_NEW_USER_VALUE, PLACEHOLDER_SRC } from '@/constants/users'
 import { useUsersActions, useUsersState } from '@/features/users'
-import { hasEmptyRequiredField } from '@/util/users'
+import { hasEmptyRequiredField, readFileAsDataURL } from '@/util/users'
 
 type UsersNewFormProps = {
   onCreate: (payload: PayloadNewUser) => Promise<void>
 }
 export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
   const [previewUrl, setPreviewUrl] = useState<string>('')
+  const [submitValue, setSubmitValue] = useState<User['avatar']>('')
   const [newUserValue, setNewUserValue] = useState<PayloadNewUser>(INIT_NEW_USER_VALUE)
-  const [fileName, setFileName] = useState<string | null>(null)
   const { newUserState } = useUsersState()
   const { newUserDispatch } = useUsersActions()
-
-  const handleChangeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null
-    if (!file) return
-
-    const objectUrl = URL.createObjectURL(file)
-    const { name } = file
-
-    setPreviewUrl(objectUrl)
-    setFileName(name)
-    setNewUserValue((prev) => ({ ...prev, avatar: objectUrl }))
-  }
-
-  const handleRemoveImage = () => {
-    if (previewUrl == '') return
-    setPreviewUrl('')
-    setFileName(null)
-    setNewUserValue((prev) => ({ ...prev, avatar: undefined }))
-  }
-
-  const handleChangeInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name: newDataName, value } = e.target
-    const key = newDataName.replace(/_userForm$/, '') as RequiredEditableUserKey
-    setNewUserValue((prev) => ({ ...prev, [key]: value }))
-  }, [])
 
   useEffect(() => {
     return () => {
@@ -46,6 +21,32 @@ export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
       }
     }
   }, [previewUrl])
+
+  const handleChangeImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] || null
+    if (!selected) return
+
+    const objectUrl = URL.createObjectURL(selected)
+    setPreviewUrl(objectUrl)
+
+    const base64 = await readFileAsDataURL(selected)
+    setSubmitValue(base64)
+
+    setNewUserValue((prev) => ({ ...prev, avatar: base64 }))
+  }
+
+  const handleRemoveImage = () => {
+    if (previewUrl == '') return
+    setPreviewUrl('')
+    setSubmitValue('')
+    setNewUserValue((prev) => ({ ...prev, avatar: undefined }))
+  }
+
+  const handleChangeInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name: newDataName, value } = e.target
+    const key = newDataName.replace(/_userForm$/, '') as RequiredEditableUserKey
+    setNewUserValue((prev) => ({ ...prev, [key]: value }))
+  }, [])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -70,7 +71,6 @@ export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
 
       setNewUserValue(INIT_NEW_USER_VALUE)
       setPreviewUrl('')
-      setFileName(null)
     } catch (err) {
       console.error(err)
       newUserDispatch({
@@ -81,6 +81,9 @@ export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
     }
   }
 
+  const displaySrc = submitValue !== '' ? submitValue : PLACEHOLDER_SRC
+  const isHasContent = Boolean(submitValue)
+
   if (!newUserState.isShowEditor) return null
 
   return (
@@ -89,19 +92,14 @@ export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
         <div className="userForm__box">
           <div className="userForm__profileWrap">
             <div className="userForm__profile">
-              <img src={previewUrl || 'https://placehold.co/100x100?text=Hello+World'} alt="" />
+              <img src={displaySrc} alt="" />
             </div>
-            {!previewUrl ? (
+            <div className="userForm__profileBtns">
               <label htmlFor="userFormImg" className="button line userForm__profileBtn">
-                프로필 추가
+                {isHasContent ? '프로필 변경' : '프로필 추가'}
               </label>
-            ) : (
-              <div className="userForm__profileBtns">
-                <span className="userForm__profileName">{fileName}</span>
 
-                <label htmlFor="userFormImg" className="button line userForm__profileBtn">
-                  프로필 변경
-                </label>
+              {isHasContent && (
                 <button
                   type="button"
                   className="line userForm__profileBtn"
@@ -109,8 +107,8 @@ export default function UsersNewForm({ onCreate }: UsersNewFormProps) {
                 >
                   삭제
                 </button>
-              </div>
-            )}
+              )}
+            </div>
 
             <input
               id="userFormImg"

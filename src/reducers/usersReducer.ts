@@ -124,6 +124,7 @@ export function userEditReducer(state: UserEditState, action: UserEditAction) {
         ...state,
         isResetAllValue: true,
         isShowAllEditor: false,
+        displayedEditor: [],
       }
     }
     case 'RESET_COMPLETE_ALL_VALUE': {
