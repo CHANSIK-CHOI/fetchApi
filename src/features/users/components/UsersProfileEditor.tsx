@@ -1,4 +1,4 @@
-import { memo, useEffect, useState, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import { PLACEHOLDER_SRC } from '@/constants/users'
 import type { User } from '@/types/users'
 import { readFileAsDataURL } from '@/util/users'
@@ -9,7 +9,7 @@ type UsersProfileEditorProps = {
   onChange: (url: string) => void
 }
 
-function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
+export default function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
   const [preview, setPreview] = useState<string | null>(null)
   const [submitValue, setSubmitValue] = useState<User['avatar']>(avatar || '')
 
@@ -62,5 +62,3 @@ function UsersProfileEditor({ id, avatar, onChange }: UsersProfileEditorProps) {
     </>
   )
 }
-
-export default memo(UsersProfileEditor)

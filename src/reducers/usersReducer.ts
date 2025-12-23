@@ -166,16 +166,14 @@ export function userEditReducer(state: UserEditState, action: UserEditAction) {
 // DELETE
 export type UserDeleteState = {
   isShowDeleteCheckbox: boolean
-  targetIds: User['id'][]
   checkedIds: User['id'][]
   deleteing: User['id'] | 'all' | null
   error: string | null
 }
 export type UserDeleteAction =
-  | { type: 'SYNC_TARGET_USERS'; payload: { ids: User['id'][] } }
   | { type: 'SHOW_CHECKBOX' }
   | { type: 'HIDE_CHECKBOX' }
-  | { type: 'ALL_CHECKED' }
+  | { type: 'ALL_CHECKED'; payload: { ids: User['id'][] } }
   | { type: 'RESET_CHECKED' }
   | { type: 'TOGGLE_ITEM'; payload: { id: User['id'] } }
   | { type: 'SUBMIT_START'; payload: { id: User['id'] } }
@@ -185,7 +183,6 @@ export type UserDeleteAction =
   | { type: 'RESET' }
 
 export const INIT_USER_DELETE_STATE: UserDeleteState = {
-  targetIds: [],
   isShowDeleteCheckbox: false,
   checkedIds: [],
   deleteing: null,
@@ -193,15 +190,8 @@ export const INIT_USER_DELETE_STATE: UserDeleteState = {
 }
 
 export function userDeleteReducer(state: UserDeleteState, action: UserDeleteAction) {
-  const { targetIds, checkedIds } = state
+  const { checkedIds } = state
   switch (action.type) {
-    case 'SYNC_TARGET_USERS': {
-      const { ids } = action.payload
-      return {
-        ...state,
-        targetIds: ids,
-      }
-    }
     case 'SHOW_CHECKBOX': {
       return {
         ...state,
@@ -216,9 +206,10 @@ export function userDeleteReducer(state: UserDeleteState, action: UserDeleteActi
       }
     }
     case 'ALL_CHECKED': {
+      const { ids } = action.payload
       return {
         ...state,
-        checkedIds: targetIds,
+        checkedIds: ids,
       }
     }
     case 'TOGGLE_ITEM': {

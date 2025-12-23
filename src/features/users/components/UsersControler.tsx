@@ -1,10 +1,11 @@
 import { useUsersActions, useUsersState } from '@/features/users'
+import { memo } from 'react'
 
 type UsersControlerProps = {
   onDeleteSelected: (ids: number[]) => Promise<void>
 }
-export default function UsersControler({ onDeleteSelected }: UsersControlerProps) {
-  const { users, newUserState, userEditState, userDeleteState } = useUsersState()
+function UsersControler({ onDeleteSelected }: UsersControlerProps) {
+  const { users, targetIds, newUserState, userEditState, userDeleteState } = useUsersState()
   const { newUserDispatch, userEditDispatch, userDeleteDispatch } = useUsersActions()
 
   const isNoUserData = users.length === 0
@@ -113,7 +114,12 @@ export default function UsersControler({ onDeleteSelected }: UsersControlerProps
                     전체취소
                   </button>
                 ) : (
-                  <button type="button" onClick={() => userDeleteDispatch({ type: 'ALL_CHECKED' })}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      userDeleteDispatch({ type: 'ALL_CHECKED', payload: { ids: targetIds } })
+                    }
+                  >
                     전체선택
                   </button>
                 )}
@@ -160,3 +166,5 @@ export default function UsersControler({ onDeleteSelected }: UsersControlerProps
     </div>
   )
 }
+
+export default memo(UsersControler)

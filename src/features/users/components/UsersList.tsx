@@ -1,12 +1,11 @@
 import { UsersItem, useUsersState } from '@/features/users'
 import type { PayloadModifiedUser, User } from '@/types/users'
-import { memo } from 'react'
 
 type UsersListProps = {
   onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
   onDelete: (id: User['id']) => Promise<void>
 }
-function UsersList({ onModify, onDelete }: UsersListProps) {
+export default function UsersList({ onModify, onDelete }: UsersListProps) {
   const { users, userEditState } = useUsersState()
   return (
     <>
@@ -33,5 +32,3 @@ function UsersList({ onModify, onDelete }: UsersListProps) {
     </>
   )
 }
-
-export default memo(UsersList)

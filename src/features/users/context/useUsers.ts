@@ -6,11 +6,12 @@ import type {
   UserEditAction,
   UserEditState,
 } from '@/reducers/usersReducer'
-import type { User } from '@/types/users'
+import type { PayloadModifiedUser, User } from '@/types/users'
 import { createContext, useContext, type ActionDispatch } from 'react'
 
 export type UsersStateContextType = {
   users: User[]
+  targetIds: User['id'][]
   newUserState: NewUserState
   userEditState: UserEditState
   userDeleteState: UserDeleteState
@@ -20,6 +21,8 @@ export type UsersActionsContextType = {
   newUserDispatch: ActionDispatch<[action: NewUserAction]>
   userEditDispatch: ActionDispatch<[action: UserEditAction]>
   userDeleteDispatch: ActionDispatch<[action: UserDeleteAction]>
+  onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
+  onDelete: (id: User['id']) => Promise<void>
 }
 
 export const UsersStateContext = createContext<UsersStateContextType | null>(null)

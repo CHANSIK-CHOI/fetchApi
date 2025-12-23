@@ -1,4 +1,4 @@
-import React, { useEffect, type FormEvent } from 'react'
+import React, { memo, useEffect, type FormEvent } from 'react'
 import { useUsersActions, useUsersState } from '@/features/users'
 import type {
   EditableUserKey,
@@ -11,10 +11,11 @@ type UsersProps = {
   children: React.ReactNode
   onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
 }
-export default function Users({ children, onAllModify }: UsersProps) {
+function Users({ children, onAllModify }: UsersProps) {
   const { users, userEditState } = useUsersState()
-  const { userEditDispatch, userDeleteDispatch } = useUsersActions()
+  const { userEditDispatch } = useUsersActions()
 
+  // [수정하기] : 모든 유저 form value 정렬
   const parseFormDataToUsers = (formData: FormData) => {
     const currentDataMap: UserIdAndEditableUserFormObject = {}
 
@@ -113,17 +114,11 @@ export default function Users({ children, onAllModify }: UsersProps) {
     }
   }, [userEditState.isResetAllValue, userEditDispatch])
 
-  // [삭제하기] : users 업데이트 시 targetIds 업데이트
-  useEffect(() => {
-    if (users.length > 0) {
-      const ids = users.map((u) => u.id)
-      userDeleteDispatch({ type: 'SYNC_TARGET_USERS', payload: { ids } })
-    }
-  }, [users, userDeleteDispatch])
-
   return (
     <form id="users" onSubmit={handleSubmitAllUsers} className="users__body">
       {children}
     </form>
   )
 }
+
+export default memo(Users)

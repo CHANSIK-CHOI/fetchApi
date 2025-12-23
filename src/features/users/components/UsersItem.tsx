@@ -5,7 +5,7 @@ import {
   UsersProfileEditor,
 } from '@/features/users'
 import { memo, useCallback, useMemo, useState, type ChangeEvent } from 'react'
-import type { EditableUserFormObject, PayloadModifiedUser, User } from '@/types/users'
+import type { EditableUserFormObject, User } from '@/types/users'
 import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
 
 type UsersItemProps = {
@@ -14,11 +14,9 @@ type UsersItemProps = {
   lastName: User['last_name']
   email: User['email']
   id: User['id']
-  onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
-  onDelete: (id: User['id']) => Promise<void>
 }
 
-function UsersItem({ avatar, firstName, lastName, email, id, onModify, onDelete }: UsersItemProps) {
+function UsersItem({ avatar, firstName, lastName, email, id }: UsersItemProps) {
   const originalData = useMemo(
     () => ({
       avatar,
@@ -30,7 +28,7 @@ function UsersItem({ avatar, firstName, lastName, email, id, onModify, onDelete 
   )
   const [formData, setFormData] = useState<EditableUserFormObject>(originalData)
   const { newUserState, userEditState, userDeleteState } = useUsersState()
-  const { userEditDispatch, userDeleteDispatch } = useUsersActions()
+  const { userEditDispatch, userDeleteDispatch, onModify, onDelete } = useUsersActions()
 
   const isItemEditing = userEditState.displayedEditor.includes(id)
   const isEditing = userEditState.isShowAllEditor || isItemEditing
