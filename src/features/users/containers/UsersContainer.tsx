@@ -14,7 +14,7 @@ export default function UsersContainer() {
     modifyUser,
     modifyAllUsers,
     deleteUser,
-    deleteSelectedUsers,
+    // deleteSelectedUsers,
   } = useUsersQuery()
 
   useEffect(() => {
@@ -22,11 +22,7 @@ export default function UsersContainer() {
   }, [getAllUsers])
 
   return (
-    <UsersProvider
-      users={users}
-      onDeleteUser={deleteUser}
-      onDeleteSelectedUsers={deleteSelectedUsers}
-    >
+    <UsersProvider>
       <Users
         newUserForm={<UsersNewForm onCreate={createUser} />}
         users={users}
@@ -41,7 +37,7 @@ export default function UsersContainer() {
           </div>
         )}
 
-        <UsersList data={users} onModify={modifyUser} />
+        <UsersList data={users} onModify={modifyUser} onDelete={deleteUser} />
       </Users>
     </UsersProvider>
   )

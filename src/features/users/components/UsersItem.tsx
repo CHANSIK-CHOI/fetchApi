@@ -15,6 +15,7 @@ type UsersItemProps = {
   email: User['email']
   id: User['id']
   onModify: (id: User['id'], payload: PayloadModifiedUser) => Promise<void>
+  onDelete: (id: User['id']) => Promise<void>
 }
 
 export default function UsersItem({
@@ -24,6 +25,7 @@ export default function UsersItem({
   email,
   id,
   onModify,
+  onDelete,
 }: UsersItemProps) {
   const originalData = useMemo(
     () => ({
@@ -36,16 +38,18 @@ export default function UsersItem({
   )
 
   const [formData, setFormData] = useState<EditableUserFormObject>(originalData)
+  const [checkedItems, setCheckedItems] = useState(false)
 
-  const { isShowDeleteCheckbox, isDeleting, checkedDeleteItems, newUserState, userEditState } =
-    useUsersState()
-  const { onChangeCheckDeleteItems, onClickDeleteItem, userEditDispatch } = useUsersActions()
+  const { newUserState, userEditState, userDeleteState } = useUsersState()
+  const { userEditDispatch, userDeleteDispatch } = useUsersActions()
 
   const isItemEditing = userEditState.displayedEditor.includes(id)
   const isEditing = userEditState.isShowAllEditor || isItemEditing
 
   const isShowEditorBtns =
-    !userEditState.isShowAllEditor && !isShowDeleteCheckbox && !newUserState.isShowEditor
+    !userEditState.isShowAllEditor &&
+    !userDeleteState.isShowDeleteCheckbox &&
+    !newUserState.isShowEditor
 
   const handleChangeUserData = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -117,17 +121,38 @@ export default function UsersItem({
     userEditDispatch({ type: 'HIDE_EDITOR', payload: { id } })
   }
 
+  const handleDeleteItem = async () => {
+    if (userDeleteState.deleteing !== null) return
+
+    const confirmMsg = `${firstName} ${lastName}님의 데이터를 삭제하시겠습니까?`
+    if (!confirm(confirmMsg)) return
+
+    try {
+      userDeleteDispatch({ type: 'SUBMIT_START', payload: { id } })
+      await onDelete(id)
+      userDeleteDispatch({ type: 'SUBMIT_SUCCESS' })
+      alert('삭제를 완료하였습니다.')
+    } catch (err) {
+      console.error(err)
+      userDeleteDispatch({
+        type: 'SUBMIT_ERROR',
+        payload: { msg: '삭제에 실패했습니다. 다시 시도해주세요.' },
+      })
+      alert('삭제에 실패했습니다. 다시 시도해주세요.')
+    }
+  }
+
   return (
     <li className="userItem">
       <div className="userItem__box">
-        {isShowDeleteCheckbox && (
+        {userDeleteState.isShowDeleteCheckbox && (
           <div className="userItem__checkbox">
             <input
               type="checkbox"
-              name="usersItem"
+              name={`checkbox_${id}`}
               id={`checkbox_${id}`}
-              checked={checkedDeleteItems.includes(id)}
-              onChange={(e) => onChangeCheckDeleteItems({ e, id })}
+              checked={checkedItems}
+              onChange={() => setCheckedItems((prev) => !prev)}
             />
           </div>
         )}
@@ -146,7 +171,7 @@ export default function UsersItem({
 
           <div className="userItem__texts">
             {!isEditing ? (
-              isShowDeleteCheckbox ? (
+              userDeleteState.isShowDeleteCheckbox ? (
                 <label htmlFor={`checkbox_${id}`} className="userItem__checkLabel">
                   {userNameEl}
                 </label>
@@ -210,10 +235,10 @@ export default function UsersItem({
               <button
                 type="button"
                 className="line"
-                onClick={() => onClickDeleteItem(id)}
-                disabled={isDeleting == id}
+                onClick={handleDeleteItem}
+                disabled={userDeleteState.deleteing == id}
               >
-                {isDeleting == id ? '삭제중...' : '삭제하기'}
+                {userDeleteState.deleteing == id ? '삭제중...' : '삭제하기'}
               </button>
             )}
           </div>

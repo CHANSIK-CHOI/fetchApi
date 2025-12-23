@@ -1,6 +1,7 @@
 import { INIT_NEW_USER_VALUE } from '@/constants/users'
 import type { PayloadNewUser, User } from '@/types/users'
 
+// POST
 export type NewUserState = {
   isShowEditor: boolean
   isCreating: boolean
@@ -48,6 +49,7 @@ export function newUserReducer(state: NewUserState, action: NewUserAction) {
   }
 }
 
+// PATCH
 export type UserEditState = {
   isShowAllEditor: boolean
   isResetAllValue: boolean
@@ -155,6 +157,78 @@ export function userEditReducer(state: UserEditState, action: UserEditAction) {
     }
     case 'RESET':
       return INIT_USER_EDIT_STATE
+    default:
+      return state
+  }
+}
+
+// DELETE
+export type UserDeleteState = {
+  isShowDeleteCheckbox: boolean
+  isAllChecked: boolean
+  deleteing: User['id'] | 'all' | null
+  error: string | null
+}
+export type UserDeleteAction =
+  | { type: 'SHOW_CHECKBOX' }
+  | { type: 'HIDE_CHECKBOX' }
+  | { type: 'ALL_CHECKED' }
+  | { type: 'RESET_CHECKED' }
+  | { type: 'SUBMIT_START'; payload: { id: User['id'] } }
+  | { type: 'SUBMIT_CHECKED_ITEMS_START' }
+  | { type: 'SUBMIT_SUCCESS' }
+  | { type: 'SUBMIT_ERROR'; payload: { msg: string } }
+  | { type: 'RESET' }
+
+export const INIT_USER_DELETE_STATE: UserDeleteState = {
+  isShowDeleteCheckbox: false,
+  isAllChecked: false,
+  deleteing: null,
+  error: null,
+}
+
+export function userDeleteReducer(state: UserDeleteState, action: UserDeleteAction) {
+  switch (action.type) {
+    case 'SHOW_CHECKBOX': {
+      return {
+        ...state,
+        isShowDeleteCheckbox: true,
+      }
+    }
+    case 'HIDE_CHECKBOX': {
+      return {
+        ...state,
+        isShowDeleteCheckbox: false,
+      }
+    }
+    case 'ALL_CHECKED': {
+      return {
+        ...state,
+        isAllChecked: true,
+      }
+    }
+    case 'RESET_CHECKED': {
+      return {
+        ...state,
+        isAllChecked: false,
+      }
+    }
+    case 'SUBMIT_START': {
+      const { id } = action.payload
+      return { ...state, deleteing: id }
+    }
+    case 'SUBMIT_CHECKED_ITEMS_START': {
+      return { ...state, deleteing: 'all' as const }
+    }
+    case 'SUBMIT_SUCCESS': {
+      return { ...state, deleteing: null }
+    }
+    case 'SUBMIT_ERROR': {
+      const { msg } = action.payload
+      return { ...state, deleteing: null, error: msg }
+    }
+    case 'RESET':
+      return INIT_USER_DELETE_STATE
     default:
       return state
   }

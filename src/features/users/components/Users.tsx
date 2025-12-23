@@ -15,22 +15,16 @@ type UsersProps = {
   onAllModify: (data: PayloadAllModifiedUsers) => Promise<void>
 }
 export default function Users({ children, newUserForm, users, onAllModify }: UsersProps) {
-  const { isShowDeleteCheckbox, isCheckedDeleting, isAllChecked, newUserState, userEditState } =
-    useUsersState()
-  const {
-    handleToggleDeleteCheckbox,
-    onClickDeleteSelectedItems,
-    handleAllCheck,
-    resetChecked,
-    newUserDispatch,
-    userEditDispatch,
-  } = useUsersActions()
+  const { newUserState, userEditState, userDeleteState } = useUsersState()
+  const { newUserDispatch, userEditDispatch, userDeleteDispatch } = useUsersActions()
 
   const isNoUserData = users.length === 0
-  const isShowNewUserFormEl = !userEditState.isShowAllEditor && !isShowDeleteCheckbox
+  const isShowNewUserFormEl =
+    !userEditState.isShowAllEditor && !userDeleteState.isShowDeleteCheckbox
   const isShowDeleteCheckboxEl =
     !isNoUserData && !newUserState.isShowEditor && !userEditState.isShowAllEditor
-  const isShowAllEditorEl = !isNoUserData && !newUserState.isShowEditor && !isShowDeleteCheckbox
+  const isShowAllEditorEl =
+    !isNoUserData && !newUserState.isShowEditor && !userDeleteState.isShowDeleteCheckbox
 
   const resultCount = users.length.toString().padStart(2, '0')
 
@@ -59,6 +53,7 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
     return currentDataMap
   }
 
+  // PATCH : 다수 유저 수정
   const handleSubmitAllUsers = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
@@ -124,6 +119,12 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
     }
   }
 
+  // DELETE : 다수 유저 삭제
+  const handleClickCheckedItemDeleting = () => {
+    userDeleteDispatch({ type: 'SUBMIT_CHECKED_ITEMS_START' })
+  }
+
+  // RESET
   useEffect(() => {
     if (userEditState.isResetAllValue) {
       userEditDispatch({ type: 'RESET_COMPLETE_ALL_VALUE' })
@@ -165,11 +166,11 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
 
           {isShowDeleteCheckboxEl && (
             <>
-              {!isShowDeleteCheckbox ? (
+              {!userDeleteState.isShowDeleteCheckbox ? (
                 <button
                   type="button"
                   className="line"
-                  onClick={() => handleToggleDeleteCheckbox(true)}
+                  onClick={() => userDeleteDispatch({ type: 'SHOW_CHECKBOX' })}
                 >
                   삭제할 유저 선택하기
                 </button>
@@ -178,26 +179,33 @@ export default function Users({ children, newUserForm, users, onAllModify }: Use
                   <button
                     type="button"
                     className="line"
-                    onClick={() => handleToggleDeleteCheckbox(false)}
+                    onClick={() => userDeleteDispatch({ type: 'HIDE_CHECKBOX' })}
                   >
                     선택취소
                   </button>
-                  {isAllChecked ? (
-                    <button type="button" className="line" onClick={resetChecked}>
+                  {userDeleteState.isAllChecked ? (
+                    <button
+                      type="button"
+                      className="line"
+                      onClick={() => userDeleteDispatch({ type: 'RESET_CHECKED' })}
+                    >
                       전체취소
                     </button>
                   ) : (
-                    <button type="button" onClick={handleAllCheck}>
+                    <button
+                      type="button"
+                      onClick={() => userDeleteDispatch({ type: 'ALL_CHECKED' })}
+                    >
                       전체선택
                     </button>
                   )}
 
                   <button
                     type="button"
-                    onClick={onClickDeleteSelectedItems}
-                    disabled={isCheckedDeleting}
+                    onClick={handleClickCheckedItemDeleting}
+                    disabled={userDeleteState.deleteing == 'all'}
                   >
-                    {isCheckedDeleting ? '삭제중...' : '삭제하기'}
+                    {userDeleteState.deleteing == 'all' ? '삭제중...' : '삭제하기'}
                   </button>
                 </>
               )}
