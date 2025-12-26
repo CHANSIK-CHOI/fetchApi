@@ -7,8 +7,6 @@ import { useForm, useWatch } from 'react-hook-form'
 
 export default function UsersNewForm() {
   const [previewUrl, setPreviewUrl] = useState<string>('')
-  // const [submitValue, setSubmitValue] = useState<User['avatar']>('')
-  // const [newUserValue, setNewUserValue] = useState<PayloadNewUser>(INIT_NEW_USER_VALUE)
   const { newUserState } = useUsersState()
   const { onCreate, newUserDispatch } = useUsersActions()
 
@@ -71,7 +69,6 @@ export default function UsersNewForm() {
 
   // ✨ 2. 파일 미리보기 로직 (RHF와 연동)
   // const avatarFile = watch('avatar') // avatar 값이 바뀌면 감지
-  // console.log(avatarFile)
   // ✨ 여기가 변경된 핵심 포인트!
   // watch('avatar') 대신 useWatch 훅 사용
   // React Compiler가 "아, 이 변수는 control과 name에 의존하는구나"라고 명확히 알 수 있음
@@ -95,12 +92,8 @@ export default function UsersNewForm() {
     const objectUrl = URL.createObjectURL(file)
     setPreviewUrl(objectUrl)
 
-    // const base64 = await readFileAsDataURL(selected)
-    // setSubmitValue(base64)
-
-    // setNewUserValue((prev) => ({ ...prev, avatar: base64 }))
-    // shouldValidate: true -> 값이 바뀌면 유효성 검사 즉시 실행
     const base64 = await readFileAsDataURL(file)
+    // shouldValidate: true -> 값이 바뀌면 유효성 검사 즉시 실행
     setValue('avatar', base64, { shouldValidate: true })
   }
 
@@ -108,59 +101,20 @@ export default function UsersNewForm() {
     if (previewUrl == '') return
     setPreviewUrl('')
     setValue('avatar', '') // RHF 값 초기화
-    // setSubmitValue('')
-    // setNewUserValue((prev) => ({ ...prev, avatar: undefined }))
   }
-
-  // const handleChangeInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { name: newDataName, value } = e.target
-  //   const key = newDataName.replace(/_userForm$/, '') as RequiredEditableUserKey
-  //   setNewUserValue((prev) => ({ ...prev, [key]: value }))
-  // }, [])
-
-  // const handleSubmit = async (e: FormEvent) => {
-  //   e.preventDefault()
-  //   if (newUserState.isCreating) return
-
-  //   const hasEmpty = hasEmptyRequiredField(newUserValue)
-  //   if (hasEmpty) {
-  //     alert('이메일, 이름, 성을 모두 입력해주세요.')
-  //     return
-  //   }
-
-  //   const confirmMsg = `${newUserValue.first_name} ${newUserValue.last_name}님의 데이터를 추가하시겠습니까?`
-  //   if (!confirm(confirmMsg)) return
-
-  //   newUserDispatch({ type: 'RESET' })
-
-  //   try {
-  //     newUserDispatch({ type: 'SUBMIT_START' })
-  //     await onCreate(newUserValue)
-  //     newUserDispatch({ type: 'SUBMIT_SUCCESS', payload: newUserValue })
-  //     alert('추가를 완료하였습니다.')
-
-  //     setNewUserValue(INIT_NEW_USER_VALUE)
-  //     setPreviewUrl('')
-  //   } catch (err) {
-  //     console.error(err)
-  //     newUserDispatch({
-  //       type: 'SUBMIT_ERROR',
-  //       payload: '유저 생성에 실패했습니다. 다시 시도해주세요.',
-  //     })
-  //     alert('유저 생성에 실패했습니다. 다시 시도해주세요.')
-  //   }
-  // }
 
   // ✨ 3. 제출 핸들러 (이미 검증이 끝난 데이터만 들어옴)
   const onValid = async (data: PayloadNewUser) => {
-    // e.preventDefault()
-    // if (newUserState.isCreating) return
+    if (newUserState.isCreating) return
 
+    // 전체 form이 required로 되어있어 빈값인 경우 submit이 안됨
     // const hasEmpty = hasEmptyRequiredField(newUserValue)
     // if (hasEmpty) {
     //   alert('이메일, 이름, 성을 모두 입력해주세요.')
     //   return
     // }
+
+    console.log(data)
 
     const confirmMsg = `${data.first_name} ${data.last_name}님의 데이터를 추가하시겠습니까?`
     if (!confirm(confirmMsg)) return
@@ -173,9 +127,6 @@ export default function UsersNewForm() {
       newUserDispatch({ type: 'SUBMIT_SUCCESS', payload: data })
       alert('추가를 완료하였습니다.')
 
-      // setNewUserValue(INIT_NEW_USER_VALUE)
-      // setPreviewUrl('')
-      // 폼 초기화 및 미리보기 제거
       reset()
       setPreviewUrl('')
     } catch (err) {
@@ -188,12 +139,7 @@ export default function UsersNewForm() {
     }
   }
 
-  // const displaySrc = submitValue !== '' ? submitValue : PLACEHOLDER_SRC
-  // const isHasContent = Boolean(submitValue)
-  // 화면 표시용 이미지 소스
   // watch('avatar')를 통해 현재 폼 상태의 이미지를 가져올 수도 있음
-  // const displaySrc = previewUrl || (watch('avatar') ? String(watch('avatar')) : PLACEHOLDER_SRC)
-  // const isHasContent = Boolean(watch('avatar'))
   // watch('avatar')를 avatarValue 변수로 대체
   const displaySrc = previewUrl || (avatarValue ? String(avatarValue) : PLACEHOLDER_SRC)
   const isHasContent = Boolean(avatarValue)
@@ -237,10 +183,7 @@ export default function UsersNewForm() {
             <div className="input-group">
               <input
                 type="text"
-                // name={`first_name_userForm`}
                 placeholder="first name"
-                // value={newUserValue.first_name ?? ''}
-                // onChange={handleChangeInput}
                 {...register('first_name', { required: '이름을 입력해주세요.' })}
               />
               {/* 에러 메시지 노출 */}
@@ -250,10 +193,7 @@ export default function UsersNewForm() {
             <div className="input-group">
               <input
                 type="text"
-                // name={`last_name_userForm`}
                 placeholder="last name"
-                // value={newUserValue.last_name ?? ''}
-                // onChange={handleChangeInput}
                 {...register('last_name', { required: '성을 입력해주세요.' })}
               />
               {errors.last_name && <span className="error-msg">{errors.last_name.message}</span>}
@@ -262,10 +202,7 @@ export default function UsersNewForm() {
             <div className="input-group">
               <input
                 type="text"
-                // name={`email_userForm`}
                 placeholder="email"
-                // value={newUserValue.email ?? ''}
-                // onChange={handleChangeInput}
                 {...register('email', {
                   required: '이메일을 입력해주세요.',
                   pattern: {
