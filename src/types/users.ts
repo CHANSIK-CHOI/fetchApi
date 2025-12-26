@@ -6,7 +6,7 @@ export type User = {
   last_name: string
 }
 
-type UserKeys = keyof User
+export type UserKeys = keyof User
 // key
 export type EditableUserKey = Exclude<UserKeys, 'id'>
 export type RequiredEditableUserKey = Exclude<EditableUserKey, 'avatar'>

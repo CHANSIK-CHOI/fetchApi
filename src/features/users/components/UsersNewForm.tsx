@@ -184,7 +184,7 @@ export default function UsersNewForm() {
               <input
                 type="text"
                 placeholder="first name"
-                {...register('first_name', { required: '이름을 입력해주세요.' })}
+                {...register('first_name', { required: true })}
               />
               {/* 에러 메시지 노출 */}
               {errors.first_name && <span className="error-msg">{errors.first_name.message}</span>}
