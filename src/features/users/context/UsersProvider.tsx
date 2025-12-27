@@ -35,12 +35,12 @@ export default function UsersProvider({
   onDelete,
   onDeleteSelected,
 }: UsersProviderProps) {
-  const [newUserState, newUserDispatch] = useReducer(newUserReducer, INIT_NEW_USER_STATE) // 유저 추가하기 reducer
-  const [userEditState, userEditDispatch] = useReducer(userEditReducer, INIT_USER_EDIT_STATE) // 유저 수정하기 reducer
+  const [newUserState, newUserDispatch] = useReducer(newUserReducer, INIT_NEW_USER_STATE)
+  const [userEditState, userEditDispatch] = useReducer(userEditReducer, INIT_USER_EDIT_STATE)
   const [userDeleteState, userDeleteDispatch] = useReducer(
     userDeleteReducer,
     INIT_USER_DELETE_STATE,
-  ) // 유저 삭제하기reducer
+  )
 
   const targetIds = useMemo(() => users.map((u) => u.id), [users])
 

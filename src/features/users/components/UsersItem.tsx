@@ -22,7 +22,6 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
   const { newUserState, userEditState, userDeleteState } = useUsersState()
   const { userEditDispatch, userDeleteDispatch, onModify, onDelete } = useUsersActions()
 
-  // ✨ RHF 도구들 꺼내기
   const {
     register,
     getValues,
@@ -50,7 +49,6 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
     </>
   )
 
-  // [프로필 이미지 변경 핸들러]
   const handleChangeImage = useCallback(
     (url: string) => {
       setValue(`users.${index}.avatar`, url, { shouldDirty: true })
@@ -58,45 +56,34 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
     [index, setValue],
   )
 
-  // [수정하기] : 개별 유저 수정하기
   const handleSubmitUserItem = async () => {
-    // ✨ 1. RHF 유효성 검사 실행 (여기서 공백 체크가 자동으로 수행됨)
-    // register의 validate 규칙에 의해 "   " 같은 값은 false가 반환됨
     const isValid = await trigger(`users.${index}`)
 
     if (!isValid) {
-      // RHF가 에러가 난 인풋에 자동으로 포커스를 줍니다.
       alert('입력값을 확인해주세요.')
       return
     }
 
-    // 2. 변경 내역(Dirty) 확인
     const userDirtyFields = dirtyFields.users?.[index]
     if (!userDirtyFields || Object.keys(userDirtyFields).length === 0) {
       alert('수정된 내용이 없습니다.')
       return
     }
 
-    // 3. Payload 생성
     const currentUser = getValues(`users.${index}`)
     const payload: PayloadModifiedUser = {}
     const dirtyKeys = Object.keys(userDirtyFields)
 
     dirtyKeys.forEach((key) => {
-      // 수정 가능한 키인지 & 실제로 변경되었는지(dirty) 확인
       if (
         EDITABLE_USER_KEYS.some((editabledKey) => key === editabledKey) &&
         userDirtyFields[key as EditableUserKey]
       ) {
         const value = currentUser[key as EditableUserKey]
-
-        // ✨ 4. 데이터 정제 (Sanitization)
-        // 검사는 통과했지만, 저장할 때는 앞뒤 공백을 잘라내고 깔끔하게 보냄
         payload[key as EditableUserKey] = typeof value === 'string' ? value.trim() : value
       }
     })
 
-    // (방어 코드)
     if (Object.keys(payload).length === 0) {
       alert('수정된 내용이 없습니다.')
       return
@@ -119,17 +106,14 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
     }
   }
 
-  // [수정하기] : 수정 취소
   const handleClickCancel = () => {
     setValue(`users.${index}.first_name`, firstName)
     setValue(`users.${index}.last_name`, lastName)
     setValue(`users.${index}.email`, email)
     setValue(`users.${index}.avatar`, avatar as User['avatar'])
-
     userEditDispatch({ type: 'HIDE_EDITOR', payload: { id } })
   }
 
-  // [삭제하기] : 개별 유저 삭제
   const handleDeleteItem = async () => {
     if (userDeleteState.deleteing !== null) return
 
@@ -151,7 +135,6 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
     }
   }
 
-  // [삭제하기] : checkbox
   const handleChangeCheckItem = () => {
     userDeleteDispatch({ type: 'TOGGLE_ITEM', payload: { id } })
   }
@@ -175,10 +158,6 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
             {isEditing ? (
               <UsersProfileEditor
                 id={id}
-                // avatar={formData ? formData.avatar : ''}
-                // onChange={handleChangeImage}
-                // RHF의 watch를 써서 실시간 미리보기를 할 수도 있지만,
-                // 여기선 props(fields) 혹은 getValues로 처리
                 avatar={getValues(`users.${index}.avatar`)}
                 onChange={handleChangeImage}
               />
@@ -188,10 +167,8 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
           </div>
 
           <div className="userItem__texts">
-            {/* ✨ 여기가 핵심: 수정 모드면 무조건 RHF Input 렌더링 */}
             {isEditing ? (
               <div className="userItem__editer">
-                {/* 식별자 (Bulk Submit용) */}
                 <input type="hidden" {...register(`users.${index}.id`)} value={id} />
                 <input type="hidden" {...register(`users.${index}.avatar`)} value={avatar} />
 
@@ -201,11 +178,9 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
                     placeholder="first name"
                     {...register(`users.${index}.first_name`, {
                       required: '필수 입력값입니다.',
-                      // ✨ validate 추가: trim 후 길이가 없으면 에러로 간주
                       validate: (value) => !!value.trim() || '공백으로 입력할 수 없습니다.',
                     })}
                   />
-                  {/* 에러 메시지 노출 */}
                   {userError?.first_name && (
                     <span className="error-msg">{userError.first_name.message}</span>
                   )}
@@ -217,12 +192,10 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
                     placeholder="last name"
                     {...register(`users.${index}.last_name`, {
                       required: '필수 입력값입니다.',
-                      // ✨ validate 추가: trim 후 길이가 없으면 에러로 간주
                       validate: (value) => !!value.trim() || '공백으로 입력할 수 없습니다.',
                     })}
                   />
 
-                  {/* 에러 메시지 노출 */}
                   {userError?.last_name && (
                     <span className="error-msg">{userError.last_name.message}</span>
                   )}
@@ -241,12 +214,10 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
                     })}
                   />
 
-                  {/* 에러 메시지 노출 */}
                   {userError?.email && <span className="error-msg">{userError.email.message}</span>}
                 </div>
               </div>
-            ) : // 뷰 모드
-            userDeleteState.isShowDeleteCheckbox ? (
+            ) : userDeleteState.isShowDeleteCheckbox ? (
               <label htmlFor={`checkbox_${id}`} className="userItem__checkLabel">
                 {userNameEl}
               </label>
@@ -273,7 +244,7 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
                 </button>
                 <button
                   type="button"
-                  onClick={handleSubmitUserItem} // ✨ 개별 저장 핸들러 호출
+                  onClick={handleSubmitUserItem}
                   disabled={userEditState.editing == id}
                 >
                   {userEditState.editing == id ? '수정중...' : '수정완료'}

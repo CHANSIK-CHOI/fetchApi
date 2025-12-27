@@ -6,15 +6,14 @@ export type User = {
   last_name: string
 }
 
-export type UserKeys = keyof User
+type UserKeys = keyof User
 // key
 export type EditableUserKey = Exclude<UserKeys, 'id'>
-export type RequiredEditableUserKey = Exclude<EditableUserKey, 'avatar'>
+type RequiredEditableUserKey = Exclude<EditableUserKey, 'avatar'>
 
 // object
 export type InitUserFormObject = Pick<User, RequiredEditableUserKey> & { avatar?: User['avatar'] }
-export type EditableUserFormObject = Partial<Omit<User, 'id'>>
-export type UserIdAndEditableUserFormObject = Record<User['id'], EditableUserFormObject>
+type EditableUserFormObject = Partial<Omit<User, 'id'>>
 
 // POST
 export type PayloadNewUser = InitUserFormObject
@@ -28,3 +27,8 @@ export type ApiResultAllModifiedUsers = {
   id: User['id']
   result: ApiResultModifiedUser
 }[]
+
+// react form hooks
+export type UsersFormValues = {
+  users: User[]
+}

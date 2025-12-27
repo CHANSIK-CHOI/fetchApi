@@ -18,7 +18,7 @@ export default function UsersContainer() {
   } = useUsersQuery()
 
   useEffect(() => {
-    void getAllUsers()
+    getAllUsers()
   }, [getAllUsers])
 
   return (

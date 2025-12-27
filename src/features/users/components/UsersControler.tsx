@@ -16,7 +16,6 @@ function UsersControler() {
   const resultCount = users.length.toString().padStart(2, '0')
   const isAllChecked = users.length > 0 && userDeleteState.checkedIds.length === users.length
 
-  // [삭제하기] : 다수 유저 삭제
   const handleClickCheckedItemDeleting = async () => {
     if (userDeleteState.checkedIds.length === 0) {
       alert('선택한 데이터가 없습니다.')

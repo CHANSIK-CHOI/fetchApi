@@ -66,7 +66,8 @@ export function useUsersQuery() {
         const result = await patchUserApi(id, payload)
         if (!result) return
 
-        const { updatedAt: _, ...rest } = result
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { updatedAt, ...rest } = result
 
         setUsers((prev) =>
           prev.map((user) =>
@@ -78,7 +79,6 @@ export function useUsersQuery() {
               : user,
           ),
         )
-        void _
       } catch (err) {
         setErrorMessage(err, '유저 데이터를 수정할 수 없습니다.')
       }
@@ -99,8 +99,8 @@ export function useUsersQuery() {
             const patched = resultMap.get(user.id)
             if (!patched) return user
 
-            const { updatedAt: _, ...rest } = patched
-            void _
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { updatedAt, ...rest } = patched
             return { ...user, ...rest }
           })
         })

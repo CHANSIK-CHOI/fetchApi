@@ -20,16 +20,18 @@ export default function UsersProfileEditor({ id, avatar, onChange }: UsersProfil
   }, [preview])
 
   const handleChangeImage = async (e: ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0]
+    const file = e.target.files?.[0]
 
-    if (!selected) return
+    if (!file) return
 
-    const objectUrl = URL.createObjectURL(selected)
+    const objectUrl = URL.createObjectURL(file)
     setPreview(objectUrl)
 
-    const base64 = await readFileAsDataURL(selected)
+    const base64 = await readFileAsDataURL(file)
     onChange(base64)
     setSubmitValue(base64)
+
+    e.target.value = ''
   }
 
   const handleRemoveImage = () => {
@@ -58,7 +60,6 @@ export default function UsersProfileEditor({ id, avatar, onChange }: UsersProfil
         )}
       </div>
       <input id={`avatar_${id}`} type="file" accept="image/*" hidden onChange={handleChangeImage} />
-      <input type="text" name={`avatar_${id}`} hidden readOnly value={submitValue} />
     </>
   )
 }
