@@ -1,8 +1,9 @@
 import { UsersItem } from '@/features/users'
 import type { User } from '@/types/users'
+import { memo } from 'react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 
-export default function UsersList() {
+function UsersList() {
   // ✨ Brain(Users.tsx)에서 내려준 control 가져오기
   const { control } = useFormContext<{ users: User[] }>()
 
@@ -45,3 +46,5 @@ export default function UsersList() {
     </>
   )
 }
+
+export default memo(UsersList)

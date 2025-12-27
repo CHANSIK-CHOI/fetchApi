@@ -4,15 +4,8 @@ import {
   UsersProfileView,
   UsersProfileEditor,
 } from '@/features/users'
-import { memo, useCallback, useMemo, useState, type ChangeEvent } from 'react'
-import type {
-  EditableUserFormObject,
-  EditableUserKey,
-  PayloadModifiedUser,
-  User,
-  UserKeys,
-} from '@/types/users'
-import { filterModifiedData, hasEmptyRequiredField } from '@/util/users'
+import { memo, useCallback } from 'react'
+import type { EditableUserKey, PayloadModifiedUser, User } from '@/types/users'
 import { useFormContext } from 'react-hook-form'
 import { EDITABLE_USER_KEYS } from '@/constants/users'
 
@@ -26,16 +19,6 @@ type UsersItemProps = {
 }
 
 function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemProps) {
-  // const originalData = useMemo(
-  //   () => ({
-  //     avatar,
-  //     email,
-  //     first_name: firstName,
-  //     last_name: lastName,
-  //   }),
-  //   [avatar, email, firstName, lastName],
-  // )
-  // const [formData, setFormData] = useState<EditableUserFormObject>(originalData)
   const { newUserState, userEditState, userDeleteState } = useUsersState()
   const { userEditDispatch, userDeleteDispatch, onModify, onDelete } = useUsersActions()
 
@@ -47,6 +30,8 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
     trigger,
     formState: { errors, dirtyFields },
   } = useFormContext<{ users: User[] }>()
+
+  const userError = errors.users?.[index]
 
   const isItemEditing = userEditState.displayedEditor.includes(id)
   const isAllEditing = userEditState.isShowAllEditor
@@ -75,43 +60,45 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
 
   // [수정하기] : 개별 유저 수정하기
   const handleSubmitUserItem = async () => {
+    // ✨ 1. RHF 유효성 검사 실행 (여기서 공백 체크가 자동으로 수행됨)
+    // register의 validate 규칙에 의해 "   " 같은 값은 false가 반환됨
     const isValid = await trigger(`users.${index}`)
+
     if (!isValid) {
+      // RHF가 에러가 난 인풋에 자동으로 포커스를 줍니다.
       alert('입력값을 확인해주세요.')
       return
     }
 
+    // 2. 변경 내역(Dirty) 확인
     const userDirtyFields = dirtyFields.users?.[index]
-    console.log({ userDirtyFields })
     if (!userDirtyFields || Object.keys(userDirtyFields).length === 0) {
       alert('수정된 내용이 없습니다.')
       return
     }
 
-    const currentUserData = getValues(`users.${index}`)
+    // 3. Payload 생성
+    const currentUser = getValues(`users.${index}`)
     const payload: PayloadModifiedUser = {}
     const dirtyKeys = Object.keys(userDirtyFields)
 
     dirtyKeys.forEach((key) => {
+      // 수정 가능한 키인지 & 실제로 변경되었는지(dirty) 확인
       if (
         EDITABLE_USER_KEYS.some((editabledKey) => key === editabledKey) &&
         userDirtyFields[key as EditableUserKey]
       ) {
-        payload[key as EditableUserKey] = currentUserData[key as EditableUserKey]
+        const value = currentUser[key as EditableUserKey]
+
+        // ✨ 4. 데이터 정제 (Sanitization)
+        // 검사는 통과했지만, 저장할 때는 앞뒤 공백을 잘라내고 깔끔하게 보냄
+        payload[key as EditableUserKey] = typeof value === 'string' ? value.trim() : value
       }
     })
 
+    // (방어 코드)
     if (Object.keys(payload).length === 0) {
       alert('수정된 내용이 없습니다.')
-      return
-    }
-
-    if (
-      currentUserData.first_name.trim() === '' ||
-      currentUserData.last_name.trim() === '' ||
-      currentUserData.email.trim() === ''
-    ) {
-      alert('빈 값은 저장할 수 없습니다.')
       return
     }
 
@@ -208,21 +195,55 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
                 <input type="hidden" {...register(`users.${index}.id`)} value={id} />
                 <input type="hidden" {...register(`users.${index}.avatar`)} value={avatar} />
 
-                <input
-                  type="text"
-                  placeholder="first name"
-                  {...register(`users.${index}.first_name`, { required: true })}
-                />
-                <input
-                  type="text"
-                  placeholder="last name"
-                  {...register(`users.${index}.last_name`, { required: true })}
-                />
-                <input
-                  type="text"
-                  placeholder="email"
-                  {...register(`users.${index}.email`, { required: true })}
-                />
+                <div className="input-group">
+                  <input
+                    type="text"
+                    placeholder="first name"
+                    {...register(`users.${index}.first_name`, {
+                      required: '필수 입력값입니다.',
+                      // ✨ validate 추가: trim 후 길이가 없으면 에러로 간주
+                      validate: (value) => !!value.trim() || '공백으로 입력할 수 없습니다.',
+                    })}
+                  />
+                  {/* 에러 메시지 노출 */}
+                  {userError?.first_name && (
+                    <span className="error-msg">{userError.first_name.message}</span>
+                  )}
+                </div>
+
+                <div className="input-group">
+                  <input
+                    type="text"
+                    placeholder="last name"
+                    {...register(`users.${index}.last_name`, {
+                      required: '필수 입력값입니다.',
+                      // ✨ validate 추가: trim 후 길이가 없으면 에러로 간주
+                      validate: (value) => !!value.trim() || '공백으로 입력할 수 없습니다.',
+                    })}
+                  />
+
+                  {/* 에러 메시지 노출 */}
+                  {userError?.last_name && (
+                    <span className="error-msg">{userError.last_name.message}</span>
+                  )}
+                </div>
+
+                <div className="input-group">
+                  <input
+                    type="text"
+                    placeholder="email"
+                    {...register(`users.${index}.email`, {
+                      required: '필수 입력값입니다.',
+                      pattern: {
+                        value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                        message: '유효한 이메일 형식이 아닙니다.',
+                      },
+                    })}
+                  />
+
+                  {/* 에러 메시지 노출 */}
+                  {userError?.email && <span className="error-msg">{userError.email.message}</span>}
+                </div>
               </div>
             ) : // 뷰 모드
             userDeleteState.isShowDeleteCheckbox ? (

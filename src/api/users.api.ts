@@ -8,10 +8,13 @@ import type {
   User,
 } from '@/types/users'
 
+const BASE_URL = import.meta.env.VITE_API_URL
+const API_KEY = import.meta.env.VITE_API_KEY
+
 export const getAllUsersApi = async () => {
-  const response = await fetch('https://reqres.in/api/users', {
+  const response = await fetch(`${BASE_URL}/users`, {
     headers: {
-      'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
+      'x-api-key': API_KEY,
     },
   })
 
@@ -21,10 +24,10 @@ export const getAllUsersApi = async () => {
 }
 
 export const postUserApi = async (payload: PayloadNewUser) => {
-  const response = await fetch('https://reqres.in/api/users', {
+  const response = await fetch(`${BASE_URL}/users`, {
     method: 'POST',
     headers: {
-      'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
+      'x-api-key': API_KEY,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(payload),
@@ -36,10 +39,10 @@ export const postUserApi = async (payload: PayloadNewUser) => {
 }
 
 export const patchUserApi = async (id: User['id'], payload: PayloadModifiedUser) => {
-  const response = await fetch(`https://reqres.in/api/users/${id}`, {
+  const response = await fetch(`${BASE_URL}/users/${id}`, {
     method: 'PATCH',
     headers: {
-      'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
+      'x-api-key': API_KEY,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(payload),
@@ -53,10 +56,10 @@ export const patchUserApi = async (id: User['id'], payload: PayloadModifiedUser)
 export const patchAllUsersApi = async (data: PayloadAllModifiedUsers) => {
   const responses = await Promise.all(
     data.map(({ id, payload }) =>
-      fetch(`https://reqres.in/api/users/${id}`, {
+      fetch(`${BASE_URL}/users/${id}`, {
         method: 'PATCH',
         headers: {
-          'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
+          'x-api-key': API_KEY,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
@@ -75,10 +78,10 @@ export const patchAllUsersApi = async (data: PayloadAllModifiedUsers) => {
 }
 
 export const deleteUserApi = async (id: User['id']) => {
-  const response = await fetch(`https://reqres.in/api/users/${id}`, {
+  const response = await fetch(`${BASE_URL}/users/${id}`, {
     method: 'DELETE',
     headers: {
-      'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
+      'x-api-key': API_KEY,
     },
   })
 
@@ -90,10 +93,10 @@ export const deleteUserApi = async (id: User['id']) => {
 export const deleteSelectedUsersApi = async (ids: User['id'][]) => {
   const responses = await Promise.all(
     ids.map((id) =>
-      fetch(`https://reqres.in/api/users/${id}`, {
+      fetch(`${BASE_URL}/users/${id}`, {
         method: 'DELETE',
         headers: {
-          'x-api-key': 'reqres_34b210b936844955a8b80641c7073e29',
+          'x-api-key': API_KEY,
         },
       }),
     ),

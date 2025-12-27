@@ -3,7 +3,7 @@ import type { PayloadNewUser } from '@/types/users'
 import { INIT_NEW_USER_VALUE, PLACEHOLDER_SRC } from '@/constants/users'
 import { useUsersActions, useUsersState } from '@/features/users'
 import { readFileAsDataURL } from '@/util/users'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm, useWatch, type FieldErrors } from 'react-hook-form'
 
 export default function UsersNewForm() {
   const [previewUrl, setPreviewUrl] = useState<string>('')
@@ -41,7 +41,7 @@ export default function UsersNewForm() {
     formState: {
       errors,
       // isSubmitting,
-      // isDirty
+      // isDirty,
     },
     /*
     formState : 
@@ -104,17 +104,8 @@ export default function UsersNewForm() {
   }
 
   // ✨ 3. 제출 핸들러 (이미 검증이 끝난 데이터만 들어옴)
-  const onValid = async (data: PayloadNewUser) => {
+  const onSubmit = async (data: PayloadNewUser) => {
     if (newUserState.isCreating) return
-
-    // 전체 form이 required로 되어있어 빈값인 경우 submit이 안됨
-    // const hasEmpty = hasEmptyRequiredField(newUserValue)
-    // if (hasEmpty) {
-    //   alert('이메일, 이름, 성을 모두 입력해주세요.')
-    //   return
-    // }
-
-    console.log(data)
 
     const confirmMsg = `${data.first_name} ${data.last_name}님의 데이터를 추가하시겠습니까?`
     if (!confirm(confirmMsg)) return
@@ -139,6 +130,12 @@ export default function UsersNewForm() {
     }
   }
 
+  const onError = (errors: FieldErrors<PayloadNewUser>) => {
+    console.log('Validation Errors:', errors)
+    alert('입력값을 확인해주세요.')
+    // RHF가 자동으로 에러가 난 첫 번째 인풋으로 포커스를 이동시켜줍니다.
+  }
+
   // watch('avatar')를 통해 현재 폼 상태의 이미지를 가져올 수도 있음
   // watch('avatar')를 avatarValue 변수로 대체
   const displaySrc = previewUrl || (avatarValue ? String(avatarValue) : PLACEHOLDER_SRC)
@@ -148,7 +145,7 @@ export default function UsersNewForm() {
 
   return (
     <div className="users__newForm">
-      <form id="usersNewForm" className="userForm" onSubmit={handleSubmit(onValid)}>
+      <form id="usersNewForm" className="userForm" onSubmit={handleSubmit(onSubmit, onError)}>
         <div className="userForm__box">
           <div className="userForm__profileWrap">
             <div className="userForm__profile">
@@ -184,7 +181,11 @@ export default function UsersNewForm() {
               <input
                 type="text"
                 placeholder="first name"
-                {...register('first_name', { required: true })}
+                {...register('first_name', {
+                  required: '필수 입력값입니다.',
+                  // ✨ validate 추가: trim 후 길이가 없으면 에러로 간주
+                  validate: (value) => !!value.trim() || '공백으로 입력할 수 없습니다.',
+                })}
               />
               {/* 에러 메시지 노출 */}
               {errors.first_name && <span className="error-msg">{errors.first_name.message}</span>}
@@ -194,7 +195,11 @@ export default function UsersNewForm() {
               <input
                 type="text"
                 placeholder="last name"
-                {...register('last_name', { required: '성을 입력해주세요.' })}
+                {...register('last_name', {
+                  required: '필수 입력값입니다.',
+                  // ✨ validate 추가: trim 후 길이가 없으면 에러로 간주
+                  validate: (value) => !!value.trim() || '공백으로 입력할 수 없습니다.',
+                })}
               />
               {errors.last_name && <span className="error-msg">{errors.last_name.message}</span>}
             </div>
@@ -204,7 +209,7 @@ export default function UsersNewForm() {
                 type="text"
                 placeholder="email"
                 {...register('email', {
-                  required: '이메일을 입력해주세요.',
+                  required: '필수 입력값입니다.',
                   pattern: {
                     value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
                     message: '유효한 이메일 형식이 아닙니다.',
