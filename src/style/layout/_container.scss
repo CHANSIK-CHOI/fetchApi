@@ -1,36 +1,226 @@
+.page {
+  min-height: 100vh;
+  padding: 6rem 2rem 8rem;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120rem 70rem at 80% -10%, rgba(45, 127, 249, 0.16), transparent 60%),
+    radial-gradient(90rem 60rem at -10% 20%, rgba(242, 159, 58, 0.2), transparent 55%),
+    linear-gradient(135deg, var(--bg) 0%, var(--bg-strong) 100%);
+}
+
 .layout-center {
   width: 100%;
-  max-width: 102.8rem;
+  max-width: 112rem;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4.5rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 3rem;
+  align-items: center;
+}
+
+.hero__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  animation: float-in 0.7s ease both;
+}
+
+.hero__eyebrow {
+  font-size: 1.3rem;
+  letter-spacing: 0.2rem;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.hero__title {
+  font-size: clamp(3.4rem, 5vw, 5.6rem);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.hero__subtitle {
+  font-size: 1.8rem;
+  color: var(--muted);
+  max-width: 52rem;
+}
+
+.hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.badge {
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  background: rgba(11, 107, 111, 0.12);
+  color: var(--accent-strong);
+  border: 1px solid rgba(11, 107, 111, 0.2);
+}
+
+.hero__card {
+  background: linear-gradient(145deg, #ffffff 0%, #f7f2e8 100%);
+  border-radius: 2.4rem;
+  padding: 2.8rem;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  animation: float-in 0.7s ease 0.1s both;
+}
+
+.hero__cardLabel {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.18rem;
+}
+
+.hero__cardTitle {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.hero__cardText {
+  font-size: 1.5rem;
+  color: var(--muted);
+}
+
+.hero__cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--accent-cool);
+}
+
+.panel {
+  background: var(--surface);
+  border-radius: 2.6rem;
+  padding: 2.8rem;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border);
+}
+
+.panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  margin-bottom: 2.4rem;
+}
+
+.panel__title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.panel__subtitle {
+  font-size: 1.4rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+}
+
+.panel__hint {
+  font-size: 1.3rem;
+  color: var(--muted);
+  background: var(--surface-2);
+  padding: 0.8rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
 }
 
 .loading {
-  width: 10rem;
-  height: 10rem;
-  margin: 10rem auto;
+  width: 9rem;
+  height: 9rem;
+  margin: 6rem auto;
   display: block;
+  filter: drop-shadow(0 10px 12px rgba(24, 32, 46, 0.14));
 }
 
 .error {
-  margin: 10rem auto;
+  margin: 6rem auto;
   display: flex;
   align-items: center;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.6rem;
+  padding: 2.4rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(220, 91, 78, 0.3);
+  background: rgba(220, 91, 78, 0.08);
 
   &__img {
-    width: 10rem;
-    height: 10rem;
+    width: 8rem;
+    height: 8rem;
   }
   &__text {
-    font-size: 2rem;
+    font-size: 1.6rem;
+    color: #b04a3f;
+    text-align: center;
   }
 }
 
 .nodata {
-  margin: 10rem auto;
+  margin: 6rem auto;
   text-align: center;
+  padding: 2.4rem;
+  border-radius: 2rem;
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
   &__text {
-    font-size: 2rem;
+    font-size: 1.6rem;
+    color: var(--muted);
+  }
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 960px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .panel__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 4rem 1.6rem 6rem;
+  }
+
+  .hero__card {
+    padding: 2.2rem;
+  }
+
+  .panel {
+    padding: 2rem;
   }
 }

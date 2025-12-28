@@ -8,6 +8,7 @@ import { memo, useCallback } from 'react'
 import type { EditableUserKey, PayloadModifiedUser, User } from '@/types/users'
 import { useFormContext } from 'react-hook-form'
 import { EDITABLE_USER_KEYS } from '@/constants/users'
+import cn from 'classnames'
 
 type UsersItemProps = {
   avatar?: User['avatar']
@@ -140,7 +141,12 @@ function UsersItem({ avatar, firstName, lastName, email, id, index }: UsersItemP
   }
 
   return (
-    <li className="userItem">
+    <li
+      className={cn(`userItem`, {
+        'is-editing': isEditing,
+        'is-selecting': userDeleteState.isShowDeleteCheckbox,
+      })}
+    >
       <div className="userItem__box">
         {userDeleteState.isShowDeleteCheckbox && (
           <div className="userItem__checkbox">

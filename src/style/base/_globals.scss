@@ -2,6 +2,20 @@
 
 :root {
   color-scheme: light;
+  --bg: #f6f1e8;
+  --bg-strong: #efe7d9;
+  --surface: #ffffff;
+  --surface-2: #f8f5ee;
+  --text: #1b1e28;
+  --muted: #5d6677;
+  --accent: #0b6b6f;
+  --accent-strong: #0a585b;
+  --accent-warm: #f29f3a;
+  --accent-cool: #2d7ff9;
+  --border: #e3ddcf;
+  --ring: rgba(11, 107, 111, 0.28);
+  --shadow: 0 22px 48px rgba(24, 32, 46, 0.12);
+  --shadow-soft: 0 12px 24px rgba(24, 32, 46, 0.08);
 }
 
 html {
@@ -11,27 +25,36 @@ html {
 }
 body {
   font-family: v.$font-stack;
-  background-color: #fff;
-  color: v.$text-color;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
 }
 
 main {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-main h1 {
-  font-size: 4rem;
-  font-weight: 700;
-  color: #4a90e2;
-}
-
-main p {
-  font-size: 2rem;
-  margin-top: 1rem;
-  color: #4f5d75;
+  display: block;
 }
