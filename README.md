@@ -9,7 +9,8 @@
 이 프로젝트는 React와 TypeScript를 활용한 사용자 관리 대시보드입니다.
 현재 버전은 fetch와 useState 기반의 CRUD 구현에 집중한 단계이며,
 [reqres.in](https://reqres.in/) Mock API를 활용하여 데이터를 관리합니다.
-리팩토링 관련 상세 설명은 추후 업데이트 예정입니다.
+
+추후 fetch + useState으로 구현된 CRUD를 tanstack의 useQuery, useMutation으로 리펙토링할 예정입니다.
 
 ## 주요 기능
 
